@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VERACHKI | Empire Ultimate</title>
+    <title>VERACHKI | Empire</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
 
     <style>
-        /* --- EMPIRE DESIGN SYSTEM (FINAL MERGE) --- */
         :root {
             --bg-light: #f8f9fc;
             --accent: #6a4df4;
@@ -43,7 +42,6 @@
         h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 25px; }
         h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; display: inline-block; }
         h3 { font-size: 1.5rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 3px solid var(--accent); padding-left: 15px; }
-        h4 { font-size: 1.1rem; margin-bottom: 10px; }
         .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.8rem; color: var(--accent); font-weight: 800; margin-bottom: 15px; display: block; }
         p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; }
         
@@ -59,21 +57,51 @@
         .btn-danger { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
         .container { width: 90%; max-width: 1100px; margin: 0 auto; }
         section { padding: 100px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
-        
-        /* CHAT MEDIA */
-        .msg-media { max-width: 100%; border-radius: 12px; margin-top: 8px; display: block; }
-        .msg-img { max-width: 300px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* МЕДИА СТИЛИ */
+        .msg-media { border-radius: 12px; margin-top: 8px; display: block; max-width: 100%; }
+        .msg-img { 
+            max-width: 280px; width: 100%; height: auto; object-fit: cover; 
+            cursor: pointer; transition: 0.3s; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 16px;
+        }
         .msg-img:hover { transform: scale(1.02); }
-        .msg-video { max-width: 300px; background: #000; }
-        .msg-audio { width: 100%; min-width: 250px; margin-top: 5px; }
-        @media(max-width: 600px) { .msg-img, .msg-video { max-width: 100%; } }
+        .msg-video { max-width: 280px; border-radius: 16px; background: #000; }
 
-        #media-preview-area { display: none; padding: 10px 20px; background: #f0f0f0; border-top: 1px solid #ddd; align-items: center; justify-content: space-between; font-size: 0.8rem; }
-        .preview-content { display: flex; align-items: center; gap: 10px; }
+        /* КАСТОМНЫЙ АУДИО ПЛЕЕР */
+        .custom-audio-player {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.04);
+            padding: 8px 12px; border-radius: 50px;
+            width: 220px; margin-top: 5px; transition: 0.3s; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .message.mine .custom-audio-player { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); }
+        
+        .audio-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #fff; color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0; transition: 0.2s;
+        }
+        .audio-btn:hover { transform: scale(1.1); }
+        .message.mine .audio-btn { color: var(--accent); }
+        
+        .audio-track {
+            flex: 1; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px;
+            position: relative; overflow: hidden;
+        }
+        .message.mine .audio-track { background: rgba(255,255,255,0.3); }
+        
+        .audio-progress {
+            height: 100%; width: 0%; background: var(--accent); transition: width 0.1s linear;
+        }
+        .message.mine .audio-progress { background: #fff; }
 
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
+        /* HERO & LAYOUT */
+        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; min-height: 80vh; }
+        .hero-image-wrapper img { width: 100%; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 5px solid #fff; }
+        @media(max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .hero-image-wrapper { max-width: 100%; } }
 
         /* CHAT UI */
         .chat-wrapper { background: #fff; border-radius: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid rgba(0,0,0,0.05); height: 85vh; display: flex; flex-direction: column; }
@@ -94,22 +122,23 @@
         #send-btn { background: #111; color: #fff; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
         #send-btn:hover { background: var(--accent); }
 
-        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; min-height: 80vh; }
-        .hero-image-wrapper img { width: 100%; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 5px solid #fff; }
-        @media(max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .hero-image-wrapper { max-width: 100%; } }
+        #media-preview-area { display: none; padding: 10px 20px; background: #f0f0f0; border-top: 1px solid #ddd; align-items: center; justify-content: space-between; font-size: 0.8rem; }
+        .preview-content { display: flex; align-items: center; gap: 10px; }
+        
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
 
         /* MODALS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: #fff; width: 90%; max-width: 450px; padding: 40px; border-radius: 30px; text-align: center; position: relative; box-shadow: 0 50px 100px rgba(0,0,0,0.2); }
         .close-icon { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #ccc; }
         input:not([type="file"]), select, textarea { width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid #eee; border-radius: 12px; font-family: inherit; background: #f9f9f9; }
-
         .hidden { display: none !important; }
         .codex-table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 15px; overflow: hidden; margin: 30px 0; font-size: 0.9rem; }
         .codex-table th { background: #111; color: #fff; padding: 15px; text-align: left; }
         .codex-table td { padding: 15px; border-bottom: 1px solid #eee; }
 
-        /* ИСПРАВЛЕННЫЙ BAN SCREEN (Скрыт по умолчанию) */
         #ban-screen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -136,11 +165,7 @@
                     <span class="subtitle">Империя Тишины</span>
                     <h1>В эпоху шума<br>Мы выбираем память.</h1>
                     <p style="font-size: 1.1rem; color: #333;">
-                        Это не просто чат. Это Храм, где хранят особые традиции. 
-                        Мы не ищем массовости. Мы строим убежище для тех, кто ценит теплоту выше лайков, а преданность — выше хайпа.
-                    </p>
-                    <p>
-                        Мы ждем Рассвета. Того момента, когда люди поймут ценность того, что теряют в цифровом шуме.
+                        Это не просто чат. Это Храм. Мы строим убежище для тех, кто ценит теплоту выше лайков, а преданность — выше хайпа.
                     </p>
                     <div style="display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap;">
                         <button class="btn" onclick="openModal('auth-modal')">Вступить</button>
@@ -159,10 +184,7 @@
             <span class="subtitle">Глава I. Дипломатия</span>
             <h2>Тень Архитектора</h2>
             <p>
-                Всё началось в школьных коридорах в 2023 году. Глеб стоял у истоков, но история Империи знает "Великий Разлом". Предательство, которое научило нас главному уроку: <strong>доверяй, но проверяй</strong>. Даже самых близких.
-            </p>
-            <p>
-                Сейчас наши отношения — это холодная дипломатия. Глеб ушел сам. Мы встречаемся на нейтральной территории (в школе), без обид, но и без иллюзий. Летом мы даже гуляли однажды. Но шрам остался. Он — часть истории, но не часть будущего.
+                Всё началось в 2023. Глеб стоял у истоков, но история знает Великий Разлом. Предательство научило нас: <strong>доверяй, но проверяй</strong>.
             </p>
         </div>
     </section>
@@ -170,81 +192,37 @@
     <section id="geography" class="reveal" style="background: #fff;">
         <div class="container">
             <span class="subtitle">Глава II. Святыни</span>
-            <h2>Карта Памяти и Артефакты</h2>
+            <h2>Карта Памяти</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 40px;">
-                <div>
-                    <h3>Цоколь НБВ</h3>
-                    <p>Крытая конструкция на цокольном этаже, присоединенная к дому. Место Силы, где зародилась сама идея. Начало всех начал.</p>
-                </div>
-                <div>
-                    <h3>Святилище Б</h3>
-                    <p>Заброшенный дом на колесах. Свидетель всех эпох с весны 2023 года. Место трагедии: мы нарушили его покой, оставили следы, и теперь вход туда закрыт навсегда. Напоминание о том, что нужно беречь святыни.</p>
-                </div>
-            </div>
-
-            <div style="margin-top: 50px; padding: 30px; background: #f4f7fc; border-radius: 20px;">
-                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Артефакты</h3>
-                <ul style="list-style: none; padding: 0; margin-top: 20px;">
-                    <li style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                        <strong>Гимн:</strong> "Let 3 — Mama ŠČ!" (2023). Звук, с которого всё началось.
-                    </li>
-                    <li style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                        <strong>Документы:</strong> Настоящая Печать Верачек и Старые Паспорта первых граждан.
-                    </li>
-                    <li>
-                        <strong>Сеть:</strong> Главный закрытый чат и Новостной канал.
-                    </li>
-                </ul>
+                <div><h3>Цоколь НБВ</h3><p>Крытая конструкция. Место Силы.</p></div>
+                <div><h3>Святилище Б</h3><p>Заброшенный дом на колесах. Теперь вход закрыт.</p></div>
             </div>
         </div>
     </section>
 
-    <section id="enemy" class="reveal">
+    <section id="codex" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава III. Предостережение</span>
-            <h2>Анатомия Пустоты</h2>
-            <p>
-                Галя — это не имя, а диагноз. Это болезнь, от которой почти невозможно излечиться, ведь часто она врожденная.
-            </p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
-                <div style="background: #fff; padding: 30px; border-radius: 15px; border-left: 3px solid #ccc;">
-                    <h4>Галя Обыкновенная</h4>
-                    <p style="font-size: 0.9rem;">Не скрывается. Показывает характер сразу. Глупая, выделывается, ведет пустые разговоры. Распознается мгновенно.</p>
-                </div>
-                <div style="background: #fff; padding: 30px; border-radius: 15px; border-left: 3px solid var(--danger);">
-                    <h4>Галя Скрытая (Опасная)</h4>
-                    <p style="font-size: 0.9rem;">Хитрая. Чтобы её заметить, нужно следить за деталями и мелкими шагами. Она разрушает изнутри.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="codex" class="reveal" style="background: #fff;">
-        <div class="container">
-            <span class="subtitle">Глава IV. Закон</span>
-            <h2>Уголовный Кодекс Империи</h2>
-            <p>Наказание может быть страшнее изгнания. Соблюдайте правила.</p>
+            <span class="subtitle">Глава III. Закон</span>
+            <h2>Уголовный Кодекс</h2>
             <table class="codex-table">
-                <thead><tr><th>№</th><th>Догма</th><th>Расшифровка</th></tr></thead>
+                <thead><tr><th>№</th><th>Догма</th><th>Суть</th></tr></thead>
                 <tbody>
-                    <tr><td>I</td><td>Святость Прав</td><td>Запрещено оскорблять права граждан ВЕР. Личность неприкосновенна.</td></tr>
-                    <tr><td>II</td><td>Закон Ненападения</td><td>Нельзя бить, обижать или наносить моральный вред участникам.</td></tr>
-                    <tr><td>III</td><td>Целостность</td><td>Любая попытка разрушить общество ВЕР изнутри карается немедленно.</td></tr>
-                    <tr><td>IV</td><td>Запрет Рэкета</td><td>Запрещено вымогать у ВЕР какие-либо вещи или ресурсы.</td></tr>
+                    <tr><td>I</td><td>Святость Прав</td><td>Личность неприкосновенна.</td></tr>
+                    <tr><td>II</td><td>Ненападение</td><td>Нельзя бить или обижать.</td></tr>
+                    <tr><td>III</td><td>Целостность</td><td>Попытка разрушить карается.</td></tr>
+                    <tr><td>IV</td><td>Запрет Рэкета</td><td>Вымогательство запрещено.</td></tr>
                 </tbody>
             </table>
-            <p style="text-align: right; font-size: 0.8rem; opacity: 0.6;">Последнее обновление: 30.05.2023</p>
         </div>
     </section>
 
-    <section id="structure" class="reveal">
+    <section id="structure" class="reveal" style="background: #fff;">
         <div class="container">
-            <span class="subtitle">Глава V. Путь</span>
+            <span class="subtitle">Глава IV. Путь</span>
             <h2>Бремя Власти</h2>
-            <p><strong>01. Наблюдатель (Стажировка)</strong><br>Это уже человек внутри, но он находится под прицелом глаз. Это период проверки. Мы смотрим: свой ли ты?</p>
-            <p><strong>02. Соратник (Близость)</strong><br>Как стать Соратником? Нужно пережить с нами время. Разделить хорошие моменты. Стать по-настоящему близким другом.</p>
-            <p><strong>03. Элита (Админ)</strong><br>Это не власть, а обязанность. Обязанность хранить атмосферу, даже когда вокруг тишина.</p>
-            <p style="margin-top: 40px; font-weight: bold; font-style: italic;">Добро пожаловать в теплую библиотеку, где хранятся книги о Верачках. Призыв дождя окончен. Наступает эра Тишины.</p>
+            <p><strong>01. Наблюдатель</strong><br>Человек под прицелом глаз.</p>
+            <p><strong>02. Соратник</strong><br>Нужно пережить с нами время. Стать близким.</p>
+            <p><strong>03. Элита</strong><br>Обязанность хранить атмосферу.</p>
         </div>
     </section>
 
@@ -254,7 +232,7 @@
                 <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: #fff;">TG: Гости</a>
                 <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: #fff;">TG: Новости</a>
             </div>
-            <p style="opacity: 0.4; font-size: 0.8rem;">© 2026 VERACHKI EMPIRE.<br>made by KC_Comms [oV] and 미하이</p>
+            <p style="opacity: 0.4; font-size: 0.8rem;">© 2026 VERACHKI EMPIRE.</p>
         </div>
     </footer>
 
@@ -356,6 +334,7 @@
 
         let user = null, userProfile = null, editingMsgId = null, isLoginMode = true, currentModalProfileId = null;
         let currentAttachment = null, mediaRecorder = null, audioChunks = [], isRecording = false;
+        let currentAudio = null; // Для плеера
 
         async function checkSession() {
             try {
@@ -409,6 +388,7 @@
             }
         }
         function clearAttachment() { currentAttachment = null; document.getElementById('file-upload').value = ''; document.getElementById('media-preview-area').style.display = 'none'; }
+        
         async function toggleRecording() {
             const btn = document.getElementById('record-btn');
             if (!isRecording) {
@@ -430,6 +410,40 @@
             } else { mediaRecorder.stop(); isRecording = false; btn.classList.remove('recording'); }
         }
 
+        // АУДИО ПЛЕЕР
+        function toggleAudio(btn, src) {
+            const playerContainer = btn.parentElement;
+            const progress = playerContainer.querySelector('.audio-progress');
+            
+            if (currentAudio && currentAudio.src === src) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                    btn.innerText = '❚❚';
+                } else {
+                    currentAudio.pause();
+                    btn.innerText = '▶';
+                }
+            } else {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    // Сброс иконок других плееров
+                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
+                }
+                currentAudio = new Audio(src);
+                currentAudio.play();
+                btn.innerText = '❚❚';
+                
+                currentAudio.ontimeupdate = () => {
+                    const percent = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    progress.style.width = percent + '%';
+                };
+                currentAudio.onended = () => {
+                    btn.innerText = '▶';
+                    progress.style.width = '0%';
+                };
+            }
+        }
+
         async function loadMessages() {
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
@@ -443,28 +457,47 @@
         function renderMessage(msg) {
             const container = document.getElementById('messages-container');
             if(document.getElementById(msg.$id)) {
+                // Если сообщение уже есть, обновляем только если это не "временное" (оптимистичное)
                 const existing = document.getElementById(msg.$id);
-                existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
-                if(msg.isEdited && !existing.innerText.includes('(ред.)')) existing.querySelector('.msg-text').innerHTML += " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>";
+                if (!existing.dataset.optimistic) {
+                    existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
+                    if(msg.isEdited && !existing.innerText.includes('(ред.)')) existing.querySelector('.msg-text').innerHTML += " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>";
+                }
                 return;
             }
+
             const isMine = userProfile && msg.senderId === userProfile.username;
             const isAdmin = user && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
             const div = document.createElement('div');
             div.className = `message ${isMine ? 'mine' : ''}`;
             div.id = msg.$id;
+            
+            // Если это оптимистичное сообщение, пометим его
+            if (msg.optimistic) div.dataset.optimistic = "true";
+
             let controls = '';
-            if (isMine || isAdmin) {
+            if ((isMine || isAdmin) && !msg.optimistic) {
                 controls = `<div class="controls"><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
                 if(!msg.fileId) controls = `<div class="controls"><span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(msg.messageContent)}')">✎</span><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
             }
+            
             let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
-            if (msg.fileId) {
-                const fileView = storage.getFileView(STORAGE_ID, msg.fileId);
-                if (msg.fileType === 'image') contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')">${msg.messageContent ? `<div style="margin-top:5px; font-size:0.9rem;">${escapeHtml(msg.messageContent)}</div>` : ''}`;
-                else if (msg.fileType === 'video') contentHtml = `<video src="${fileView}" controls class="msg-media msg-video"></video>`;
-                else if (msg.fileType === 'audio') contentHtml = `<audio src="${fileView}" controls class="msg-media msg-audio"></audio>`;
+            if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
+                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId);
+                
+                if (msg.fileType === 'image') {
+                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')">${msg.messageContent ? `<div style="margin-top:5px; font-size:0.9rem;">${escapeHtml(msg.messageContent)}</div>` : ''}`;
+                } else if (msg.fileType === 'video') {
+                    contentHtml = `<video src="${fileView}" controls class="msg-media msg-video"></video>`;
+                } else if (msg.fileType === 'audio') {
+                    contentHtml = `
+                    <div class="custom-audio-player">
+                        <div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div>
+                        <div class="audio-track"><div class="audio-progress"></div></div>
+                    </div>`;
+                }
             }
+            
             div.innerHTML = `${controls}<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span><div class="msg-text">${contentHtml}${msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : ""}</div>`;
             container.appendChild(div);
             if(!document.getElementById(msg.$id)) scrollToBottom();
@@ -474,6 +507,8 @@
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if ((!text && !currentAttachment) || !userProfile) return;
+            
+            // Edit Mode
             if (editingMsgId) {
                 const msgDiv = document.getElementById(editingMsgId);
                 if(msgDiv) {
@@ -486,26 +521,66 @@
                 input.value = '';
                 return;
             }
+
+            // МГНОВЕННОЕ ОТОБРАЖЕНИЕ (Optimistic UI)
+            const tempId = "temp-" + Date.now();
+            const optimisticMsg = {
+                $id: tempId,
+                messageContent: text,
+                senderId: userProfile.username,
+                timestamp: new Date().toISOString(),
+                isEdited: false,
+                fileType: currentAttachment ? currentAttachment.type : null,
+                fileUrl: currentAttachment ? URL.createObjectURL(currentAttachment.file) : null,
+                optimistic: true
+            };
+            renderMessage(optimisticMsg);
+            
+            // Очистка полей
+            input.value = '';
+            const fileToUpload = currentAttachment; // Сохраняем ссылку для загрузки
+            clearAttachment();
+
+            // Фоновая загрузка
             let fileId = null, fileType = null;
-            if (currentAttachment) {
+            if (fileToUpload) {
                 try {
-                    document.getElementById('send-btn').innerText = "⏳";
-                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), currentAttachment.file);
-                    fileId = uploaded.$id; fileType = currentAttachment.type;
-                    clearAttachment();
-                } catch(e) { alert("Ошибка загрузки: " + e.message); document.getElementById('send-btn').innerText = "➤"; return; }
+                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
+                    fileId = uploaded.$id; fileType = fileToUpload.type;
+                } catch(e) { alert("Ошибка загрузки: " + e.message); document.getElementById(tempId).remove(); return; }
             }
+            
             try {
-                input.value = '';
-                document.getElementById('send-btn').innerText = "➤";
-                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { messageContent: text, senderId: userProfile.username, timestamp: new Date().toISOString(), isEdited: false, fileId: fileId, fileType: fileType });
-            } catch(e) { alert("Ошибка отправки: " + e.message); }
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
+                    messageContent: text, 
+                    senderId: userProfile.username, 
+                    timestamp: new Date().toISOString(), 
+                    isEdited: false, 
+                    fileId: fileId, 
+                    fileType: fileType 
+                });
+                // Удаляем временное сообщение, когда придет настоящее через Realtime
+                setTimeout(() => { if(document.getElementById(tempId)) document.getElementById(tempId).remove(); }, 2000);
+            } catch(e) { alert("Ошибка отправки: " + e.message); document.getElementById(tempId).remove(); }
         }
 
         function handleRealtime(response) {
-            if(response.events.includes("create") || response.events.includes("update")) renderMessage(response.payload);
+            if(response.events.includes("create")) {
+                // Если это сообщение уже есть (отправили мы), удаляем времянку
+                const msgs = document.querySelectorAll('.message');
+                msgs.forEach(m => {
+                    if (m.dataset.optimistic && 
+                        m.querySelector('.msg-author').innerText === response.payload.senderId &&
+                        m.querySelector('.msg-text-content').innerText === response.payload.messageContent) {
+                        m.remove();
+                    }
+                });
+                renderMessage(response.payload);
+            }
+            if(response.events.includes("update")) renderMessage(response.payload);
             if(response.events.includes("delete")) document.getElementById(response.payload.$id)?.remove();
         }
+
         function startEdit(id, text) { const i = document.getElementById('msg-input'); i.value = text; i.focus(); editingMsgId = id; document.getElementById('send-btn').innerText = "✓"; }
         async function deleteMsg(id) { if(confirm('Удалить?')) { await db.deleteDocument(DB_ID, MSG_COL, id); document.getElementById(id).remove(); } }
         function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
