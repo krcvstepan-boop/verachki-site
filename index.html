@@ -3,269 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VERACHKI | Empire of Silence</title>
+    <title>VERACHKI | Winter Protocol</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Manrope:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
 
     <style>
         :root {
-            --bg-light: #f4f6f9;
-            --accent: #6a4df4;
-            --accent-dark: #4b32c3;
-            --accent-glow: rgba(106, 77, 244, 0.4);
-            --text-main: #0f0f12;
-            --text-muted: #5e6472;
-            --danger: #ff3b30;
-            --glass: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            /* Palette */
+            --bg-color: #f2f4f8;
+            --accent: #5e5ce6; /* iOS System Indigo */
+            --accent-dark: #3634a3;
+            --accent-glow: rgba(94, 92, 230, 0.4);
+            --winter-blue: #a3d8f4; /* Ice tint */
+            --text-main: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --danger: #ff453a; /* iOS Red */
+            --success: #32d74b;
+            
+            /* iOS Glass Params */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.65);
+            --glass-blur: blur(25px) saturate(210%); /* High saturation is key for iOS look */
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.06);
+            --radius: 24px;
         }
 
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        html { scroll-behavior: smooth; height: 100%; }
+        html { scroll-behavior: smooth; height: 100%; font-size: 16px; }
 
         body {
-            background: var(--bg-light);
+            background: var(--bg-color);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(106, 77, 244, 0.08) 0px, transparent 60%),
-                radial-gradient(at 90% 100%, rgba(200, 200, 200, 0.15) 0px, transparent 60%);
+                radial-gradient(at 10% 10%, rgba(163, 216, 244, 0.4) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(94, 92, 230, 0.15) 0px, transparent 50%);
             background-attachment: fixed;
             color: var(--text-main);
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Manrope', -apple-system, sans-serif;
             line-height: 1.7;
-            font-size: 16px;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            position: relative;
         }
 
-        /* LIQUID GLASS EFFECT (iOS Style) */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
+        /* WINTER SNOW EFFECT */
+        .snow-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='white' opacity='0.3'/%3E%3Ccircle cx='40' cy='60' r='1' fill='white' opacity='0.3'/%3E%3Ccircle cx='80' cy='20' r='1' fill='white' opacity='0.4'/%3E%3C/svg%3E");
+            background-size: 300px 300px;
+            pointer-events: none; z-index: 1; opacity: 0.6;
+            animation: snowfall 40s linear infinite;
+        }
+        @keyframes snowfall { from { background-position: 0 0; } to { background-position: 100px 300px; } }
+
+        /* LIQUID GLASS UTILITY (THE IOS MAGIC) */
+        .ios-glass {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-glass);
+            box-shadow: var(--shadow-soft);
         }
 
-        /* Typography */
-        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #000; font-weight: 700; }
-        h1 { font-size: clamp(2.8rem, 6vw, 4.8rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 25px; }
-        h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; display: inline-block; }
-        h3 { font-size: 1.4rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 4px solid var(--accent); padding-left: 20px; }
-        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-bottom: 20px; display: block; }
-        p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; font-size: 1.05rem; }
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #000; font-weight: 700; line-height: 1.1; }
+        h1 { font-size: clamp(3rem, 6vw, 5rem); margin-bottom: 25px; letter-spacing: -0.02em; }
+        h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; }
+        h3 { font-size: 1.4rem; margin: 30px 0 15px 0; color: #000; display: flex; align-items: center; gap: 10px; }
+        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.7rem; color: var(--accent); font-weight: 700; display: block; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .subtitle::before { content: '❄'; color: var(--winter-blue); font-size: 1.2em; }
+        p { margin-bottom: 20px; color: var(--text-secondary); text-align: justify; font-size: 1.05rem; }
 
-        /* UI Elements */
-        .btn {
-            cursor: pointer; padding: 18px 38px; border: none; border-radius: 50px;
-            background: #111; color: #fff;
-            text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-decoration: none; display: inline-flex; justify-content: center; align-items: center;
-            position: relative; overflow: hidden;
-        }
-        .btn:hover { transform: translateY(-2px); background: var(--accent); box-shadow: 0 20px 40px var(--accent-glow); }
-        .btn:active { transform: scale(0.98); }
-        .btn-outline { background: transparent; border: 1px solid #111; color: #111; }
-        .btn-outline:hover { background: #111; color: #fff; border-color: #111; }
-        .btn-danger { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
-        
+        /* LAYOUT */
         .container { width: 90%; max-width: 1050px; margin: 0 auto; position: relative; z-index: 2; }
         section { padding: 120px 0; position: relative; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: 1s cubic-bezier(0.19, 1, 0.22, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .hidden { display: none !important; }
 
-        /* Navigation */
+        /* BUTTONS */
+        .btn {
+            padding: 18px 36px; border: none; border-radius: 50px;
+            background: #000; color: #fff;
+            text-transform: uppercase; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+            cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .btn:hover { transform: scale(1.03); background: var(--accent); box-shadow: 0 15px 35px var(--accent-glow); }
+        .btn-outline { background: transparent; color: #000; border: 1px solid #000; box-shadow: none; }
+        .btn-outline:hover { background: #000; color: #fff; transform: translateY(-2px); }
+
+        /* NAVIGATION */
         nav {
             padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
-            transition: all 0.3s ease;
+            position: sticky; top: 20px; z-index: 100;
+            width: 95%; margin: 0 auto; border-radius: 50px;
+            transition: 0.3s;
         }
-        /* Применяем класс glass-panel к навигации */
-        nav.glass-panel { border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .nav-logo { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.3rem; color: #000; letter-spacing: 0.05em; cursor: pointer; }
+        .nav-logo span { color: var(--accent); }
 
-        .nav-logo { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.4rem; cursor: pointer; color: #111; letter-spacing: 0.05em; }
-
-        /* Hero */
-        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 70px; align-items: center; min-height: 85vh; }
-        .hero-image-wrapper { position: relative; }
+        /* HERO SECTION */
+        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; min-height: 80vh; }
+        .hero-image-wrapper { position: relative; perspective: 1000px; }
         .hero-image-wrapper img { 
-            width: 100%; border-radius: 24px; 
-            box-shadow: 0 40px 80px rgba(0,0,0,0.15); 
-            border: 1px solid rgba(255,255,255,0.5);
-            transform: rotate(2deg); transition: 0.5s ease;
+            width: 100%; border-radius: 32px; 
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.8);
+            transform: rotateY(-5deg) rotateX(2deg); transition: 0.5s ease;
         }
-        .hero-image-wrapper:hover img { transform: rotate(0deg) scale(1.02); }
-        
+        .hero-image-wrapper:hover img { transform: rotateY(0) rotateX(0) scale(1.02); }
+        .frost-badge { display: inline-block; background: var(--winter-blue); color: #004; padding: 5px 12px; border-radius: 20px; font-size: 0.65rem; font-weight: 800; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.1em; }
+
         @media(max-width: 900px) { 
-            .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } 
-            .hero-image-wrapper { max-width: 100%; margin: 30px 0; transform: none; } 
+            .hero-grid { grid-template-columns: 1fr; text-align: center; } 
+            .hero-image-wrapper { margin-top: 40px; transform: none; } 
             .hero-image-wrapper img { transform: none; }
+            h1 { font-size: 3rem; }
         }
 
-        /* MEDIA MESSAGES */
-        .msg-media { border-radius: 18px; margin-top: 8px; display: block; max-width: 100%; border: 1px solid rgba(0,0,0,0.05); }
-        .msg-img { 
-            max-width: 280px; width: 100%; height: auto; object-fit: cover; 
-            cursor: pointer; transition: 0.3s; 
-        }
-        .msg-video { max-width: 300px; width: 100%; background: #000; border-radius: 18px; }
+        /* CARD GRIDS */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
+        .card { padding: 40px; border-radius: 30px; transition: 0.4s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); background: #fff; }
 
-        /* AUDIO PLAYER (Glass Style) */
-        .custom-audio-player {
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
-            padding: 8px 12px; border-radius: 50px;
-            width: 240px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.4);
-            user-select: none; transition: 0.3s;
-        }
-        .message.mine .custom-audio-player { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.2); }
-        
-        .audio-btn {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: #fff; color: var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .audio-progress { height: 100%; width: 0%; background: var(--accent); border-radius: 10px; transition: width 0.1s linear; }
-        .audio-track { flex: 1; height: 4px; background: rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
-        .message.mine .audio-track { background: rgba(255,255,255,0.3); } .message.mine .audio-progress { background: #fff; }
-
-        /* CHAT INTERFACE */
+        /* APP INTERFACE */
+        #app-interface { padding-top: 20px; height: 100dvh; overflow: hidden; position: fixed; inset: 0; z-index: 500; background: var(--bg-color); }
         .chat-wrapper { 
-            background: #fff; border-radius: 30px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
-            overflow: hidden; height: 88dvh; display: flex; flex-direction: column; 
-            position: relative; border: 1px solid rgba(0,0,0,0.04);
-        }
-        .chat-header { 
-            padding: 18px 25px; z-index: 10;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .chat-messages { 
-            flex: 1; overflow-y: auto; padding: 20px; 
-            display: flex; flex-direction: column; gap: 15px; 
-            background: #f8f9fc; 
-        }
-        .chat-messages::-webkit-scrollbar { width: 5px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-
-        .message { 
-            padding: 12px 18px; border-radius: 20px; border-bottom-left-radius: 4px; 
-            max-width: 85%; font-size: 0.95rem; position: relative; 
-            background: #fff; color: #1a1a1a; align-self: flex-start; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
-        }
-        .message.mine { 
-            align-self: flex-end; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); 
-            color: #fff; border-radius: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 4px;
-            box-shadow: 0 8px 20px rgba(106, 77, 244, 0.3); 
+            border-radius: 35px; overflow: hidden; height: 90dvh; 
+            display: flex; flex-direction: column; position: relative;
+            background: #fff;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 25px 80px -20px rgba(0,0,0,0.2);
         }
         
-        .controls { 
-            display: none; position: absolute; top: -30px; right: 0; 
-            background: #fff; padding: 6px 12px; border-radius: 50px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 5; 
-        }
-        .message:hover .controls { display: flex; gap: 8px; }
-        .control-btn { font-size: 0.8rem; cursor: pointer; color: #555; }
+        .chat-header { padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.03); background: rgba(255,255,255,0.8); backdrop-filter: blur(15px); }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 16px; background: #fafbfc; background-image: radial-gradient(#dbeaf9 1px, transparent 0); background-size: 20px 20px; }
+        
+        /* IOS MESSAGE BUBBLES */
+        .message { padding: 12px 18px; border-radius: 22px; max-width: 80%; font-size: 0.98rem; position: relative; background: #e5e5ea; color: #000; align-self: flex-start; border-bottom-left-radius: 4px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .message.mine { align-self: flex-end; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; border-bottom-left-radius: 22px; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--accent-glow); }
+        .msg-media { border-radius: 18px; max-width: 100%; display: block; margin: 5px 0; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
 
-        .chat-input { 
-            padding: 15px; background: #fff; 
-            display: flex; gap: 10px; align-items: center; z-index: 20;
-            border-top: 1px solid rgba(0,0,0,0.05);
-        }
-        .chat-input input[type="text"] { 
-            flex: 1; padding: 14px 20px; border: 1px solid #f0f0f0; border-radius: 30px; 
-            outline: none; background: #f9f9f9; font-size: 16px; transition: 0.3s;
-        }
-        .chat-input input[type="text"]:focus { background: #fff; border-color: var(--accent); }
-
-        .media-btn { 
-            width: 44px; height: 44px; border-radius: 50%; border: none; 
-            background: #f4f4f4; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-        }
-        .media-btn:hover { color: var(--accent); background: #eee; }
-        .record-btn.recording { color: #fff; background: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
-
-        #media-preview-area { display: none; padding: 10px 20px; background: #f9f9f9; border-top: 1px solid #eee; align-items: center; justify-content: space-between; font-size: 0.85rem; }
-
+        /* INPUT BAR */
+        .chat-input-bar { padding: 12px; background: rgba(255,255,255,0.9); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: flex-end; }
+        .input-wrapper { flex: 1; background: #f2f2f7; border-radius: 22px; padding: 8px 15px; border: 1px solid #e5e5ea; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .input-wrapper:focus-within { background: #fff; border-color: var(--accent); box-shadow: 0 4px 12px rgba(94, 92, 230, 0.15); }
+        input[type="text"] { width: 100%; background: transparent; border: none; font-size: 16px; height: 24px; padding: 0; }
+        
+        .circle-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--accent); cursor: pointer; transition: 0.2s; border: none; }
+        .circle-btn:hover { background: rgba(94, 92, 230, 0.1); }
+        .send-btn { background: var(--accent); color: white; border-radius: 50%; width: 36px; height: 36px; border: none; box-shadow: 0 2px 8px var(--accent-glow); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
+        .send-btn:active { transform: scale(0.9); }
+        
         /* MODALS */
-        .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            z-index: 2000; display: none; justify-content: center; align-items: center; 
-        }
-        .modal-box { 
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(30px) saturate(180%);
-            width: 90%; max-width: 400px; padding: 40px; border-radius: 35px; 
-            text-align: center; position: relative; box-shadow: 0 50px 100px rgba(0,0,0,0.3); 
-            border: 1px solid rgba(255,255,255,0.5);
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(15px) saturate(180%); -webkit-backdrop-filter: blur(15px) saturate(180%); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; animation: fadeIn 0.3s forwards; }
+        .modal-box { background: rgba(255,255,255,0.85); width: 85%; max-width: 380px; padding: 35px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.5); text-align: center; box-shadow: 0 40px 100px -10px rgba(0,0,0,0.15); transform: scale(0.9); animation: zoomIn 0.3s forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes zoomIn { to { transform: scale(1); } }
         
-        input:not([type="file"]), select, textarea { 
-            width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); 
-            border-radius: 16px; font-family: inherit; background: rgba(255,255,255,0.6); 
-        }
+        input:not([type="file"], .chat-input input), select, textarea { width: 100%; padding: 18px; margin-bottom: 12px; border: 1px solid #e1e1e6; border-radius: 16px; background: rgba(255,255,255,0.6); transition: 0.3s; font-size: 1rem; }
+        input:focus { background: #fff; border-color: var(--accent); }
 
-        /* UTILS */
-        .hidden { display: none !important; }
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        /* CODEX TABLE */
+        .codex-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 30px; font-size: 0.95rem; }
+        .codex-table td, .codex-table th { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .codex-table th { text-align: left; font-family: 'Cinzel', serif; color: var(--accent); }
         
-        /* Tables */
-        .codex-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border-radius: 20px; overflow: hidden; margin: 30px 0; }
-        .codex-table th { background: #111; color: #fff; padding: 20px; text-align: left; }
-        .codex-table td { padding: 20px; border-bottom: 1px solid #f0f0f0; }
+        /* TOAST */
+        #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 5000; }
+        .toast { background: rgba(28, 28, 30, 0.95); color: #fff; padding: 16px 24px; border-radius: 50px; font-size: 0.9rem; backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-        /* Toast */
-        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; }
-        .toast { background: rgba(20, 20, 20, 0.9); color: white; padding: 14px 28px; border-radius: 50px; font-size: 0.9rem; backdrop-filter: blur(10px); margin-top: 10px; animation: fadeUp 0.3s forwards; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .red-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--danger); }
     </style>
 </head>
 <body>
 
+    <!-- Зимний слой -->
+    <div class="snow-layer"></div>
     <div id="toast-container"></div>
 
-    <nav class="glass-panel">
-        <div class="nav-logo" onclick="location.reload()">VERACHKI.</div>
+    <nav class="ios-glass">
+        <div class="nav-logo" onclick="location.reload()">VERACHKI<span>.</span></div>
+        
         <div id="nav-guest">
-            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 25px; font-size: 0.7rem;">Вход</button>
+            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 24px; font-size: 0.75rem;">Войти</button>
         </div>
+        
         <div id="nav-user" class="hidden" style="display: flex; align-items: center; gap: 15px;">
-            <div style="text-align: right; cursor: pointer; line-height: 1.2;" onclick="openMyProfile()">
-                <div id="nav-username" style="font-weight: 700; font-size: 0.9rem;">User</div>
-                <div id="nav-rank" style="font-size: 0.65rem; color: var(--accent); text-transform: uppercase; font-weight: 800;">Имперец</div>
+            <div style="text-align: right; cursor: pointer;" onclick="openMyProfile()">
+                <div id="nav-username" style="font-weight: 800; font-size: 0.9rem;">User</div>
+                <div id="nav-rank" style="font-size: 0.65rem; color: var(--accent); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Imperialis</div>
             </div>
-            <button class="btn" style="padding: 10px 20px; font-size: 0.7rem;" onclick="logout()">Выход</button>
         </div>
     </nav>
 
+    <!-- LANDING -->
     <section class="hero reveal">
         <div class="container">
             <div class="hero-grid">
                 <div class="hero-content">
-                    <span class="subtitle">Империя Тишины // Est. 2023</span>
-                    <h1>Мы строим Храм<br>Посреди цифрового шума.</h1>
+                    <span class="frost-badge">❄ Winter Protocol Activated</span>
+                    <h1>Мы строим Храм<br>посреди<br>Белого Шума.</h1>
                     <p>
-                        Добро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, 
-                        VERACHKI остаются островом аналоговой честности. Мы — не просто чат. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.
+                        Добро пожаловать в последнее аналоговое убежище. Империя Тишины вступает в "Сезон Длинных Ночей".
+                        В мире, где искренность оцифрована и продана, VERACHKI остаются форпостом чистого сигнала. 
+                        Это закрытый орден тех, кто помнит тепло настоящих слов.
                     </p>
-                    <p>
-                        Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.
+                    <p style="font-size: 0.95rem; border-left: 3px solid var(--winter-blue); padding-left: 20px;">
+                        Текущий статус: <b>Режим гибернации активен.</b> Внешний мир покрыт инеем лицемерия, но наш очаг горит ярче всего.
                     </p>
-                    <div style="display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 15px; margin-top: 40px;">
                         <button class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
-                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Изучить Архивы</button>
+                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Открыть Летопись</button>
                     </div>
                 </div>
-                <div class="hero-image-wrapper reveal">
-                    <img src="cover.jpg" alt="Символ Империи" onerror="this.src='https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop'">
+                <div class="hero-image-wrapper">
+                    <!-- Заглушка изображения -->
+                    <img src="https://images.unsplash.com/photo-1476370648495-3533f64427a2?q=80&w=1000&auto=format&fit=crop" alt="Зимняя Империя">
                 </div>
             </div>
         </div>
@@ -273,653 +233,489 @@
 
     <section id="history" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава I. Хроники Разлома</span>
-            <h2>Тень Архитектора и Великий Холод</h2>
-            <p>
-                История Империи написана не чернилами, а доверием и его осколками. В 2023 году, в школьных коридорах, Глеб был одним из нас. Он был Архитектором ранних дней. Но амбиции часто затмевают верность. Произошел "Великий Разлом" — предательство, которое раскололо наше единство и научило нас закрывать двери на замки.
-            </p>
-            <p>
-                Теперь между нами и Глебом — демилитаризованная зона. Мы видимся в школе, киваем друг другу, иногда даже гуляем по нейтральным паркам. Но это не дружба. Это холодная дипломатия. Как две сверхдержавы, мы сосуществуем, помня о ядерном чемоданчике обид. Он — призрак прошлого, который больше не имеет власти над нашим будущим.
-            </p>
+            <span class="subtitle">Глава I. Хроники Холода</span>
+            <h2>От Разлома до Вечной Мерзлоты</h2>
+            <div style="margin-top: 30px;">
+                <p>
+                    История Империи берет начало в эпоху Школьного Хаоса 2023 года. Тогда Глеб был одним из Архитекторов, столпом нашей веры. Но человеческие слабости подобны коррозии. Случился "Великий Разлом" — предательство доверия, которое навсегда изменило геополитическую карту нашего круга общения. 
+                </p>
+                <p>
+                    Глеб стал "Призраком Коридоров". Мы не враждуем открыто — это ниже достоинства Империи. Мы поддерживаем режим Холодной Дипломатии. Как государства, разделенные железным занавесом, мы вежливо киваем при встрече, зная, что общие воспоминания заморожены до лучших времен.
+                </p>
+                <p>
+                    Теперь, когда наступила Зима, мы укрепили свои границы. "Галя" не дремлет, и холодный воздух школы лишь усиливает резонанс сплетен. Наша задача — сохранять тепло внутри Круга.
+                </p>
+            </div>
         </div>
     </section>
 
-    <section id="geography" class="reveal" style="background: #fff;">
+    <section id="geography" class="reveal" style="background: #fff; padding: 100px 0;">
         <div class="container">
-            <span class="subtitle">Глава II. Сакральная География</span>
-            <h2>Места Силы и Забытые Руины</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; margin-top: 40px;">
-                <div style="padding: 30px; background: #f8f9fa; border-radius: 20px;">
-                    <h3 style="margin-top:0;">Цоколь НБВ</h3>
-                    <p style="font-size: 0.9rem;">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика этого места настолько плотная, что здесь глохнет сотовая связь. Это сердце Империи.</p>
+            <span class="subtitle">Глава II. Святыни</span>
+            <h2>География Сопротивления</h2>
+            
+            <div class="grid-cards ios-glass" style="margin-top: 40px; padding: 10px; border: none; background: transparent; box-shadow: none;">
+                <div class="card ios-glass">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🏯</div>
+                    <h3>Цоколь НБВ</h3>
+                    <p>Нулевой уровень. Бетонные катакомбы под фундаментом, где нет сотовой связи. Именно здесь, в тишине подземелья, рождается истина. Главное святилище на зимний период.</p>
                 </div>
-                <div style="padding: 30px; background: #f8f9fa; border-radius: 20px;">
-                    <h3 style="margin-top:0;">Святилище Б (Lost)</h3>
-                    <p style="font-size: 0.9rem;">Мертвый дом на колесах. Ржавый ковчег, стоявший с весны 2023. Мы осквернили его своим присутствием, оставив слишком много следов. Духи места разгневались. Теперь вход туда запечатан. Это памятник нашей неосторожности.</p>
+                <div class="card ios-glass">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🚌</div>
+                    <h3>Святилище Б (Lost)</h3>
+                    <p>Заброшенный дом на колесах, ржавеющий в сугробах. Когда-то наш летний дворец, теперь — зона отчуждения, оскверненная нашим неосторожным весельем.</p>
+                </div>
+                <div class="card ios-glass">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🛋️</div>
+                    <h3>Зелёный Диван</h3>
+                    <p>Тактическая точка в школьном рекреации. Место сбора Совета. Именно здесь обсуждаются указы о наказаниях и стратегические планы по избеганию встреч с Галей.</p>
                 </div>
             </div>
 
-            <div style="margin-top: 50px; padding: 40px; background: #f0f4ff; border-radius: 24px;">
-                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Регалии</h3>
-                <ul style="list-style: none; padding: 0; margin-top: 25px;">
-                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="font-size: 1.5rem;">🎵</span>
-                        <div><strong>Гимн: "Mama ŠČ!" (Let 3).</strong> Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</div>
-                    </li>
-                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="font-size: 1.5rem;">📜</span>
-                        <div><strong>Печать Верачек.</strong> Физический артефакт, подтверждающий подлинность указов. Хранится в секретере.</div>
-                    </li>
+            <div style="margin-top: 50px; background: rgba(94, 92, 230, 0.05); padding: 40px; border-radius: 24px;">
+                <h3>Артефакты Власти</h3>
+                <ul style="list-style: none; padding: 0; margin-top: 20px;">
+                    <li style="padding: 15px 0; border-bottom: 1px solid rgba(0,0,0,0.05);"><strong>👑 Гимн "Mama ŠČ!"</strong> — Атональная звуковая стена, отпугивающая чужаков.</li>
+                    <li style="padding: 15px 0; border-bottom: 1px solid rgba(0,0,0,0.05);"><strong>✒️ Печать Империи</strong> — Физический штамп, хранящийся в секретере.</li>
+                    <li style="padding: 15px 0;"><strong>📜 Зимний Манифест</strong> — Свод правил поведения на период экзаменов и каникул.</li>
                 </ul>
             </div>
         </div>
     </section>
 
-    <section id="enemy" class="reveal">
+    <section id="codex" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава III. Энтропия</span>
-            <h2>Феномен "Галя"</h2>
-            <p>
-                Враг не всегда носит оружие. Иногда враг — это всепоглощающая глупость и суета. Мы называем это "Эффект Гали". Это вирус сознания.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
-                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid #ccc; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <h4>Тип А: Шумная</h4>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Громкая, пустая, требующая внимания. Она как статическое электричество — раздражает, но легко заземляется игнором.</p>
-                </div>
-                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid var(--danger); box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <h4>Тип Б: Латентная (Danger)</h4>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="codex" class="reveal" style="background: #fff;">
-        <div class="container">
-            <span class="subtitle">Глава IV. Уложение о Наказаниях</span>
-            <h2>Кодекс Империи</h2>
-            <div style="overflow-x: auto;">
+            <span class="subtitle">Глава III. Устав</span>
+            <h2>Закон и Порядок</h2>
+            <div class="ios-glass" style="padding: 10px 30px; border-radius: 20px; overflow-x: auto;">
                 <table class="codex-table">
-                    <thead><tr><th>№</th><th>Догма</th><th>Толкование</th></tr></thead>
                     <tbody>
-                        <tr><td>I</td><td>Святость Личности</td><td>Честь Имперца неприкосновенна. Оскорбление приравнивается к измене.</td></tr>
-                        <tr><td>II</td><td>Пакт Ненападения</td><td>Физическое насилие внутри Круга запрещено под страхом изгнания.</td></tr>
-                        <tr><td>III</td><td>Целостность</td><td>Любая попытка расколоть общество карается баном. Интриги запрещены.</td></tr>
-                        <tr><td>IV</td><td>Финансовая Чистота</td><td>Запрет на вымогательство и рэкет (даже в шутку).</td></tr>
+                        <tr><td>01.</td><td><strong>Закон Тишины</strong></td><td>Информация внутри круга священна. Слив переписки — высшая мера (изгнание).</td></tr>
+                        <tr><td>02.</td><td><strong>Протокол "Анти-Галя"</strong></td><td>Игнорирование шумных субъектов (Тип А) и изоляция скрытых интриганов (Тип Б).</td></tr>
+                        <tr><td>03.</td><td><strong>Омерта Чувств</strong></td><td>Насмешки над искренними переживаниями Братьев запрещены.</td></tr>
+                        <tr><td>04.</td><td><strong>Догма Чистоты</strong></td><td>Никаких финансовых пирамид и токсичных долгов внутри семьи.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <section id="structure" class="reveal">
+    <footer style="padding: 60px 0; text-align: center; color: var(--text-secondary); background: #f9f9fc;">
         <div class="container">
-            <span class="subtitle">Глава V. Иерархия</span>
-            <h2>Лестница Власти</h2>
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="padding: 20px; border-left: 3px solid #ccc; background: rgba(255,255,255,0.5);">
-                    <strong>01. Наблюдатель (The Watcher)</strong>
-                    <div style="font-size: 0.9rem; margin-top: 5px;">Неофит. Вы уже внутри, но вы под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не "Галя".</div>
-                </div>
-                <div style="padding: 20px; border-left: 3px solid var(--accent); background: rgba(106, 77, 244, 0.05);">
-                    <strong>02. Соратник (The Ally)</strong>
-                    <div style="font-size: 0.9rem; margin-top: 5px;">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к голосовым чатам и сходкам.</div>
-                </div>
-                <div style="padding: 20px; border-left: 3px solid #111; background: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
-                    <strong>03. Элита (The Architect)</strong>
-                    <div style="font-size: 0.9rem; margin-top: 5px;">Хранители ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</div>
-                </div>
+            <h4 style="margin-bottom: 20px; font-size: 1.5rem;">VERACHKI.</h4>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 40px;">
+                <a href="#" class="btn btn-outline" style="border-radius: 12px; padding: 12px 25px;">Telegram Channel</a>
             </div>
-            <div style="margin-top: 60px; padding: 30px; border: 1px dashed var(--accent); border-radius: 20px; text-align: center;">
-                <p style="margin: 0; font-weight: 600; font-style: italic; color: var(--accent);">"Призыв дождя окончен. Наступает эра Великой Тишины."</p>
-            </div>
-        </div>
-    </section>
-
-    <footer style="background: #0a0a0a; color: #fff; padding: 80px 0;">
-        <div class="container" style="text-align: center;">
-            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
-                <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Гости</a>
-                <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Новости</a>
-            </div>
-            <p style="opacity: 0.3; font-size: 0.75rem;">© 2026 VERACHKI EMPIRE.<br>Design by KC_Comms [oV] & Architecture by 미하이</p>
+            <p style="font-size: 0.75rem; opacity: 0.6;">Empire of Silence © 2024-2025. Built with ice and anxiety.</p>
         </div>
     </footer>
 
-    <!-- APP INTERFACE -->
-    <section id="app-interface" class="hidden" style="background: var(--bg-light); padding-top: 20px; height: 100dvh; padding-bottom: 20px; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
-        <div class="container" style="height: 100%;">
-            <div class="chat-wrapper">
-                <div class="chat-header glass-panel">
-                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="showLanding()">
-                        <span style="font-size: 1.2rem; color: var(--accent);">❮</span>
-                        <span style="font-weight: 700; font-size: 0.8rem; color: var(--accent); letter-spacing: 0.05em;">В МИР</span>
-                    </div>
-                    <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
-                    <div style="width: 50px;"></div>
-                </div>
+    <!-- APP SECTION -->
+    <section id="app-interface" class="hidden">
+        <div class="container" style="height: 100%; padding: 0; max-width: 800px;">
+            <div class="chat-wrapper ios-glass">
                 
-                <div class="chat-messages" id="messages-container">
-                    <div style="text-align: center; margin-top: 50px; color: #ccc; font-size: 0.85rem;">Подключение к нейросети...</div>
-                </div>
-                
-                <div id="media-preview-area">
-                    <div class="preview-content" style="display: flex; align-items: center; gap: 10px;">
-                        <span id="preview-icon">📎</span>
-                        <span id="preview-name" style="max-width: 200px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600;">file</span>
+                <!-- HEADER -->
+                <div class="chat-header">
+                    <div style="cursor: pointer; display: flex; align-items: center; color: var(--accent);" onclick="showLanding()">
+                        <span style="font-size: 1.5rem; margin-right: 5px;">‹</span> <span style="font-weight: 600;">Выход</span>
                     </div>
-                    <span style="cursor: pointer; color: var(--danger); font-size: 1.2rem;" onclick="clearAttachment()">✕</span>
+                    <div style="text-align: center;">
+                        <span style="font-weight: 700; font-size: 1rem; display: block;">VERACHKI</span>
+                        <span style="font-size: 0.65rem; color: #8e8e93; font-weight: 500;">Подключено (Безопасное)</span>
+                    </div>
+                    <div onclick="openMyProfile()" style="width: 35px; height: 35px; background: #eee; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: #666;">
+                        👤
+                    </div>
                 </div>
 
-                <div class="chat-input">
-                    <button class="media-btn" onclick="document.getElementById('file-upload').click()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                <!-- MESSAGES AREA -->
+                <div class="chat-messages" id="messages-container">
+                    <!-- Загрузка сообщений происходит здесь -->
+                    <div style="text-align: center; margin-top: 50px; opacity: 0.5; font-size: 0.8rem;">
+                        <div class="snow-loader">❄</div>
+                        Расшифровка архивов...
+                    </div>
+                </div>
+
+                <!-- PREVIEW -->
+                <div id="media-preview-area" style="display: none; padding: 10px 15px; background: rgba(255,255,255,0.8); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; gap: 10px;">
+                    <div style="background: #eee; width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center;">📎</div>
+                    <span id="preview-name" style="flex:1; font-size: 0.8rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Файл</span>
+                    <button class="circle-btn" style="color: var(--danger);" onclick="clearAttachment()">✕</button>
+                </div>
+
+                <!-- INPUT AREA -->
+                <div class="chat-input-bar">
+                    <button class="circle-btn" onclick="document.getElementById('file-upload').click()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                     </button>
                     <input type="file" id="file-upload" class="hidden" accept="image/*,video/*,audio/*" onchange="handleFileSelect(this)">
                     
-                    <button class="media-btn record-btn" id="record-btn" onclick="toggleRecording()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    <button class="circle-btn" id="record-btn" onclick="toggleRecording()" style="color: var(--text-main);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                     </button>
                     
-                    <input type="text" id="msg-input" placeholder="Передача сообщения..." autocomplete="off">
+                    <div class="input-wrapper">
+                        <input type="text" id="msg-input" placeholder="Сообщение..." autocomplete="off">
+                    </div>
                     
-                    <button id="send-btn" class="media-btn" style="background: #111; color: #fff;" onclick="sendMessage()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    <button id="send-btn" class="send-btn" onclick="sendMessage()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Modals -->
+    <!-- AUTH MODAL -->
     <div id="auth-modal" class="modal-overlay">
-        <div class="modal-box">
-            <span class="close-icon" onclick="closeModal('auth-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
-            <h2 id="auth-title">Доступ</h2>
-            <input type="text" id="reg-name" placeholder="Позывной (Имя)" style="display: none;">
-            <input type="email" id="email" placeholder="Email">
+        <div class="modal-box ios-glass">
+            <h2 id="auth-title" style="margin-bottom: 20px;">Вход</h2>
+            <input type="text" id="reg-name" placeholder="Позывной" style="display: none;">
+            <input type="email" id="email" placeholder="Email (iCloud/Gmail)">
             <input type="password" id="password" placeholder="Пароль">
             <input type="text" id="invite-code" placeholder="Код Доступа (Alpha)" style="display: none;">
-            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleAuth()" id="auth-btn">Войти</button>
-            <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer; color: var(--accent); font-weight: 700;" onclick="toggleAuthMode()">Сменить протокол (Регистрация)</p>
+            
+            <button class="btn" style="width: 100%; margin-top: 15px; background: var(--accent);" onclick="handleAuth()" id="auth-btn">Войти в Систему</button>
+            <p style="margin-top: 15px; font-size: 0.8rem; cursor: pointer; color: var(--text-secondary);" onclick="toggleAuthMode()">Нет аккаунта? <span style="color: var(--accent); font-weight: 700;">Создать</span></p>
+            <button class="btn btn-outline" style="margin-top: 10px; width: 100%; padding: 10px;" onclick="closeModal('auth-modal')">Отмена</button>
         </div>
     </div>
 
+    <!-- PROFILE MODAL -->
     <div id="profile-modal" class="modal-overlay">
-        <div class="modal-box">
-            <span class="close-icon" onclick="closeModal('profile-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
-            <h2 id="p-name" style="margin-bottom: 5px;">User</h2>
-            <span id="p-rank" style="background: #111; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem;">RANK</span>
-            <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 15px; margin-top: 20px; text-align: left;">
-                <textarea id="p-about-edit" class="hidden" rows="3" placeholder="Досье..."></textarea>
-                <p id="p-about" style="margin: 0; font-size: 0.9rem;">-</p>
+        <div class="modal-box ios-glass" style="text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <div>
+                    <h2 id="p-name" style="margin: 0; font-size: 1.8rem;">Username</h2>
+                    <span id="p-rank" style="color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">Rank</span>
+                </div>
+                <button class="circle-btn" onclick="closeModal('profile-modal')" style="background: rgba(0,0,0,0.05);">✕</button>
             </div>
-            <div id="admin-controls" class="hidden" style="margin-top: 20px;">
-                <select id="p-rank-edit" style="margin-bottom: 10px;">
+            
+            <label style="font-size: 0.8rem; color: #888; margin-left: 5px;">ДОСЬЕ</label>
+            <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 18px; margin-top: 5px; margin-bottom: 20px;">
+                <textarea id="p-about-edit" class="hidden" rows="4" placeholder="Напиши что-нибудь о себе..."></textarea>
+                <p id="p-about" style="margin: 0; font-size: 0.95rem;">Информация отсутствует.</p>
+            </div>
+
+            <div id="admin-controls" class="hidden">
+                <select id="p-rank-edit">
                     <option value="Наблюдатель">Наблюдатель</option>
                     <option value="Соратник">Соратник</option>
                     <option value="Элита">Элита</option>
-                    <option value="Изгнан">ИЗГНАНИЕ</option>
+                    <option value="Изгнан">🚫 ИЗГНАНИЕ</option>
                 </select>
-                <button class="btn-danger btn" onclick="saveProfileChanges()">Применить</button>
+                <button class="btn" style="width: 100%; background: var(--danger);" onclick="saveProfileChanges()">Обновить Статус</button>
             </div>
-            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 15px;" onclick="saveMyProfile()">Сохранить</button>
+
+            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 10px; background: var(--accent);" onclick="saveMyProfile()">Сохранить профиль</button>
+            
+            <button id="logout-btn" class="btn btn-outline hidden" style="width: 100%; margin-top: 20px; color: var(--danger); border-color: var(--danger);" onclick="logout()">Выйти из системы</button>
         </div>
     </div>
     
+    <!-- IMAGE VIEWER -->
     <div id="image-viewer" class="modal-overlay" onclick="this.style.display='none'">
-        <img id="viewer-img" style="max-width: 95%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
+        <img id="viewer-img" style="max-width: 90%; max-height: 85%; border-radius: 20px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
     </div>
 
-    <div id="ban-screen" style="display: none; position: fixed; inset: 0; background: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center;">
-        <h1 style="color: red; margin-bottom: 20px;">ДОСТУП ЗАПРЕЩЕН</h1>
-        <p>Вы были изгнаны из Империи.</p>
-        <button class="btn-outline" onclick="logout()" style="margin-top: 20px;">Покинуть</button>
+    <!-- BAN SCREEN -->
+    <div id="ban-screen" style="display: none; position: fixed; inset: 0; background: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
+        <h1 style="color: var(--danger); font-size: 4rem;">⚠</h1>
+        <h2 style="color: #000;">ДОСТУП ОГРАНИЧЕН</h2>
+        <p>Вы были изгнаны из Империи за нарушение Устава.</p>
+        <button class="btn" onclick="logout()" style="margin-top: 20px; background: #000;">Покинуть территорию</button>
     </div>
 
     <script>
-        // CONFIG
+        // --- APPWRITE CONFIG ---
+        // Замените ID на свои реальные при необходимости
         const PROJECT_ID = '69624669002d880cd7bb'; 
         const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
         const DB_ID = '6962475a003af27425fb';
         const MSG_COL = 'verachkichathistory'; 
         const PROFILES_COL = 'profiles'; 
         const STORAGE_ID = '696363f30004cb97e6a1'; 
-        const ADMIN_EMAIL = "kraacovstepa@gmail.com";
-        const SECRET_CODE = "GLEB2023";
-
-        // INIT APPWRITE
+        const SECRET_CODE = "GLEB2023"; // Код регистрации
+        
+        // --- CORE LOGIC ---
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
         const account = new Account(client);
         const db = new Databases(client);
         const storage = new Storage(client);
 
-        // STATE
         let state = {
             user: null,
             profile: null,
-            editingId: null,
-            isLogin: true,
-            currentProfileId: null,
             attachment: null,
+            isUploading: false,
             recorder: null,
-            chunks: [],
-            isRecording: false,
             audioPlayer: null,
-            isUploading: false
+            isRecording: false,
+            editingId: null,
+            tempChunks: []
         };
 
-        // HELPERS
-        function showToast(msg, type = 'info') {
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.innerText = msg;
-            if(type === 'error') t.style.background = 'rgba(255, 59, 48, 0.9)';
-            document.getElementById('toast-container').appendChild(t);
-            setTimeout(() => t.remove(), 3500);
-        }
-
-        function escapeHtml(text) {
-            if (!text) return "";
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        // AUTH CHECK
+        // --- INIT & AUTH ---
         async function checkSession() {
             try {
                 state.user = await account.get();
+                // Fetch or Create Profile
                 try {
                     const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
                     if(res.documents.length > 0) state.profile = res.documents[0];
                     else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
-                } catch(e) { console.log("Profile create/fetch error", e); }
+                } catch(e) { console.error("Profile Error", e); }
                 
-                if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
+                // Ban Check
+                if(state.profile?.rank === 'Изгнан') {
+                    document.getElementById('ban-screen').style.display = 'flex';
+                    return;
+                }
+
+                // UI Update
+                document.getElementById('nav-guest').classList.add('hidden');
+                document.getElementById('nav-user').classList.remove('hidden');
+                if(state.profile) {
+                    document.getElementById('nav-username').innerText = state.profile.username;
+                    document.getElementById('nav-rank').innerText = state.profile.rank;
+                }
+                
                 showApp();
             } catch (e) { showLanding(); }
         }
         checkSession();
 
+        function handleAuth() {
+            const isRegister = document.getElementById('reg-name').style.display !== 'none';
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const btn = document.getElementById('auth-btn');
+            
+            btn.innerText = "Обработка...";
+            
+            if (!isRegister) {
+                // Login
+                account.createEmailPasswordSession(email, pass)
+                    .then(() => location.reload())
+                    .catch(e => { showToast(e.message, 'error'); btn.innerText = "Войти"; });
+            } else {
+                // Register
+                const code = document.getElementById('invite-code').value;
+                const name = document.getElementById('reg-name').value;
+                if(code !== SECRET_CODE) { showToast("Неверный код доступа", 'error'); btn.innerText = "Вступить"; return; }
+                
+                account.create(ID.unique(), email, pass, name)
+                    .then(() => account.createEmailPasswordSession(email, pass))
+                    .then(() => db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" }))
+                    .then(() => location.reload())
+                    .catch(e => { showToast(e.message, 'error'); btn.innerText = "Вступить"; });
+            }
+        }
+
+        // --- UI NAVIGATION ---
         function showApp() {
             document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
-            document.querySelector('footer').style.display = 'none';
+            document.querySelector('footer').classList.add('hidden');
             document.getElementById('app-interface').classList.remove('hidden');
-            document.getElementById('nav-guest').classList.add('hidden');
-            document.getElementById('nav-user').classList.remove('hidden');
-            closeModal('auth-modal');
-            if(state.profile) {
-                document.getElementById('nav-username').innerText = state.profile.username;
-                document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
-            }
+            document.body.style.overflow = 'hidden';
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
         }
-
         function showLanding() {
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
-            document.querySelector('footer').style.display = 'block';
-            document.getElementById('nav-guest').classList.remove('hidden');
-            document.getElementById('nav-user').classList.add('hidden');
+            document.querySelector('footer').classList.remove('hidden');
+            document.body.style.overflow = 'auto';
             setTimeout(reveal, 100);
-            window.scrollTo(0, 0);
         }
-
-        // FILE HANDLING
-        function handleFileSelect(input) {
-            if(input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Проверка размера (50MB лимит)
-                if (file.size > 50 * 1024 * 1024) {
-                    showToast("Файл слишком большой (>50МБ)", 'error');
-                    input.value = '';
-                    return;
-                }
-
-                let type = 'file';
-                if(file.type.startsWith('image/')) type = 'image';
-                else if(file.type.startsWith('video/')) type = 'video';
-                else if(file.type.startsWith('audio/')) type = 'audio';
-                
-                state.attachment = { file: file, type: type };
-                document.getElementById('media-preview-area').style.display = 'flex';
-                document.getElementById('preview-name').innerText = file.name;
-                document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : (type === 'video' ? '🎬' : '🎵');
-            }
+        function openModal(id) { 
+            const m = document.getElementById(id); m.style.display = 'flex'; 
         }
-        function clearAttachment() { 
-            state.attachment = null; 
-            document.getElementById('file-upload').value = ''; 
-            document.getElementById('media-preview-area').style.display = 'none'; 
-        }
-
-        // VOICE RECORDING
-        async function toggleRecording() {
-            const btn = document.getElementById('record-btn');
-            if (!state.isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    state.recorder = new MediaRecorder(stream);
-                    state.chunks = [];
-                    state.recorder.ondataavailable = event => state.chunks.push(event.data);
-                    state.recorder.onstop = () => {
-                        const audioBlob = new Blob(state.chunks, { type: 'audio/mp3' });
-                        const audioFile = new File([audioBlob], "voice_msg.mp3", { type: "audio/mp3" });
-                        state.attachment = { file: audioFile, type: 'audio' };
-                        sendMessage();
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    state.recorder.start();
-                    state.isRecording = true;
-                    btn.classList.add('recording');
-                    showToast('Запись... (Нажми еще раз чтобы отправить)');
-                } catch(e) { showToast("Нет доступа к микрофону", 'error'); }
-            } else { 
-                state.recorder.stop(); 
-                state.isRecording = false; 
-                btn.classList.remove('recording'); 
-            }
-        }
-
-        // AUDIO PLAYER
-        function toggleAudio(btn, src) {
-            const playerContainer = btn.parentElement;
-            const progress = playerContainer.querySelector('.audio-progress');
-            
-            if (state.audioPlayer && state.audioPlayer.src === src) {
-                if (state.audioPlayer.paused) {
-                    state.audioPlayer.play();
-                    btn.innerText = '❚❚';
-                } else {
-                    state.audioPlayer.pause();
-                    btn.innerText = '▶';
-                }
-            } else {
-                if (state.audioPlayer) {
-                    state.audioPlayer.pause();
-                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
-                }
-                state.audioPlayer = new Audio(src);
-                state.audioPlayer.play();
-                btn.innerText = '❚❚';
-                
-                state.audioPlayer.ontimeupdate = () => {
-                    if(state.audioPlayer.duration) {
-                        const percent = (state.audioPlayer.currentTime / state.audioPlayer.duration) * 100;
-                        progress.style.width = percent + '%';
-                    }
-                };
-                state.audioPlayer.onended = () => {
-                    btn.innerText = '▶';
-                    progress.style.width = '0%';
-                };
-            }
-        }
-
-        // CHAT LOGIC
-        async function loadMessages() {
-            const container = document.getElementById('messages-container');
-            container.innerHTML = '';
-            try {
-                const res = await db.listDocuments(DB_ID, MSG_COL, [Query.orderAsc('timestamp'), Query.limit(100)]);
-                res.documents.forEach(renderMessage);
-                scrollToBottom();
-            } catch(e) { console.error(e); }
-        }
-
-        function renderMessage(msg) {
-            const container = document.getElementById('messages-container');
-            const existing = document.getElementById(msg.$id);
-            
-            // Если сообщение уже есть (например, оптимистичное), обновляем его
-            if (existing) {
-                if (!existing.dataset.optimistic) {
-                    existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
-                    if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
-                        existing.querySelector('.msg-text').insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
-                    }
-                }
-                return;
-            }
-
-            const isMine = state.profile && msg.senderId === state.profile.username;
-            const isAdmin = state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            const div = document.createElement('div');
-            div.className = `message ${isMine ? 'mine' : ''}`;
-            div.id = msg.$id;
-            if (msg.optimistic) div.dataset.optimistic = "true";
-
-            let controls = '';
-            if (!msg.optimistic) {
-                if(isMine) {
-                    controls = `<div class="controls">`;
-                    if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(msg.messageContent)}')">✎</span>`;
-                    controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
-                } else if(isAdmin) {
-                    controls = `<div class="controls"><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
-                }
-            }
-            
-            let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
-            
-            // RENDERING MEDIA
-            if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
-                // Для видео используем View, так как Download может требовать других заголовков
-                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
-                
-                if (msg.fileType === 'image') {
-                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
-                } else if (msg.fileType === 'video') {
-                    // Важно: playsinline для iOS
-                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
-                } else if (msg.fileType === 'audio') {
-                    contentHtml = `
-                    <div class="custom-audio-player">
-                        <div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div>
-                        <div class="audio-track"><div class="audio-progress"></div></div>
-                    </div>`;
-                }
-                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
-            }
-            
-            const author = isMine ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
-            const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
-            
-            div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div>`;
-            container.appendChild(div);
-            
-            // Auto scroll if near bottom
-            if(container.scrollHeight - container.scrollTop - container.clientHeight < 300 || isMine) scrollToBottom();
-        }
-
-        async function sendMessage() {
-            if (state.isUploading) return;
-
-            const input = document.getElementById('msg-input');
-            const text = input.value.trim();
-            if ((!text && !state.attachment) || !state.profile) return;
-            
-            // EDIT MODE
-            if (state.editingId) {
-                try {
-                    await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
-                    state.editingId = null;
-                    document.getElementById('send-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-                    input.value = '';
-                } catch(e) { showToast("Ошибка редактирования", 'error'); }
-                return;
-            }
-
-            // UPLOAD STATE
-            const sendBtn = document.getElementById('send-btn');
-            state.isUploading = true;
-            sendBtn.innerHTML = "•••";
-
-            // 1. Optimistic UI
-            const tempId = "temp-" + Date.now();
-            const optimisticMsg = {
-                $id: tempId,
-                messageContent: text,
-                senderId: state.profile.username,
-                timestamp: new Date().toISOString(),
-                isEdited: false,
-                fileType: state.attachment ? state.attachment.type : null,
-                fileUrl: state.attachment ? URL.createObjectURL(state.attachment.file) : null,
-                optimistic: true
-            };
-            renderMessage(optimisticMsg);
-            
-            input.value = '';
-            const fileToUpload = state.attachment;
-            clearAttachment(); // Clear UI immediately
-
-            // 2. Upload Logic
-            let fileId = null, fileType = null;
-            if (fileToUpload) {
-                try {
-                    // Важный момент: Для видео Appwrite создает файл, но он может не быть доступен сразу же для просмотра
-                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
-                    fileId = uploaded.$id; 
-                    fileType = fileToUpload.type;
-                } catch(e) { 
-                    showToast("Ошибка загрузки файла. " + e.message, 'error'); 
-                    document.getElementById(tempId).remove();
-                    state.isUploading = false;
-                    sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-                    return; 
-                }
-            }
-            
-            // 3. Save to DB
-            try {
-                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
-                    messageContent: text, 
-                    senderId: state.profile.username, 
-                    timestamp: new Date().toISOString(), 
-                    isEdited: false, 
-                    fileId: fileId, 
-                    fileType: fileType 
-                });
-                // Realtime event will replace the optimistic message
-            } catch(e) { 
-                showToast("Ошибка отправки: " + e.message, 'error'); 
-                document.getElementById(tempId).remove(); 
-            } finally {
-                state.isUploading = false;
-                sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-            }
-        }
-
-        function handleRealtime(response) {
-            if(response.events.includes("create")) {
-                const newMsg = response.payload;
-                // Remove optimistic duplicates
-                const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
-                tempMsgs.forEach(m => {
-                    if (m.querySelector('.msg-text-content').innerText === newMsg.messageContent &&
-                        (newMsg.fileId || !m.querySelector('img, video, .custom-audio-player'))) { // Rough check
-                         m.remove();
-                    }
-                });
-                renderMessage(newMsg);
-            }
-            if(response.events.includes("update")) renderMessage(response.payload);
-            if(response.events.includes("delete")) {
-                const el = document.getElementById(response.payload.$id);
-                if(el) {
-                    el.style.transition = "0.3s"; el.style.opacity = "0"; el.style.transform = "scale(0.9)";
-                    setTimeout(() => el.remove(), 300);
-                }
-            }
-        }
-
-        // EDIT & DELETE
-        function startEdit(id, text) { 
-            const i = document.getElementById('msg-input'); i.value = text; i.focus(); 
-            state.editingId = id; document.getElementById('send-btn').innerText = "✓"; 
-        }
-        async function deleteMsg(id) { 
-            if(confirm('Удалить?')) await db.deleteDocument(DB_ID, MSG_COL, id); 
-        }
-
-        // UI & MODALS
-        function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
         function toggleAuthMode() {
-            state.isLogin = !state.isLogin;
-            document.getElementById('auth-title').innerText = state.isLogin ? 'Доступ' : 'Присяга';
-            document.getElementById('auth-btn').innerText = state.isLogin ? 'Войти' : 'Вступить';
-            document.getElementById('reg-name').style.display = state.isLogin ? 'none' : 'block';
-            document.getElementById('invite-code').style.display = state.isLogin ? 'none' : 'block';
+            const isLogin = document.getElementById('reg-name').style.display === 'none';
+            document.getElementById('reg-name').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('invite-code').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('auth-title').innerText = isLogin ? 'Новобранец' : 'Вход';
+            document.getElementById('auth-btn').innerText = isLogin ? 'Вступить' : 'Войти в Систему';
         }
 
-        async function handleAuth() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
+        // --- CHAT LOGIC ---
+        async function loadMessages() {
+            const cont = document.getElementById('messages-container');
+            cont.innerHTML = '';
             try {
-                if (state.isLogin) { await account.createEmailPasswordSession(email, pass); location.reload(); }
-                else { 
-                    if(document.getElementById('invite-code').value !== SECRET_CODE) throw new Error("Неверный код доступа");
-                    const name = document.getElementById('reg-name').value;
-                    await account.create(ID.unique(), email, pass, name); 
-                    await account.createEmailPasswordSession(email, pass); 
-                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" }); 
-                    location.reload(); 
-                }
-            } catch(e) { showToast(e.message, 'error'); }
-        }
-
-        async function logout() { await account.deleteSession('current'); location.reload(); }
-
-        async function openProfile(username) {
-            openModal('profile-modal'); document.getElementById('p-name').innerText = username;
-            document.getElementById('p-rank').innerText = "...";
-            document.getElementById('admin-controls').classList.add('hidden'); 
-            document.getElementById('p-save-self').classList.add('hidden'); 
-            document.getElementById('p-about-edit').classList.add('hidden'); 
-            document.getElementById('p-about').classList.remove('hidden');
-
-            try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
-                if(res.documents.length > 0) {
-                    const p = res.documents[0]; state.currentProfileId = p.$id; 
-                    document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
-                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
-                    
-                    if (state.profile && p.$id === state.profile.$id) {
-                        document.getElementById('p-about').classList.add('hidden'); 
-                        document.getElementById('p-about-edit').classList.remove('hidden'); 
-                        document.getElementById('p-about-edit').value = p.about || ""; 
-                        document.getElementById('p-save-self').classList.remove('hidden');
-                    }
-                    if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                        document.getElementById('admin-controls').classList.remove('hidden');
-                        document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
-                    }
-                }
+                const res = await db.listDocuments(DB_ID, MSG_COL, [Query.orderAsc('timestamp'), Query.limit(100)]);
+                res.documents.forEach(renderMsg);
+                scrollToBottom();
             } catch(e) {}
         }
-        function openMyProfile() { if(state.profile) openProfile(state.profile.username); }
-        async function saveMyProfile() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); closeModal('profile-modal'); showToast("Сохранено"); }
-        async function saveProfileChanges() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); closeModal('profile-modal'); showToast("Статус обновлен"); }
 
-        function scrollToBottom() { const c = document.getElementById('messages-container'); c.scrollTop = c.scrollHeight; }
-        
-        // ANIMATION
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) { 
-                if (reveals[i].getBoundingClientRect().top < window.innerHeight - 50) reveals[i].classList.add("active"); 
+        function renderMsg(msg) {
+            const cont = document.getElementById('messages-container');
+            // Duplicate Check
+            if(document.getElementById(msg.$id)) return;
+            
+            const isMine = state.profile && msg.senderId === state.profile.username;
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'mine' : ''} reveal`;
+            div.style.opacity = '1'; div.style.transform = 'none'; // Instant show
+            div.id = msg.$id;
+            
+            let content = "";
+            
+            // Media
+            if(msg.fileId || msg.fileUrl) {
+                const url = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId);
+                if(msg.fileType === 'image') content += `<img src="${url}" class="msg-media" onclick="openViewer('${url}')">`;
+                else if(msg.fileType === 'video') content += `<video src="${url}" controls class="msg-media" style="background:#000"></video>`;
+                else if(msg.fileType === 'audio') content += `<audio controls src="${url}" class="msg-media" style="width:200px; height:40px;"></audio>`;
+            }
+            
+            content += `<div style="word-break: break-word;">${escapeHtml(msg.messageContent || "")}</div>`;
+            if(!isMine) content = `<div style="font-size:0.7rem; font-weight:700; margin-bottom:2px; color:${varHash(msg.senderId)}">${msg.senderId}</div>` + content;
+            
+            div.innerHTML = content;
+            cont.appendChild(div);
+            if(isMine || cont.scrollHeight - cont.scrollTop - cont.clientHeight < 200) scrollToBottom();
+        }
+
+        async function sendMessage() {
+            if(state.isUploading) return;
+            const txt = document.getElementById('msg-input').value.trim();
+            const file = state.attachment;
+            if((!txt && !file) || !state.profile) return;
+            
+            const btn = document.getElementById('send-btn');
+            btn.innerHTML = '•••'; state.isUploading = true;
+
+            try {
+                let fileId = null, fileType = null;
+                if(file) {
+                    const up = await storage.createFile(STORAGE_ID, ID.unique(), file.file);
+                    fileId = up.$id; fileType = file.type;
+                }
+                
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), {
+                    messageContent: txt,
+                    senderId: state.profile.username,
+                    timestamp: new Date().toISOString(),
+                    fileId: fileId,
+                    fileType: fileType
+                });
+                
+                document.getElementById('msg-input').value = '';
+                clearAttachment();
+            } catch(e) { showToast('Ошибка отправки', 'error'); }
+            finally {
+                state.isUploading = false;
+                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
             }
         }
-        window.addEventListener("scroll", reveal); reveal();
 
+        // --- MEDIA UTILS ---
+        function handleFileSelect(input) {
+            const f = input.files[0];
+            if(!f) return;
+            if(f.size > 50 * 1024 * 1024) { showToast("Файл слишком большой (>50MB)", "error"); return; }
+            
+            let type = 'file';
+            if(f.type.includes('image')) type = 'image';
+            else if(f.type.includes('video')) type = 'video';
+            else if(f.type.includes('audio')) type = 'audio';
+
+            state.attachment = { file: f, type: type };
+            document.getElementById('media-preview-area').style.display = 'flex';
+            document.getElementById('preview-name').innerText = f.name;
+        }
+        function clearAttachment() {
+            state.attachment = null;
+            document.getElementById('file-upload').value = '';
+            document.getElementById('media-preview-area').style.display = 'none';
+        }
+        function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if(!state.isRecording) {
+                navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
+                    state.recorder = new MediaRecorder(stream);
+                    state.tempChunks = [];
+                    state.recorder.ondataavailable = e => state.tempChunks.push(e.data);
+                    state.recorder.onstop = () => {
+                        const blob = new Blob(state.tempChunks, {type:'audio/mp3'});
+                        state.attachment = { file: new File([blob], "voice.mp3", {type:'audio/mp3'}), type: 'audio' };
+                        sendMessage();
+                        stream.getTracks().forEach(t => t.stop());
+                    };
+                    state.recorder.start();
+                    state.isRecording = true;
+                    btn.style.color = 'var(--danger)';
+                    btn.style.animation = 'pulse 1s infinite';
+                });
+            } else {
+                state.recorder.stop();
+                state.isRecording = false;
+                btn.style.color = 'var(--text-main)';
+                btn.style.animation = 'none';
+            }
+        }
+
+        // --- PROFILE LOGIC ---
+        async function openMyProfile() {
+            if(!state.profile) return;
+            openModal('profile-modal');
+            const p = state.profile;
+            document.getElementById('p-name').innerText = p.username;
+            document.getElementById('p-rank').innerText = p.rank;
+            document.getElementById('p-about').classList.add('hidden');
+            document.getElementById('p-about-edit').classList.remove('hidden');
+            document.getElementById('p-about-edit').value = p.about || "";
+            document.getElementById('p-save-self').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('admin-controls').classList.add('hidden');
+        }
+        async function saveMyProfile() {
+            await db.updateDocument(DB_ID, PROFILES_COL, state.profile.$id, { about: document.getElementById('p-about-edit').value });
+            closeModal('profile-modal'); showToast('Сохранено');
+        }
+        async function logout() { await account.deleteSession('current'); location.reload(); }
+
+        // --- REALTIME ---
+        function handleRealtime(r) {
+            if(r.events.includes("create")) renderMsg(r.payload);
+        }
+
+        // --- HELPERS ---
+        function scrollToBottom() { const c = document.getElementById('messages-container'); c.scrollTop = c.scrollHeight; }
+        function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
+        function showToast(msg, type='info') {
+            const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+            if(type==='error') t.style.background = 'rgba(255, 69, 58, 0.9)';
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+        function escapeHtml(txt) { return txt.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+        function varHash(str) { 
+            const colors = ['#007aff', '#af52de', '#ff2d55', '#5856d6', '#ff9500'];
+            let hash = 0;
+            for(let i=0; i<str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        // --- ANIMATION OBSERVER ---
+        function reveal() {
+            const reveals = document.querySelectorAll(".reveal");
+            reveals.forEach(el => {
+                if(el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add("active");
+            });
+        }
+        window.addEventListener("scroll", reveal);
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
+
     </script>
 </body>
 </html>
