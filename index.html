@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VERACHKI | Empire</title>
+    <title>VERACHKI | Empire of Silence</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,18 +13,16 @@
 
     <style>
         :root {
-            --bg-light: #f8f9fc;
+            --bg-light: #f4f6f9;
             --accent: #6a4df4;
-            --accent-dark: #5236d9;
-            --accent-glow: rgba(106, 77, 244, 0.3);
-            --text-main: #1a1a1a;
-            --text-muted: #5a5a5a;
-            --danger: #ef4444;
-            --rec-color: #ff3b30;
-            --glass: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
-            --shadow-hard: 0 15px 40px rgba(0, 0, 0, 0.12);
+            --accent-dark: #4b32c3;
+            --accent-glow: rgba(106, 77, 244, 0.4);
+            --text-main: #0f0f12;
+            --text-muted: #5e6472;
+            --danger: #ff3b30;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -33,8 +31,8 @@
         body {
             background: var(--bg-light);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(106, 77, 244, 0.08) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(200, 200, 200, 0.15) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(106, 77, 244, 0.08) 0px, transparent 60%),
+                radial-gradient(at 90% 100%, rgba(200, 200, 200, 0.15) 0px, transparent 60%);
             background-attachment: fixed;
             color: var(--text-main);
             font-family: 'Manrope', sans-serif;
@@ -44,238 +42,200 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* LIQUID GLASS EFFECT (iOS Style) */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass);
+        }
+
         /* Typography */
         h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #000; font-weight: 700; }
-        h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 25px; }
+        h1 { font-size: clamp(2.8rem, 6vw, 4.8rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 25px; }
         h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; display: inline-block; }
-        h3 { font-size: 1.4rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 4px solid var(--accent); padding-left: 15px; }
-        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-bottom: 15px; display: block; }
-        p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; }
+        h3 { font-size: 1.4rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 4px solid var(--accent); padding-left: 20px; }
+        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; color: var(--accent); font-weight: 800; margin-bottom: 20px; display: block; }
+        p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; font-size: 1.05rem; }
 
         /* UI Elements */
         .btn {
-            cursor: pointer; padding: 16px 35px; border: none; border-radius: 50px;
+            cursor: pointer; padding: 18px 38px; border: none; border-radius: 50px;
             background: #111; color: #fff;
-            text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; font-weight: 700;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-decoration: none; display: inline-flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-decoration: none; display: inline-flex; justify-content: center; align-items: center;
             position: relative; overflow: hidden;
         }
-        .btn:hover { transform: translateY(-3px); background: var(--accent); box-shadow: 0 15px 35px var(--accent-glow); }
-        .btn:active { transform: translateY(0); }
+        .btn:hover { transform: translateY(-2px); background: var(--accent); box-shadow: 0 20px 40px var(--accent-glow); }
+        .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid #111; color: #111; }
         .btn-outline:hover { background: #111; color: #fff; border-color: #111; }
         .btn-danger { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
-        .btn-danger:hover { background: #d32f2f; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); }
-
-        .container { width: 90%; max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; }
-        section { padding: 100px 0; position: relative; }
+        
+        .container { width: 90%; max-width: 1050px; margin: 0 auto; position: relative; z-index: 2; }
+        section { padding: 120px 0; position: relative; }
 
         /* Navigation */
         nav {
             padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
             transition: all 0.3s ease;
         }
+        /* Применяем класс glass-panel к навигации */
+        nav.glass-panel { border-bottom: 1px solid rgba(255,255,255,0.2); }
+
         .nav-logo { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.4rem; cursor: pointer; color: #111; letter-spacing: 0.05em; }
 
-        /* Media Styles */
-        .msg-media { border-radius: 16px; margin-top: 8px; display: block; max-width: 100%; }
+        /* Hero */
+        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 70px; align-items: center; min-height: 85vh; }
+        .hero-image-wrapper { position: relative; }
+        .hero-image-wrapper img { 
+            width: 100%; border-radius: 24px; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.15); 
+            border: 1px solid rgba(255,255,255,0.5);
+            transform: rotate(2deg); transition: 0.5s ease;
+        }
+        .hero-image-wrapper:hover img { transform: rotate(0deg) scale(1.02); }
+        
+        @media(max-width: 900px) { 
+            .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } 
+            .hero-image-wrapper { max-width: 100%; margin: 30px 0; transform: none; } 
+            .hero-image-wrapper img { transform: none; }
+        }
+
+        /* MEDIA MESSAGES */
+        .msg-media { border-radius: 18px; margin-top: 8px; display: block; max-width: 100%; border: 1px solid rgba(0,0,0,0.05); }
         .msg-img { 
             max-width: 280px; width: 100%; height: auto; object-fit: cover; 
             cursor: pointer; transition: 0.3s; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .msg-img:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .msg-video { max-width: 280px; background: #000; }
+        .msg-video { max-width: 300px; width: 100%; background: #000; border-radius: 18px; }
 
-        /* Audio Player */
+        /* AUDIO PLAYER (Glass Style) */
         .custom-audio-player {
             display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.6); backdrop-filter: blur(5px);
-            padding: 10px 14px; border-radius: 50px;
-            width: 240px; margin-top: 8px; border: 1px solid rgba(0,0,0,0.05);
-            user-select: none;
+            background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
+            padding: 8px 12px; border-radius: 50px;
+            width: 240px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.4);
+            user-select: none; transition: 0.3s;
         }
-        .message.mine .custom-audio-player { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.25); }
+        .message.mine .custom-audio-player { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.2); }
         
         .audio-btn {
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 34px; height: 34px; border-radius: 50%;
             background: #fff; color: var(--accent);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .audio-btn:hover { transform: scale(1.1); }
-        .audio-btn:active { transform: scale(0.95); }
-        
-        .audio-track {
-            flex: 1; height: 5px; background: rgba(0,0,0,0.08); border-radius: 10px;
-            position: relative; overflow: hidden;
-        }
-        .message.mine .audio-track { background: rgba(255,255,255,0.3); }
-        .audio-progress { height: 100%; width: 0%; background: var(--accent); transition: width 0.1s linear; border-radius: 10px; }
-        .message.mine .audio-progress { background: #fff; }
+        .audio-progress { height: 100%; width: 0%; background: var(--accent); border-radius: 10px; transition: width 0.1s linear; }
+        .audio-track { flex: 1; height: 4px; background: rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
+        .message.mine .audio-track { background: rgba(255,255,255,0.3); } .message.mine .audio-progress { background: #fff; }
 
-        /* HERO & Content */
-        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; min-height: 80vh; }
-        .hero-image-wrapper img { 
-            width: 100%; border-radius: 20px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.15); 
-            border: 6px solid rgba(255,255,255,0.8); 
-        }
-        @media(max-width: 900px) { 
-            .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } 
-            .hero-image-wrapper { max-width: 100%; margin-bottom: 30px; } 
-            h1 { font-size: 2.8rem; }
-        }
-
-        /* CHAT UI */
+        /* CHAT INTERFACE */
         .chat-wrapper { 
-            background: #fff; border-radius: 24px; 
-            box-shadow: var(--shadow-hard); 
-            overflow: hidden; border: 1px solid rgba(0,0,0,0.05); 
-            height: 85dvh; display: flex; flex-direction: column; 
-            position: relative;
+            background: #fff; border-radius: 30px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+            overflow: hidden; height: 88dvh; display: flex; flex-direction: column; 
+            position: relative; border: 1px solid rgba(0,0,0,0.04);
         }
         .chat-header { 
-            padding: 15px 20px; border-bottom: 1px solid #f0f0f0; 
-            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); 
-            display: flex; justify-content: space-between; align-items: center; z-index: 10; 
+            padding: 18px 25px; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
         }
         .chat-messages { 
             flex: 1; overflow-y: auto; padding: 20px; 
             display: flex; flex-direction: column; gap: 15px; 
-            background: #f8f9fa; scroll-behavior: smooth;
+            background: #f8f9fc; 
         }
-        
-        /* Custom Scrollbar */
-        .chat-messages::-webkit-scrollbar { width: 6px; }
-        .chat-messages::-webkit-scrollbar-track { background: transparent; }
-        .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-        .chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 
         .message { 
-            padding: 12px 18px; border-radius: 20px; border-top-left-radius: 4px; 
+            padding: 12px 18px; border-radius: 20px; border-bottom-left-radius: 4px; 
             max-width: 85%; font-size: 0.95rem; position: relative; 
             background: #fff; color: #1a1a1a; align-self: flex-start; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); word-wrap: break-word; 
-            transition: transform 0.2s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
         }
         .message.mine { 
             align-self: flex-end; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); 
-            color: #fff; border-radius: 20px; border-top-right-radius: 4px; border-top-left-radius: 20px; 
-            box-shadow: 0 5px 15px rgba(106, 77, 244, 0.25); 
+            color: #fff; border-radius: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px rgba(106, 77, 244, 0.3); 
         }
-        .msg-author { font-size: 0.7rem; font-weight: 700; color: #999; display: block; margin-bottom: 4px; cursor: pointer; opacity: 0.8; }
-        .message.mine .msg-author { display: none; }
         
         .controls { 
-            display: none; gap: 8px; position: absolute; top: -30px; right: 0; 
+            display: none; position: absolute; top: -30px; right: 0; 
             background: #fff; padding: 6px 12px; border-radius: 50px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 5; 
-            animation: fadeIn 0.2s ease;
         }
-        .message:hover .controls { display: flex; }
-        .control-btn { font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s; }
-        .control-btn:hover { color: var(--accent); transform: scale(1.2); }
+        .message:hover .controls { display: flex; gap: 8px; }
+        .control-btn { font-size: 0.8rem; cursor: pointer; color: #555; }
 
         .chat-input { 
-            padding: 15px; border-top: 1px solid #f0f0f0; background: #fff; 
-            display: flex; gap: 12px; align-items: center; position: relative; z-index: 20;
+            padding: 15px; background: #fff; 
+            display: flex; gap: 10px; align-items: center; z-index: 20;
+            border-top: 1px solid rgba(0,0,0,0.05);
         }
         .chat-input input[type="text"] { 
-            width: 100%; padding: 14px 20px; border: 1px solid #eee; border-radius: 30px; 
+            flex: 1; padding: 14px 20px; border: 1px solid #f0f0f0; border-radius: 30px; 
             outline: none; background: #f9f9f9; font-size: 16px; transition: 0.3s;
         }
-        .chat-input input[type="text"]:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
-        
-        .media-btn { 
-            background: #f5f5f5; border: none; cursor: pointer; font-size: 1.1rem; 
-            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; color: #666; transition: 0.2s; flex-shrink: 0;
-        }
-        .media-btn:hover { background: #eee; color: var(--accent); transform: rotate(10deg); }
-        .record-btn.recording { color: #fff; background: var(--rec-color); animation: pulse-red 1.5s infinite; }
-        
-        #send-btn { 
-            background: #111; color: #fff; border: none; border-radius: 50%; 
-            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.3s; flex-shrink: 0; font-size: 1.1rem;
-        }
-        #send-btn:hover { background: var(--accent); transform: rotate(-10deg) scale(1.05); }
+        .chat-input input[type="text"]:focus { background: #fff; border-color: var(--accent); }
 
-        #media-preview-area { 
-            display: none; padding: 12px 20px; background: #fafafa; 
-            border-top: 1px solid #eee; align-items: center; justify-content: space-between; 
-            font-size: 0.85rem; animation: slideUp 0.3s ease;
+        .media-btn { 
+            width: 44px; height: 44px; border-radius: 50%; border: none; 
+            background: #f4f4f4; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
         }
-        .preview-content { display: flex; align-items: center; gap: 10px; color: var(--accent); font-weight: 600; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
-        
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        .media-btn:hover { color: var(--accent); background: #eee; }
+        .record-btn.recording { color: #fff; background: var(--danger); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
+
+        #media-preview-area { display: none; padding: 10px 20px; background: #f9f9f9; border-top: 1px solid #eee; align-items: center; justify-content: space-between; font-size: 0.85rem; }
 
         /* MODALS */
         .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             z-index: 2000; display: none; justify-content: center; align-items: center; 
-            animation: fadeIn 0.3s ease;
         }
         .modal-box { 
-            background: #fff; width: 90%; max-width: 420px; padding: 40px; 
-            border-radius: 30px; text-align: center; position: relative; 
-            box-shadow: 0 50px 100px rgba(0,0,0,0.3); transform: scale(0.95);
-            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(30px) saturate(180%);
+            width: 90%; max-width: 400px; padding: 40px; border-radius: 35px; 
+            text-align: center; position: relative; box-shadow: 0 50px 100px rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.5);
         }
-        @keyframes popIn { to { transform: scale(1); } }
-        
-        .close-icon { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #ccc; transition: 0.2s; }
-        .close-icon:hover { color: #111; transform: rotate(90deg); }
         
         input:not([type="file"]), select, textarea { 
-            width: 100%; padding: 16px; margin-bottom: 15px; 
-            border: 1px solid #eee; border-radius: 16px; font-family: inherit; 
-            background: #f9f9f9; transition: 0.3s; 
+            width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); 
+            border-radius: 16px; font-family: inherit; background: rgba(255,255,255,0.6); 
         }
-        input:focus, textarea:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
-        
+
+        /* UTILS */
         .hidden { display: none !important; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
         
         /* Tables */
-        .codex-table { 
-            width: 100%; border-collapse: separate; border-spacing: 0;
-            background: #fff; box-shadow: var(--shadow-soft); 
-            border-radius: 16px; overflow: hidden; margin: 30px 0; font-size: 0.95rem; 
-        }
-        .codex-table th { background: #111; color: #fff; padding: 18px; text-align: left; font-family: 'Cinzel', serif; }
-        .codex-table td { padding: 18px; border-bottom: 1px solid #f0f0f0; }
-        .codex-table tr:last-child td { border-bottom: none; }
-        .codex-table tr:hover td { background: #fcfcfc; }
+        .codex-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border-radius: 20px; overflow: hidden; margin: 30px 0; }
+        .codex-table th { background: #111; color: #fff; padding: 20px; text-align: left; }
+        .codex-table td { padding: 20px; border-bottom: 1px solid #f0f0f0; }
 
-        /* Toast Notifications */
-        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .toast { background: rgba(30, 30, 30, 0.9); color: white; padding: 12px 24px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2); backdrop-filter: blur(5px); animation: fadeIn 0.3s, fadeOut 0.3s 2.7s forwards; }
-        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
-
-        #ban-screen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        /* Toast */
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; }
+        .toast { background: rgba(20, 20, 20, 0.9); color: white; padding: 14px 28px; border-radius: 50px; font-size: 0.9rem; backdrop-filter: blur(10px); margin-top: 10px; animation: fadeUp 0.3s forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- Toast Notifications -->
     <div id="toast-container"></div>
 
-    <nav>
+    <nav class="glass-panel">
         <div class="nav-logo" onclick="location.reload()">VERACHKI.</div>
         <div id="nav-guest">
-            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 24px; font-size: 0.7rem;">Вход</button>
+            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 25px; font-size: 0.7rem;">Вход</button>
         </div>
         <div id="nav-user" class="hidden" style="display: flex; align-items: center; gap: 15px;">
             <div style="text-align: right; cursor: pointer; line-height: 1.2;" onclick="openMyProfile()">
@@ -290,22 +250,22 @@
         <div class="container">
             <div class="hero-grid">
                 <div class="hero-content">
-                    <span class="subtitle">Империя Тишины</span>
-                    <h1>В эпоху шума<br>Мы выбираем память.</h1>
-                    <p style="font-size: 1.15rem; color: #333;">
-                        Это не просто чат. Это Храм, где хранят особые традиции. 
-                        Мы не ищем массовости. Мы строим убежище для тех, кто ценит теплоту выше лайков, а преданность — выше хайпа.
+                    <span class="subtitle">Империя Тишины // Est. 2023</span>
+                    <h1>Мы строим Храм<br>Посреди цифрового шума.</h1>
+                    <p>
+                        Добро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, 
+                        VERACHKI остаются островом аналоговой честности. Мы — не просто чат. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.
                     </p>
                     <p>
-                        Мы ждем Рассвета. Того момента, когда люди поймут ценность того, что теряют в цифровом шуме.
+                        Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.
                     </p>
                     <div style="display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap;">
-                        <button class="btn" onclick="openModal('auth-modal')">Вступить</button>
-                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Летопись</button>
+                        <button class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
+                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Изучить Архивы</button>
                     </div>
                 </div>
                 <div class="hero-image-wrapper reveal">
-                    <img src="cover.jpg" alt="Символ Империи" onerror="this.src='https://images.unsplash.com/photo-1594322436404-5a0526db4d13?q=80&w=1000&auto=format&fit=crop'">
+                    <img src="cover.jpg" alt="Символ Империи" onerror="this.src='https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop'">
                 </div>
             </div>
         </div>
@@ -313,43 +273,42 @@
 
     <section id="history" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава I. Дипломатия</span>
-            <h2>Тень Архитектора</h2>
+            <span class="subtitle">Глава I. Хроники Разлома</span>
+            <h2>Тень Архитектора и Великий Холод</h2>
             <p>
-                Всё началось в школьных коридорах в 2023 году. Глеб стоял у истоков, но история Империи знает "Великий Разлом". Предательство, которое научило нас главному уроку: <strong>доверяй, но проверяй</strong>. Даже самых близких.
+                История Империи написана не чернилами, а доверием и его осколками. В 2023 году, в школьных коридорах, Глеб был одним из нас. Он был Архитектором ранних дней. Но амбиции часто затмевают верность. Произошел "Великий Разлом" — предательство, которое раскололо наше единство и научило нас закрывать двери на замки.
             </p>
             <p>
-                Сейчас наши отношения — это холодная дипломатия. Глеб ушел сам. Мы встречаемся на нейтральной территории (в школе), без обид, но и без иллюзий. Летом мы даже гуляли однажды. Но шрам остался. Он — часть истории, но не часть будущего.
+                Теперь между нами и Глебом — демилитаризованная зона. Мы видимся в школе, киваем друг другу, иногда даже гуляем по нейтральным паркам. Но это не дружба. Это холодная дипломатия. Как две сверхдержавы, мы сосуществуем, помня о ядерном чемоданчике обид. Он — призрак прошлого, который больше не имеет власти над нашим будущим.
             </p>
         </div>
     </section>
 
     <section id="geography" class="reveal" style="background: #fff;">
         <div class="container">
-            <span class="subtitle">Глава II. Святыни</span>
-            <h2>Карта Памяти и Артефакты</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 40px;">
-                <div>
-                    <h3>Цоколь НБВ</h3>
-                    <p>Крытая конструкция на цокольном этаже, присоединенная к дому. Место Силы, где зародилась сама идея. Начало всех начал.</p>
+            <span class="subtitle">Глава II. Сакральная География</span>
+            <h2>Места Силы и Забытые Руины</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; margin-top: 40px;">
+                <div style="padding: 30px; background: #f8f9fa; border-radius: 20px;">
+                    <h3 style="margin-top:0;">Цоколь НБВ</h3>
+                    <p style="font-size: 0.9rem;">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика этого места настолько плотная, что здесь глохнет сотовая связь. Это сердце Империи.</p>
                 </div>
-                <div>
-                    <h3>Святилище Б</h3>
-                    <p>Заброшенный дом на колесах. Свидетель всех эпох с весны 2023 года. Место трагедии: мы нарушили его покой, оставили следы, и теперь вход туда закрыт навсегда. Напоминание о том, что нужно беречь святыни.</p>
+                <div style="padding: 30px; background: #f8f9fa; border-radius: 20px;">
+                    <h3 style="margin-top:0;">Святилище Б (Lost)</h3>
+                    <p style="font-size: 0.9rem;">Мертвый дом на колесах. Ржавый ковчег, стоявший с весны 2023. Мы осквернили его своим присутствием, оставив слишком много следов. Духи места разгневались. Теперь вход туда запечатан. Это памятник нашей неосторожности.</p>
                 </div>
             </div>
 
-            <div style="margin-top: 50px; padding: 40px; background: #f4f7fc; border-radius: 20px; box-shadow: var(--shadow-soft);">
-                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Артефакты</h3>
-                <ul style="list-style: none; padding: 0; margin-top: 20px;">
-                    <li style="margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 15px;">
-                        <strong>Гимн:</strong> "Let 3 — Mama ŠČ!" (2023). Звук, с которого всё началось.
+            <div style="margin-top: 50px; padding: 40px; background: #f0f4ff; border-radius: 24px;">
+                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Регалии</h3>
+                <ul style="list-style: none; padding: 0; margin-top: 25px;">
+                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
+                        <span style="font-size: 1.5rem;">🎵</span>
+                        <div><strong>Гимн: "Mama ŠČ!" (Let 3).</strong> Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</div>
                     </li>
-                    <li style="margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 15px;">
-                        <strong>Документы:</strong> Настоящая Печать Верачек и Старые Паспорта первых граждан.
-                    </li>
-                    <li>
-                        <strong>Сеть:</strong> Главный закрытый чат и Новостной канал.
+                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
+                        <span style="font-size: 1.5rem;">📜</span>
+                        <div><strong>Печать Верачек.</strong> Физический артефакт, подтверждающий подлинность указов. Хранится в секретере.</div>
                     </li>
                 </ul>
             </div>
@@ -358,19 +317,19 @@
 
     <section id="enemy" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава III. Предостережение</span>
-            <h2>Анатомия Пустоты</h2>
+            <span class="subtitle">Глава III. Энтропия</span>
+            <h2>Феномен "Галя"</h2>
             <p>
-                Галя — это не имя, а диагноз. Это болезнь, от которой почти невозможно излечиться, ведь часто она врожденная.
+                Враг не всегда носит оружие. Иногда враг — это всепоглощающая глупость и суета. Мы называем это "Эффект Гали". Это вирус сознания.
             </p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
-                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid #ccc; box-shadow: var(--shadow-soft);">
-                    <h4>Галя Обыкновенная</h4>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Не скрывается. Показывает характер сразу. Глупая, выделывается, ведет пустые разговоры. Распознается мгновенно.</p>
+                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid #ccc; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <h4>Тип А: Шумная</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Громкая, пустая, требующая внимания. Она как статическое электричество — раздражает, но легко заземляется игнором.</p>
                 </div>
-                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid var(--danger); box-shadow: var(--shadow-soft);">
-                    <h4>Галя Скрытая (Опасная)</h4>
-                    <p style="font-size: 0.9rem; margin-top: 10px;">Хитрая. Чтобы её заметить, нужно следить за деталями и мелкими шагами. Она разрушает изнутри.</p>
+                <div style="background: #fff; padding: 35px; border-radius: 20px; border-left: 5px solid var(--danger); box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <h4>Тип Б: Латентная (Danger)</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</p>
                 </div>
             </div>
         </div>
@@ -378,84 +337,95 @@
 
     <section id="codex" class="reveal" style="background: #fff;">
         <div class="container">
-            <span class="subtitle">Глава IV. Закон</span>
-            <h2>Уголовный Кодекс Империи</h2>
-            <p>Надеемся, что вы не нарушите данные правила. За несоблюдение вы будете наказаны или выгнаны.</p>
+            <span class="subtitle">Глава IV. Уложение о Наказаниях</span>
+            <h2>Кодекс Империи</h2>
             <div style="overflow-x: auto;">
                 <table class="codex-table">
-                    <thead><tr><th>№</th><th>Догма</th><th>Расшифровка</th></tr></thead>
+                    <thead><tr><th>№</th><th>Догма</th><th>Толкование</th></tr></thead>
                     <tbody>
-                        <tr><td>1</td><td>Святость Прав</td><td>Нельзя оскорблять права ВЕР.</td></tr>
-                        <tr><td>2</td><td>Закон Ненападения</td><td>Нельзя бить или обижать ВЕР.</td></tr>
-                        <tr><td>3</td><td>Целостность</td><td>Нельзя пытаться разрушать общество ВЕР.</td></tr>
-                        <tr><td>4</td><td>Запрет Рэкета</td><td>Нельзя вымогать у ВЕР какие-любо вещи.</td></tr>
+                        <tr><td>I</td><td>Святость Личности</td><td>Честь Имперца неприкосновенна. Оскорбление приравнивается к измене.</td></tr>
+                        <tr><td>II</td><td>Пакт Ненападения</td><td>Физическое насилие внутри Круга запрещено под страхом изгнания.</td></tr>
+                        <tr><td>III</td><td>Целостность</td><td>Любая попытка расколоть общество карается баном. Интриги запрещены.</td></tr>
+                        <tr><td>IV</td><td>Финансовая Чистота</td><td>Запрет на вымогательство и рэкет (даже в шутку).</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: right; font-size: 0.8rem; opacity: 0.6; margin-top: 10px;">Последнее обновление: 30.05.2023 12:28</p>
         </div>
     </section>
 
     <section id="structure" class="reveal">
         <div class="container">
-            <span class="subtitle">Глава V. Путь</span>
-            <h2>Бремя Власти</h2>
-            <p><strong>01. Наблюдатель (Стажировка)</strong><br>Это уже человек внутри, но он находится под прицелом глаз. Это период проверки. Мы смотрим: свой ли ты?</p>
-            <p><strong>02. Соратник (Близость)</strong><br>Как стать Соратником? Нужно пережить с нами время. Разделить хорошие моменты. Стать по-настоящему близким другом.</p>
-            <p><strong>03. Элита (Админ)</strong><br>Это не власть, а обязанность. Обязанность хранить атмосферу, даже когда вокруг тишина.</p>
-            <div style="margin-top: 50px; padding: 25px; border: 1px solid var(--accent); border-radius: 15px; background: rgba(106, 77, 244, 0.03);">
-                <p style="margin: 0; font-weight: bold; font-style: italic; text-align: center; color: var(--accent);">Добро пожаловать в теплую библиотеку, где хранятся книги о Верачках. Призыв дождя окончен. Наступает эра Тишины.</p>
+            <span class="subtitle">Глава V. Иерархия</span>
+            <h2>Лестница Власти</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="padding: 20px; border-left: 3px solid #ccc; background: rgba(255,255,255,0.5);">
+                    <strong>01. Наблюдатель (The Watcher)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Неофит. Вы уже внутри, но вы под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не "Галя".</div>
+                </div>
+                <div style="padding: 20px; border-left: 3px solid var(--accent); background: rgba(106, 77, 244, 0.05);">
+                    <strong>02. Соратник (The Ally)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к голосовым чатам и сходкам.</div>
+                </div>
+                <div style="padding: 20px; border-left: 3px solid #111; background: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                    <strong>03. Элита (The Architect)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Хранители ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</div>
+                </div>
+            </div>
+            <div style="margin-top: 60px; padding: 30px; border: 1px dashed var(--accent); border-radius: 20px; text-align: center;">
+                <p style="margin: 0; font-weight: 600; font-style: italic; color: var(--accent);">"Призыв дождя окончен. Наступает эра Великой Тишины."</p>
             </div>
         </div>
     </section>
 
-    <footer style="background: #111; color: #fff; padding: 80px 0;">
+    <footer style="background: #0a0a0a; color: #fff; padding: 80px 0;">
         <div class="container" style="text-align: center;">
             <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
-                <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">TG: Гости</a>
-                <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.3);">TG: Новости</a>
+                <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Гости</a>
+                <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Новости</a>
             </div>
-            <p style="opacity: 0.4; font-size: 0.8rem;">© 2026 VERACHKI EMPIRE.<br>made by KC_Comms [oV] and 미하이</p>
+            <p style="opacity: 0.3; font-size: 0.75rem;">© 2026 VERACHKI EMPIRE.<br>Design by KC_Comms [oV] & Architecture by 미하이</p>
         </div>
     </footer>
 
-    <section id="app-interface" class="hidden" style="background: var(--bg-light); padding-top: 20px; height: 100dvh; padding-bottom: 20px; overflow: hidden;">
+    <!-- APP INTERFACE -->
+    <section id="app-interface" class="hidden" style="background: var(--bg-light); padding-top: 20px; height: 100dvh; padding-bottom: 20px; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
         <div class="container" style="height: 100%;">
             <div class="chat-wrapper">
-                <div class="chat-header">
-                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 10px; transition: 0.2s;" onclick="showLanding()" class="hover-bg">
+                <div class="chat-header glass-panel">
+                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="showLanding()">
                         <span style="font-size: 1.2rem; color: var(--accent);">❮</span>
-                        <span style="font-weight: 700; font-size: 0.9rem; color: var(--accent);">НАЗАД</span>
+                        <span style="font-weight: 700; font-size: 0.8rem; color: var(--accent); letter-spacing: 0.05em;">В МИР</span>
                     </div>
-                    <span style="font-weight: 700; font-size: 1rem; letter-spacing: 0.05em;">ЧАТ ИМПЕРИИ</span>
+                    <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
                     <div style="width: 50px;"></div>
                 </div>
                 
                 <div class="chat-messages" id="messages-container">
-                    <div style="text-align: center; margin-top: 50px; color: #ccc; font-size: 0.85rem; animation: fadeIn 1s;">Загрузка архива...</div>
+                    <div style="text-align: center; margin-top: 50px; color: #ccc; font-size: 0.85rem;">Подключение к нейросети...</div>
                 </div>
                 
                 <div id="media-preview-area">
-                    <div class="preview-content">
-                        <span id="preview-icon" style="font-size: 1.2rem;">📎</span>
-                        <span id="preview-name" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">file.jpg</span>
+                    <div class="preview-content" style="display: flex; align-items: center; gap: 10px;">
+                        <span id="preview-icon">📎</span>
+                        <span id="preview-name" style="max-width: 200px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600;">file</span>
                     </div>
-                    <span style="cursor: pointer; color: var(--danger); font-weight: bold; font-size: 1.2rem;" onclick="clearAttachment()">✕</span>
+                    <span style="cursor: pointer; color: var(--danger); font-size: 1.2rem;" onclick="clearAttachment()">✕</span>
                 </div>
 
                 <div class="chat-input">
-                    <button class="media-btn" onclick="document.getElementById('file-upload').click()" title="Прикрепить файл">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    <button class="media-btn" onclick="document.getElementById('file-upload').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                     </button>
                     <input type="file" id="file-upload" class="hidden" accept="image/*,video/*,audio/*" onchange="handleFileSelect(this)">
                     
-                    <button class="media-btn record-btn" id="record-btn" onclick="toggleRecording()" title="Голосовое сообщение">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    <button class="media-btn record-btn" id="record-btn" onclick="toggleRecording()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                     </button>
                     
-                    <input type="text" id="msg-input" placeholder="Написать сообщение..." autocomplete="off">
-                    <button id="send-btn" onclick="sendMessage()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    <input type="text" id="msg-input" placeholder="Передача сообщения..." autocomplete="off">
+                    
+                    <button id="send-btn" class="media-btn" style="background: #111; color: #fff;" onclick="sendMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
             </div>
@@ -465,47 +435,47 @@
     <!-- Modals -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-box">
-            <span class="close-icon" onclick="closeModal('auth-modal')">✕</span>
-            <h2 id="auth-title" style="margin-bottom: 25px;">Доступ</h2>
-            <input type="text" id="reg-name" placeholder="Ваше Имя" style="display: none;">
+            <span class="close-icon" onclick="closeModal('auth-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
+            <h2 id="auth-title">Доступ</h2>
+            <input type="text" id="reg-name" placeholder="Позывной (Имя)" style="display: none;">
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Пароль">
-            <input type="text" id="invite-code" placeholder="Код Доступа (Секретный)" style="display: none;">
+            <input type="text" id="invite-code" placeholder="Код Доступа (Alpha)" style="display: none;">
             <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleAuth()" id="auth-btn">Войти</button>
-            <p style="margin-top: 25px; font-size: 0.85rem; cursor: pointer; color: var(--accent); font-weight: 600;" onclick="toggleAuthMode()">Нет аккаунта? Регистрация</p>
+            <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer; color: var(--accent); font-weight: 700;" onclick="toggleAuthMode()">Сменить протокол (Регистрация)</p>
         </div>
     </div>
 
     <div id="profile-modal" class="modal-overlay">
         <div class="modal-box">
-            <span class="close-icon" onclick="closeModal('profile-modal')">✕</span>
+            <span class="close-icon" onclick="closeModal('profile-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
             <h2 id="p-name" style="margin-bottom: 5px;">User</h2>
-            <span id="p-rank" style="background: #111; color: #fff; padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">RANK</span>
-            <div style="background: #f4f7fc; padding: 20px; border-radius: 20px; margin-top: 25px; text-align: left; border: 1px solid rgba(0,0,0,0.05);">
-                <textarea id="p-about-edit" class="hidden" rows="3" placeholder="Расскажите о себе..."></textarea>
-                <p id="p-about" style="margin: 0; font-size: 0.95rem; line-height: 1.5;">-</p>
+            <span id="p-rank" style="background: #111; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem;">RANK</span>
+            <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 15px; margin-top: 20px; text-align: left;">
+                <textarea id="p-about-edit" class="hidden" rows="3" placeholder="Досье..."></textarea>
+                <p id="p-about" style="margin: 0; font-size: 0.9rem;">-</p>
             </div>
             <div id="admin-controls" class="hidden" style="margin-top: 20px;">
                 <select id="p-rank-edit" style="margin-bottom: 10px;">
                     <option value="Наблюдатель">Наблюдатель</option>
                     <option value="Соратник">Соратник</option>
                     <option value="Элита">Элита</option>
-                    <option value="Изгнан">БАН</option>
+                    <option value="Изгнан">ИЗГНАНИЕ</option>
                 </select>
-                <button class="btn-danger btn" onclick="saveProfileChanges()">Обновить статус</button>
+                <button class="btn-danger btn" onclick="saveProfileChanges()">Применить</button>
             </div>
-            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 15px;" onclick="saveMyProfile()">Сохранить профиль</button>
+            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 15px;" onclick="saveMyProfile()">Сохранить</button>
         </div>
     </div>
     
-    <div id="image-viewer" class="modal-overlay" onclick="this.style.display='none'" style="cursor: zoom-out;">
-        <img id="viewer-img" style="max-width: 95%; max-height: 90vh; border-radius: 12px; box-shadow: 0 0 60px rgba(0,0,0,0.8); object-fit: contain;">
+    <div id="image-viewer" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="viewer-img" style="max-width: 95%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
     </div>
 
-    <div id="ban-screen">
-        <h1 style="color: var(--danger); margin-bottom: 20px; font-size: 3rem;">ИЗГНАНИЕ</h1>
-        <p style="text-align: center; max-width: 400px; margin: 0 auto 30px auto;">Путь в Империю для вас закрыт. Решение окончательное.</p>
-        <button class="btn-outline" style="padding: 12px 30px; border-radius: 30px;" onclick="logout()">Покинуть</button>
+    <div id="ban-screen" style="display: none; position: fixed; inset: 0; background: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center;">
+        <h1 style="color: red; margin-bottom: 20px;">ДОСТУП ЗАПРЕЩЕН</h1>
+        <p>Вы были изгнаны из Империи.</p>
+        <button class="btn-outline" onclick="logout()" style="margin-top: 20px;">Покинуть</button>
     </div>
 
     <script>
@@ -519,7 +489,7 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        // INIT
+        // INIT APPWRITE
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
         const account = new Account(client);
@@ -537,77 +507,78 @@
             recorder: null,
             chunks: [],
             isRecording: false,
-            audioPlayer: null
+            audioPlayer: null,
+            isUploading: false
         };
 
-        // UI HELPERS
+        // HELPERS
         function showToast(msg, type = 'info') {
             const t = document.createElement('div');
             t.className = 'toast';
             t.innerText = msg;
-            if(type === 'error') t.style.borderLeft = '4px solid var(--danger)';
+            if(type === 'error') t.style.background = 'rgba(255, 59, 48, 0.9)';
             document.getElementById('toast-container').appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+            setTimeout(() => t.remove(), 3500);
         }
 
         function escapeHtml(text) {
             if (!text) return "";
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                       .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // APP LOGIC
+        // AUTH CHECK
         async function checkSession() {
             try {
                 state.user = await account.get();
                 try {
                     const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
                     if(res.documents.length > 0) state.profile = res.documents[0];
-                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { 
-                        username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" 
-                    });
-                } catch(e) { console.error("Profile error", e); }
+                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
+                } catch(e) { console.log("Profile create/fetch error", e); }
                 
-                if(state.profile && state.profile.rank === 'Изгнан') { 
-                    document.getElementById('ban-screen').style.display = 'flex'; 
-                    return; 
-                }
+                if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
                 showApp();
             } catch (e) { showLanding(); }
         }
         checkSession();
 
         function showApp() {
-            document.querySelectorAll('section:not(#app-interface)').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
             document.querySelector('footer').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
             document.getElementById('nav-guest').classList.add('hidden');
             document.getElementById('nav-user').classList.remove('hidden');
             closeModal('auth-modal');
-            
             if(state.profile) {
                 document.getElementById('nav-username').innerText = state.profile.username;
                 document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
             }
             loadMessages();
-            // Подписка на обновления
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
         }
 
         function showLanding() {
-            document.querySelectorAll('section:not(#app-interface)').forEach(el => el.style.display = 'block');
-            document.querySelector('footer').style.display = 'block';
+            document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
+            document.querySelector('footer').style.display = 'block';
             document.getElementById('nav-guest').classList.remove('hidden');
             document.getElementById('nav-user').classList.add('hidden');
-            window.scrollTo(0,0);
             setTimeout(reveal, 100);
+            window.scrollTo(0, 0);
         }
 
-        // MEDIA & INPUT
+        // FILE HANDLING
         function handleFileSelect(input) {
             if(input.files && input.files[0]) {
                 const file = input.files[0];
+                
+                // Проверка размера (50MB лимит)
+                if (file.size > 50 * 1024 * 1024) {
+                    showToast("Файл слишком большой (>50МБ)", 'error');
+                    input.value = '';
+                    return;
+                }
+
                 let type = 'file';
                 if(file.type.startsWith('image/')) type = 'image';
                 else if(file.type.startsWith('video/')) type = 'video';
@@ -619,13 +590,13 @@
                 document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : (type === 'video' ? '🎬' : '🎵');
             }
         }
-
         function clearAttachment() { 
             state.attachment = null; 
             document.getElementById('file-upload').value = ''; 
             document.getElementById('media-preview-area').style.display = 'none'; 
         }
-        
+
+        // VOICE RECORDING
         async function toggleRecording() {
             const btn = document.getElementById('record-btn');
             if (!state.isRecording) {
@@ -636,15 +607,15 @@
                     state.recorder.ondataavailable = event => state.chunks.push(event.data);
                     state.recorder.onstop = () => {
                         const audioBlob = new Blob(state.chunks, { type: 'audio/mp3' });
-                        const audioFile = new File([audioBlob], "voice_message.mp3", { type: "audio/mp3" });
+                        const audioFile = new File([audioBlob], "voice_msg.mp3", { type: "audio/mp3" });
                         state.attachment = { file: audioFile, type: 'audio' };
                         sendMessage();
-                        stream.getTracks().forEach(track => track.stop()); // Остановить микрофон
+                        stream.getTracks().forEach(track => track.stop());
                     };
                     state.recorder.start();
                     state.isRecording = true;
                     btn.classList.add('recording');
-                    showToast('Запись пошла...', 'info');
+                    showToast('Запись... (Нажми еще раз чтобы отправить)');
                 } catch(e) { showToast("Нет доступа к микрофону", 'error'); }
             } else { 
                 state.recorder.stop(); 
@@ -653,6 +624,7 @@
             }
         }
 
+        // AUDIO PLAYER
         function toggleAudio(btn, src) {
             const playerContainer = btn.parentElement;
             const progress = playerContainer.querySelector('.audio-progress');
@@ -687,7 +659,7 @@
             }
         }
 
-        // MESSAGING
+        // CHAT LOGIC
         async function loadMessages() {
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
@@ -695,21 +667,19 @@
                 const res = await db.listDocuments(DB_ID, MSG_COL, [Query.orderAsc('timestamp'), Query.limit(100)]);
                 res.documents.forEach(renderMessage);
                 scrollToBottom();
-            } catch(e) { console.error(e); container.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa">Ошибка загрузки</div>'; }
+            } catch(e) { console.error(e); }
         }
 
         function renderMessage(msg) {
             const container = document.getElementById('messages-container');
             const existing = document.getElementById(msg.$id);
             
-            if(existing) {
+            // Если сообщение уже есть (например, оптимистичное), обновляем его
+            if (existing) {
                 if (!existing.dataset.optimistic) {
                     existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
-                    if(msg.isEdited && !existing.innerText.includes('(ред.)')) {
-                        const editSpan = document.createElement('span');
-                        editSpan.style.opacity = '0.5'; editSpan.style.fontSize = '0.6rem'; editSpan.style.marginLeft = '5px';
-                        editSpan.innerText = '(ред.)';
-                        existing.querySelector('.msg-text').appendChild(editSpan);
+                    if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
+                        existing.querySelector('.msg-text').insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
                     }
                 }
                 return;
@@ -717,34 +687,34 @@
 
             const isMine = state.profile && msg.senderId === state.profile.username;
             const isAdmin = state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            
             const div = document.createElement('div');
             div.className = `message ${isMine ? 'mine' : ''}`;
             div.id = msg.$id;
             if (msg.optimistic) div.dataset.optimistic = "true";
 
             let controls = '';
-            // Логика кнопок управления
             if (!msg.optimistic) {
-                if (isMine) {
+                if(isMine) {
                     controls = `<div class="controls">`;
                     if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(msg.messageContent)}')">✎</span>`;
                     controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
-                } else if (isAdmin) {
+                } else if(isAdmin) {
                     controls = `<div class="controls"><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
                 }
             }
             
             let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
             
+            // RENDERING MEDIA
             if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
-                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId);
+                // Для видео используем View, так как Download может требовать других заголовков
+                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
                 
                 if (msg.fileType === 'image') {
-                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">
-                                   ${msg.messageContent ? `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>` : ''}`;
+                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
                 } else if (msg.fileType === 'video') {
-                    contentHtml = `<video src="${fileView}" controls class="msg-media msg-video"></video>`;
+                    // Важно: playsinline для iOS
+                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
                 } else if (msg.fileType === 'audio') {
                     contentHtml = `
                     <div class="custom-audio-player">
@@ -752,44 +722,43 @@
                         <div class="audio-track"><div class="audio-progress"></div></div>
                     </div>`;
                 }
+                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
             }
             
-            const authorHtml = isMine ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
-            const editedHtml = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
+            const author = isMine ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
+            const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
             
-            div.innerHTML = `${controls}${authorHtml}<div class="msg-text">${contentHtml}${editedHtml}</div>`;
+            div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div>`;
             container.appendChild(div);
             
-            // Скроллим вниз только если мы близко к низу или сообщение наше
-            if(isMine || (container.scrollHeight - container.scrollTop - container.clientHeight) < 200) {
-                scrollToBottom();
-            }
+            // Auto scroll if near bottom
+            if(container.scrollHeight - container.scrollTop - container.clientHeight < 300 || isMine) scrollToBottom();
         }
 
         async function sendMessage() {
+            if (state.isUploading) return;
+
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
             
-            // Edit Mode
+            // EDIT MODE
             if (state.editingId) {
-                const oldText = text;
-                const mid = state.editingId;
-                state.editingId = null;
-                document.getElementById('send-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-                input.value = '';
-                
-                // UI Optimistic update for edit
-                const msgDiv = document.getElementById(mid);
-                if(msgDiv) msgDiv.querySelector('.msg-text-content').innerText = oldText;
-
                 try {
-                    await db.updateDocument(DB_ID, MSG_COL, mid, { messageContent: oldText, isEdited: true });
+                    await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
+                    state.editingId = null;
+                    document.getElementById('send-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+                    input.value = '';
                 } catch(e) { showToast("Ошибка редактирования", 'error'); }
                 return;
             }
 
-            // UI Optimistic Create
+            // UPLOAD STATE
+            const sendBtn = document.getElementById('send-btn');
+            state.isUploading = true;
+            sendBtn.innerHTML = "•••";
+
+            // 1. Optimistic UI
             const tempId = "temp-" + Date.now();
             const optimisticMsg = {
                 $id: tempId,
@@ -805,20 +774,26 @@
             
             input.value = '';
             const fileToUpload = state.attachment;
-            clearAttachment();
+            clearAttachment(); // Clear UI immediately
 
+            // 2. Upload Logic
             let fileId = null, fileType = null;
             if (fileToUpload) {
                 try {
+                    // Важный момент: Для видео Appwrite создает файл, но он может не быть доступен сразу же для просмотра
                     const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
-                    fileId = uploaded.$id; fileType = fileToUpload.type;
+                    fileId = uploaded.$id; 
+                    fileType = fileToUpload.type;
                 } catch(e) { 
-                    showToast("Ошибка загрузки файла", 'error'); 
-                    document.getElementById(tempId).remove(); 
+                    showToast("Ошибка загрузки файла. " + e.message, 'error'); 
+                    document.getElementById(tempId).remove();
+                    state.isUploading = false;
+                    sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
                     return; 
                 }
             }
             
+            // 3. Save to DB
             try {
                 await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
                     messageContent: text, 
@@ -828,80 +803,67 @@
                     fileId: fileId, 
                     fileType: fileType 
                 });
-                // Реальный объект придет через Realtime, оптимистичный удалится там же
+                // Realtime event will replace the optimistic message
             } catch(e) { 
-                showToast("Не удалось отправить", 'error'); 
+                showToast("Ошибка отправки: " + e.message, 'error'); 
                 document.getElementById(tempId).remove(); 
+            } finally {
+                state.isUploading = false;
+                sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
             }
         }
 
         function handleRealtime(response) {
             if(response.events.includes("create")) {
                 const newMsg = response.payload;
-                // Удаляем дубликат (оптимистичное сообщение), если оно есть
+                // Remove optimistic duplicates
                 const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
                 tempMsgs.forEach(m => {
-                    const content = m.querySelector('.msg-text-content').innerText;
-                    if (content === newMsg.messageContent && m.querySelector('.msg-author')?.innerText !== newMsg.senderId) {
-                        m.remove();
+                    if (m.querySelector('.msg-text-content').innerText === newMsg.messageContent &&
+                        (newMsg.fileId || !m.querySelector('img, video, .custom-audio-player'))) { // Rough check
+                         m.remove();
                     }
                 });
-                // Если мы отправитель, находим наше temp по контенту и заменяем ID
-                // Но проще удалить temp и отрисовать чистовое
-                const myTemp = [...tempMsgs].find(m => m.querySelector('.msg-text-content').innerText === newMsg.messageContent);
-                if(myTemp) myTemp.remove();
-
                 renderMessage(newMsg);
             }
             if(response.events.includes("update")) renderMessage(response.payload);
             if(response.events.includes("delete")) {
                 const el = document.getElementById(response.payload.$id);
                 if(el) {
-                    el.style.opacity = '0';
+                    el.style.transition = "0.3s"; el.style.opacity = "0"; el.style.transform = "scale(0.9)";
                     setTimeout(() => el.remove(), 300);
                 }
             }
         }
 
+        // EDIT & DELETE
         function startEdit(id, text) { 
-            const i = document.getElementById('msg-input'); 
-            i.value = text; i.focus(); 
-            state.editingId = id; 
-            document.getElementById('send-btn').innerHTML = "✓"; 
+            const i = document.getElementById('msg-input'); i.value = text; i.focus(); 
+            state.editingId = id; document.getElementById('send-btn').innerText = "✓"; 
         }
-        
         async function deleteMsg(id) { 
-            if(confirm('Удалить сообщение навсегда?')) { 
-                try {
-                    await db.deleteDocument(DB_ID, MSG_COL, id); 
-                    // Удаление из DOM произойдет через realtime
-                } catch(e) { showToast('Ошибка удаления', 'error'); }
-            } 
+            if(confirm('Удалить?')) await db.deleteDocument(DB_ID, MSG_COL, id); 
         }
 
-        // AUTH & PROFILE
+        // UI & MODALS
+        function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
         function toggleAuthMode() {
             state.isLogin = !state.isLogin;
             document.getElementById('auth-title').innerText = state.isLogin ? 'Доступ' : 'Присяга';
             document.getElementById('auth-btn').innerText = state.isLogin ? 'Войти' : 'Вступить';
             document.getElementById('reg-name').style.display = state.isLogin ? 'none' : 'block';
             document.getElementById('invite-code').style.display = state.isLogin ? 'none' : 'block';
-            document.querySelector('#auth-modal p').innerText = state.isLogin ? 'Нет аккаунта? Регистрация' : 'Есть аккаунт? Вход';
         }
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            const btn = document.getElementById('auth-btn');
-            
-            btn.innerText = "⏳"; 
-            btn.disabled = true;
-
             try {
-                if (state.isLogin) { 
-                    await account.createEmailPasswordSession(email, pass); 
-                    location.reload(); 
-                } else { 
+                if (state.isLogin) { await account.createEmailPasswordSession(email, pass); location.reload(); }
+                else { 
                     if(document.getElementById('invite-code').value !== SECRET_CODE) throw new Error("Неверный код доступа");
                     const name = document.getElementById('reg-name').value;
                     await account.create(ID.unique(), email, pass, name); 
@@ -909,21 +871,14 @@
                     await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" }); 
                     location.reload(); 
                 }
-            } catch(e) { 
-                showToast(e.message, 'error'); 
-                btn.innerText = state.isLogin ? "Войти" : "Вступить";
-                btn.disabled = false;
-            }
+            } catch(e) { showToast(e.message, 'error'); }
         }
 
         async function logout() { await account.deleteSession('current'); location.reload(); }
 
         async function openProfile(username) {
-            openModal('profile-modal'); 
-            document.getElementById('p-name').innerText = username;
+            openModal('profile-modal'); document.getElementById('p-name').innerText = username;
             document.getElementById('p-rank').innerText = "...";
-            document.getElementById('p-about').innerText = "Загрузка...";
-            
             document.getElementById('admin-controls').classList.add('hidden'); 
             document.getElementById('p-save-self').classList.add('hidden'); 
             document.getElementById('p-about-edit').classList.add('hidden'); 
@@ -932,67 +887,37 @@
             try {
                 const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
                 if(res.documents.length > 0) {
-                    const p = res.documents[0]; 
-                    state.currentProfileId = p.$id; 
+                    const p = res.documents[0]; state.currentProfileId = p.$id; 
                     document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
-                    document.getElementById('p-about').innerText = p.about || "Информация отсутствует.";
+                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
                     
-                    // Если это мой профиль
-                    if (state.profile && p.$id === state.profile.$id) { 
+                    if (state.profile && p.$id === state.profile.$id) {
                         document.getElementById('p-about').classList.add('hidden'); 
                         document.getElementById('p-about-edit').classList.remove('hidden'); 
                         document.getElementById('p-about-edit').value = p.about || ""; 
-                        document.getElementById('p-save-self').classList.remove('hidden'); 
+                        document.getElementById('p-save-self').classList.remove('hidden');
                     }
-                    
-                    // Если я админ
                     if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                         document.getElementById('admin-controls').classList.remove('hidden');
                         document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
                     }
-                } else {
-                    document.getElementById('p-about').innerText = "Профиль не найден.";
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         }
-
         function openMyProfile() { if(state.profile) openProfile(state.profile.username); }
-        
-        async function saveMyProfile() { 
-            try {
-                await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); 
-                showToast("Профиль сохранен");
-                closeModal('profile-modal');
-                // Обновляем локальные данные
-                if(state.profile.$id === state.currentProfileId) state.profile.about = document.getElementById('p-about-edit').value;
-            } catch(e) { showToast("Ошибка сохранения", 'error'); }
-        }
+        async function saveMyProfile() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); closeModal('profile-modal'); showToast("Сохранено"); }
+        async function saveProfileChanges() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); closeModal('profile-modal'); showToast("Статус обновлен"); }
 
-        async function saveProfileChanges() { 
-            try {
-                await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); 
-                showToast("Статус обновлен");
-                closeModal('profile-modal'); 
-            } catch(e) { showToast("Ошибка обновления", 'error'); }
-        }
-
-        // UTILS
-        function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function scrollToBottom() { const c = document.getElementById('messages-container'); c.scrollTop = c.scrollHeight; }
         
-        // SCROLL REVEAL
+        // ANIMATION
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) { 
-                var winH = window.innerHeight;
-                var elTop = reveals[i].getBoundingClientRect().top;
-                if (elTop < winH - 50) reveals[i].classList.add("active"); 
+                if (reveals[i].getBoundingClientRect().top < window.innerHeight - 50) reveals[i].classList.add("active"); 
             }
         }
-        window.addEventListener("scroll", reveal); 
-        reveal();
+        window.addEventListener("scroll", reveal); reveal();
 
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
     </script>
