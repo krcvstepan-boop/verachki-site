@@ -1,4 +1,4 @@
-     <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -58,6 +58,7 @@
             filter: blur(80px);
             opacity: 0.6;
             animation: float 10s infinite ease-in-out alternate;
+            transition: background 2s ease-in-out; /* Smooth transition for AI coloring */
         }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation-duration: 15s; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: var(--secondary); animation-duration: 20s; }
@@ -157,6 +158,7 @@
             background: #fff; color: #1a1a1a; align-self: flex-start; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
         }
         .message.mine { 
             align-self: flex-end; 
@@ -521,6 +523,7 @@
         const STORAGE_ID = '696363f30004cb97e6a1'; 
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
+        const AI_KEY = 'AIzaSyCDu-np7L9bApZr-AWnGS2NN74aU36OqgQ';
 
         // INIT APPWRITE
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -541,7 +544,8 @@
             chunks: [],
             isRecording: false,
             audioPlayer: null,
-            isUploading: false
+            isUploading: false,
+            vibeInterval: null
         };
 
         // UTILITIES
@@ -592,10 +596,16 @@
                 document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
             }
             loadMessages();
+            // Subscribe to Realtime events
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
+            
+            // Start AI Vibe Check
+            analyzeVibe();
+            state.vibeInterval = setInterval(analyzeVibe, 60000);
         }
 
         function showLanding() {
+            if(state.vibeInterval) clearInterval(state.vibeInterval);
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
@@ -862,25 +872,115 @@
             }
         }
 
+        // REALTIME LOGIC
         function handleRealtime(response) {
-            if(response.events.includes("create")) {
-                const newMsg = response.payload;
-                const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
-                tempMsgs.forEach(m => {
-                    if (m.querySelector('.msg-text-content').innerText === newMsg.messageContent &&
-                        (newMsg.fileId || !m.querySelector('img, video, .custom-audio-player'))) {
-                         m.remove();
-                    }
-                });
-                renderMessage(newMsg);
-            }
-            if(response.events.includes("update")) renderMessage(response.payload);
-            if(response.events.includes("delete")) {
-                const el = document.getElementById(response.payload.$id);
+            const ev = response.events[0];
+            const payload = response.payload;
+
+            // Handle DELETE
+            if(ev.includes('.delete')) {
+                const el = document.getElementById(payload.$id);
                 if(el) {
-                    el.style.transition = "0.3s"; el.style.opacity = "0"; el.style.transform = "scale(0.9)";
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.8)';
                     setTimeout(() => el.remove(), 300);
                 }
+                return;
+            }
+
+            // Handle UPDATE
+            if(ev.includes('.update')) {
+                const el = document.getElementById(payload.$id);
+                if(el) {
+                    const content = el.querySelector('.msg-text-content');
+                    if(content) content.innerText = payload.messageContent;
+                    const msgText = el.querySelector('.msg-text');
+                    if(msgText && !msgText.innerText.includes('(ред.)')) {
+                        msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
+                    }
+                }
+                return;
+            }
+
+            // Handle CREATE
+            if(ev.includes('.create')) {
+                // Check if this is my own message (optimistic UI duplicate check)
+                const isMine = state.profile && payload.senderId === state.profile.username;
+                
+                if (isMine) {
+                    // Try to find the optimistic message and remove it to replace with real one
+                    // or better, just leave it if it matches perfectly, but here we replace to ensure ID is correct
+                    const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
+                    tempMsgs.forEach(m => {
+                        if (m.querySelector('.msg-text-content').innerText === payload.messageContent) {
+                            m.remove();
+                        }
+                    });
+                }
+                
+                // If message already exists by ID (race condition), don't render
+                if(!document.getElementById(payload.$id)) {
+                    renderMessage(payload);
+                    scrollToBottom();
+                }
+            }
+        }
+
+        // AI VIBE CHECK (GEMINI)
+        async function analyzeVibe() {
+            const msgs = Array.from(document.querySelectorAll('.msg-text-content'))
+                .slice(-15)
+                .map(el => el.innerText)
+                .join("\n");
+
+            if(msgs.length < 5) return;
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_KEY}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `Analyze the mood of this chat history. Reply with ONE word only: ANGER (if angry/fighting), FUN (if funny/joking), SAD (if sad/depressed), or NEUTRAL.\n\nChat:\n${msgs}`
+                            }]
+                        }]
+                    })
+                });
+                const data = await response.json();
+                if(data.candidates && data.candidates[0]) {
+                    const mood = data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                    applyTheme(mood);
+                }
+            } catch (e) { console.error("AI Error:", e); }
+        }
+
+        function applyTheme(mood) {
+            const b1 = document.querySelector('.blob-1');
+            const b2 = document.querySelector('.blob-2');
+            const b3 = document.querySelector('.blob-3');
+
+            // Reset transitions
+            [b1, b2, b3].forEach(b => b.style.transition = "background 2s ease");
+
+            if (mood.includes('ANGER')) {
+                b1.style.background = '#ff0000'; // Red
+                b2.style.background = '#800000'; // Maroon
+                b3.style.background = '#1a1a1a'; // Dark
+            } else if (mood.includes('FUN')) {
+                b1.style.background = '#ffeaa7'; // Yellow
+                b2.style.background = '#fdcb6e'; // Orange
+                b3.style.background = '#55efc4'; // Lime
+            } else if (mood.includes('SAD')) {
+                b1.style.background = '#0984e3'; // Blue
+                b2.style.background = '#636e72'; // Grey
+                b3.style.background = '#a29bfe'; // Purple
+            } else {
+                // Neutral
+                b1.style.background = 'var(--primary)';
+                b2.style.background = 'var(--secondary)';
+                b3.style.background = 'var(--accent)';
             }
         }
 
