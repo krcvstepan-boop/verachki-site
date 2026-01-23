@@ -601,7 +601,7 @@
             
             // Start AI Vibe Check
             analyzeVibe();
-            state.vibeInterval = setInterval(analyzeVibe, 60000);
+            state.vibeInterval = setInterval(analyzeVibe, 120000); // 2 minutes interval
         }
 
         function showLanding() {
@@ -948,6 +948,12 @@
                         }]
                     })
                 });
+                
+                if (response.status === 429) {
+                    console.warn("AI Rate Limit (429). Skipping vibe check.");
+                    return;
+                }
+
                 const data = await response.json();
                 if(data.candidates && data.candidates[0]) {
                     const mood = data.candidates[0].content.parts[0].text.trim().toUpperCase();
