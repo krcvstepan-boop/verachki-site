@@ -601,7 +601,7 @@
             
             // Start AI Vibe Check
             analyzeVibe();
-            state.vibeInterval = setInterval(analyzeVibe, 120000); // 2 minutes interval
+            state.vibeInterval = setInterval(analyzeVibe, 300000); // 5 minutes interval
         }
 
         function showLanding() {
@@ -1047,4 +1047,5 @@
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
     </script>
 </body>
+
 </html>
