@@ -108,7 +108,8 @@
         /* NAVIGATION */
         nav {
             padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
+            position: sticky; top: 0; 
+            z-index: 1000; /* FIXED: Increased z-index to be above chat interface */
             transition: all 0.3s ease;
             border-bottom: 1px solid rgba(255,255,255,0.3);
         }
@@ -246,7 +247,7 @@
         .defcon-widget {
             display: flex; gap: 8px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.3); margin-right: 15px; backdrop-filter: blur(10px);
-            z-index: 101; pointer-events: auto;
+            pointer-events: auto;
         }
         .defcon-lvl {
             width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
@@ -675,6 +676,7 @@
         const STORAGE_ID = '696363f30004cb97e6a1'; 
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
+        const AI_KEY = 'AIzaSyDPEkqkxCEMJ7Lr7Mo-OZLNgm-NuusVq5Q';
 
         // INIT APPWRITE
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -698,7 +700,8 @@
             isUploading: false,
             isRadioMode: false,
             radioNoise: null,
-            geigerVal: 0
+            geigerVal: 0,
+            vibeInterval: null
         };
 
         // UTILITIES
@@ -751,9 +754,14 @@
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
             startGeigerLoop();
+            
+            // Start AI Vibe Check
+            analyzeVibe();
+            state.vibeInterval = setInterval(analyzeVibe, 60000);
         }
 
         function showLanding() {
+            if(state.vibeInterval) clearInterval(state.vibeInterval);
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
@@ -1181,6 +1189,68 @@
                     renderMessage(payload);
                     scrollToBottom();
                 }
+            }
+        }
+
+        // AI VIBE CHECK (GEMINI PRO FIXED)
+        async function analyzeVibe() {
+            const msgs = Array.from(document.querySelectorAll('.msg-text-content'))
+                .slice(-15)
+                .map(el => el.innerText)
+                .join("\n");
+
+            if(msgs.length < 2) return; 
+
+            try {
+                // ИСПОЛЬЗУЕМ 1.5 FLASH (Она доступнее)
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `Analyze the mood of this chat history. Reply with ONE word only: ANGER (if angry/fighting), FUN (if funny/joking), SAD (if sad/depressed), or NEUTRAL.\n\nChat:\n${msgs}`
+                            }]
+                        }]
+                    })
+                });
+                
+                if (!response.ok) throw new Error("API Error: " + response.status);
+
+                const data = await response.json();
+                if(data.candidates && data.candidates[0]) {
+                    const mood = data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                    console.log("Gemini Mood:", mood);
+                    applyTheme(mood);
+                }
+            } catch (e) { console.error("AI Error:", e); }
+        }
+
+        function applyTheme(mood) {
+            const b1 = document.querySelector('.blob-1');
+            const b2 = document.querySelector('.blob-2');
+            const b3 = document.querySelector('.blob-3');
+
+            [b1, b2, b3].forEach(b => b.style.transition = "background 2s ease");
+
+            if (mood.includes('ANGER')) {
+                b1.style.background = '#ff0000'; 
+                b2.style.background = '#800000'; 
+                b3.style.background = '#1a1a1a'; 
+            } else if (mood.includes('FUN')) {
+                b1.style.background = '#ffeaa7'; 
+                b2.style.background = '#fdcb6e'; 
+                b3.style.background = '#55efc4'; 
+            } else if (mood.includes('SAD')) {
+                b1.style.background = '#0984e3'; 
+                b2.style.background = '#636e72'; 
+                b3.style.background = '#a29bfe'; 
+            } else {
+                b1.style.background = 'var(--primary)';
+                b2.style.background = 'var(--secondary)';
+                b3.style.background = 'var(--accent)';
             }
         }
 
