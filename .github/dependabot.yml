@@ -1,0 +1,1061 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and wher<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VERACHKI | Empire of Silence</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;800&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- APPWRITE SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+
+    <style>
+        :root {
+            /* Palette */
+            --primary: #6a4df4;
+            --primary-dark: #4b32c3;
+            --secondary: #74b9ff;
+            --accent: #ff7675;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --danger: #ff3b30;
+            
+            /* Glass Variables */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --blur: blur(25px) saturate(180%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        html { scroll-behavior: smooth; height: 100%; }
+
+        body {
+            background: #f0f2f5;
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* AURORA BACKGROUND ANIMATION */
+        .aurora-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #f4f6f9;
+        }
+        .aurora-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+            transition: background 2s ease-in-out; /* Smooth transition for AI coloring */
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation-duration: 15s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: var(--secondary); animation-duration: 20s; }
+        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: var(--accent); animation-duration: 12s; opacity: 0.4; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* GLASS SYSTEM */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #000; font-weight: 700; }
+        h1 { font-size: clamp(2.8rem, 6vw, 4.8rem); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 25px; }
+        h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; display: inline-block; }
+        h3 { font-size: 1.4rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 4px solid var(--primary); padding-left: 20px; }
+        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; color: var(--primary); font-weight: 800; margin-bottom: 20px; display: block; }
+        p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; font-size: 1.05rem; }
+
+        /* UI COMPONENTS */
+        .btn {
+            cursor: pointer; padding: 16px 32px; border: none; border-radius: 50px;
+            background: #111; color: #fff;
+            text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-decoration: none; display: inline-flex; justify-content: center; align-items: center;
+        }
+        .btn:hover { transform: scale(1.05); background: var(--primary); box-shadow: 0 20px 40px rgba(106, 77, 244, 0.3); }
+        .btn:active { transform: scale(0.95); }
+        .btn-outline { background: transparent; border: 1px solid #111; color: #111; }
+        .btn-outline:hover { background: #111; color: #fff; border-color: #111; }
+        .btn-danger { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
+
+        .container { width: 90%; max-width: 1050px; margin: 0 auto; position: relative; z-index: 2; }
+        section { padding: 120px 0; position: relative; }
+
+        /* NAVIGATION */
+        nav {
+            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        .nav-logo { font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: #111; letter-spacing: 0.05em; }
+
+        /* HERO */
+        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 70px; align-items: center; min-height: 85vh; }
+        .hero-image-wrapper { position: relative; }
+        .hero-image-wrapper img { 
+            width: 100%; border-radius: 32px; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.15); 
+            border: 1px solid rgba(255,255,255,0.6);
+            transform: rotate(2deg); transition: 0.5s ease;
+        }
+        .hero-image-wrapper:hover img { transform: rotate(0deg) scale(1.02); }
+        
+        @media(max-width: 900px) { 
+            .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } 
+            .hero-image-wrapper { max-width: 100%; margin: 30px 0; transform: none; } 
+            .hero-image-wrapper img { transform: none; }
+        }
+
+        /* CHAT APP INTERFACE */
+        .chat-wrapper { 
+            background: rgba(255,255,255,0.8); 
+            backdrop-filter: blur(40px);
+            border-radius: 32px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); 
+            overflow: hidden; height: 92dvh; display: flex; flex-direction: column; 
+            position: relative; border: 1px solid rgba(255,255,255,0.6);
+        }
+        .chat-header { 
+            padding: 18px 25px; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.5);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .chat-messages { 
+            flex: 1; overflow-y: auto; padding: 20px; 
+            display: flex; flex-direction: column; gap: 12px; 
+            background: transparent;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        .message { 
+            padding: 10px 16px; border-radius: 20px; border-bottom-left-radius: 4px; 
+            max-width: 80%; font-size: 0.95rem; position: relative; 
+            background: #fff; color: #1a1a1a; align-self: flex-start; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
+        }
+        .message.mine { 
+            align-self: flex-end; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #fff; border-radius: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px rgba(106, 77, 244, 0.25); 
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .controls { 
+            display: none; position: absolute; top: -30px; right: 0; 
+            background: #fff; padding: 4px 10px; border-radius: 50px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 5; 
+        }
+        .message:hover .controls { display: flex; gap: 8px; }
+        .control-btn { font-size: 0.8rem; cursor: pointer; color: #555; }
+
+        .chat-input-area { 
+            padding: 15px; background: rgba(255,255,255,0.7); 
+            backdrop-filter: blur(20px);
+            display: flex; gap: 10px; align-items: center; z-index: 20;
+            border-top: 1px solid rgba(255,255,255,0.5);
+        }
+        .chat-input-area input[type="text"] { 
+            flex: 1; padding: 14px 20px; border: 1px solid rgba(0,0,0,0.05); border-radius: 30px; 
+            outline: none; background: #fff; font-size: 16px; transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .chat-input-area input[type="text"]:focus { border-color: var(--primary); }
+
+        .media-btn { 
+            width: 44px; height: 44px; border-radius: 50%; border: none; 
+            background: #fff; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .media-btn:hover { color: var(--primary); transform: translateY(-2px); }
+        .record-btn.recording { color: #fff; background: var(--danger); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
+
+        /* MEDIA PREVIEW & PLAYER */
+        #media-preview-area { display: none; padding: 10px 20px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; justify-content: space-between; font-size: 0.85rem; }
+        .msg-media { border-radius: 16px; margin-top: 8px; display: block; max-width: 100%; border: 1px solid rgba(0,0,0,0.05); }
+        .msg-img { max-width: 260px; height: auto; object-fit: cover; cursor: pointer; }
+        .msg-video { max-width: 280px; background: #000; }
+
+        .custom-audio-player {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
+            padding: 8px 12px; border-radius: 50px;
+            width: 220px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.4);
+            user-select: none;
+        }
+        .message.mine .custom-audio-player { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.2); }
+        .audio-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #fff; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .audio-track { flex: 1; height: 4px; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
+        .audio-progress { height: 100%; width: 0%; background: var(--primary); border-radius: 10px; transition: width 0.1s linear; }
+        .message.mine .audio-track { background: rgba(255,255,255,0.3); } .message.mine .audio-progress { background: #fff; }
+
+        /* MODALS */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 2000; display: none; justify-content: center; align-items: center; 
+        }
+        .modal-box { 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(40px) saturate(180%);
+            width: 90%; max-width: 400px; padding: 40px; border-radius: 32px; 
+            text-align: center; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        input:not([type="file"]), select, textarea { 
+            width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); 
+            border-radius: 16px; font-family: inherit; background: rgba(255,255,255,0.5); 
+            transition: 0.3s;
+        }
+        input:focus, textarea:focus { background: #fff; border-color: var(--primary); }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        .codex-table { width: 100%; border-collapse: separate; border-spacing: 0; background: rgba(255,255,255,0.7); box-shadow: 0 10px 40px rgba(0,0,0,0.05); border-radius: 20px; overflow: hidden; margin: 30px 0; }
+        .codex-table th { background: #111; color: #fff; padding: 20px; text-align: left; }
+        .codex-table td { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; }
+        .toast { background: rgba(20, 20, 20, 0.9); color: white; padding: 14px 28px; border-radius: 50px; font-size: 0.9rem; backdrop-filter: blur(10px); margin-top: 10px; animation: fadeUp 0.3s forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- AURORA BACKGROUND -->
+    <div class="aurora-bg">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <nav class="glass-panel">
+        <div class="nav-logo" onclick="location.reload()">VERACHKI.</div>
+        <div id="nav-guest">
+            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 25px; font-size: 0.7rem;">Вход</button>
+        </div>
+        <div id="nav-user" class="hidden" style="display: flex; align-items: center; gap: 15px;">
+            <div style="text-align: right; cursor: pointer; line-height: 1.2;" onclick="openMyProfile()">
+                <div id="nav-username" style="font-weight: 700; font-size: 0.9rem;">User</div>
+                <div id="nav-rank" style="font-size: 0.65rem; color: var(--primary); text-transform: uppercase; font-weight: 800;">Имперец</div>
+            </div>
+            <button class="btn" style="padding: 10px 20px; font-size: 0.7rem;" onclick="logout()">Выход</button>
+        </div>
+    </nav>
+
+    <!-- LANDING CONTENT -->
+    <section class="hero reveal">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <span class="subtitle">Империя Тишины // Est. 2023</span>
+                    <h1>Мы строим Храм<br>Посреди цифрового шума.</h1>
+                    <p>
+                        Добро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, 
+                        VERACHKI остаются островом аналоговой честности. Мы — не просто чат. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.
+                    </p>
+                    <p>
+                        Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.
+                    </p>
+                    <div style="display: flex; gap: 15px; margin-top: 40px; flex-wrap: wrap;">
+                        <button class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
+                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Изучить Архивы</button>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper reveal">
+                    <img src="cover.jpg" alt="Символ Империи" onerror="this.src='https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="history" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава I. Хроники Разлома</span>
+            <h2>Тень Архитектора и Великий Холод</h2>
+            <p>
+                История Империи написана не чернилами, а доверием и его осколками. В 2023 году, в школьных коридорах, Глеб был одним из нас. Он был Архитектором ранних дней. Но амбиции часто затмевают верность. Произошел "Великий Разлом" — предательство, которое раскололо наше единство и научило нас закрывать двери на замки.
+            </p>
+            <p>
+                Теперь между нами и Глебом — демилитаризованная зона. Мы видимся в школе, киваем друг другу, иногда даже гуляем по нейтральным паркам. Но это не дружба. Это холодная дипломатия. Как две сверхдержавы, мы сосуществуем, помня о ядерном чемоданчике обид. Он — призрак прошлого, который больше не имеет власти над нашим будущим.
+            </p>
+        </div>
+    </section>
+
+    <section id="geography" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава II. Сакральная География</span>
+            <h2>Места Силы и Забытые Руины</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; margin-top: 40px;">
+                <div class="glass-panel" style="padding: 30px; border-radius: 24px;">
+                    <h3 style="margin-top:0;">Цоколь НБВ</h3>
+                    <p style="font-size: 0.9rem;">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика этого места настолько плотная, что здесь глохнет сотовая связь. Это сердце Империи.</p>
+                </div>
+                <div class="glass-panel" style="padding: 30px; border-radius: 24px;">
+                    <h3 style="margin-top:0;">Святилище Б (Lost)</h3>
+                    <p style="font-size: 0.9rem;">Мертвый дом на колесах. Ржавый ковчег, стоявший с весны 2023. Мы осквернили его своим присутствием, оставив слишком много следов. Духи места разгневались. Теперь вход туда запечатан. Это памятник нашей неосторожности.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 50px; padding: 40px; border-radius: 24px;">
+                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Регалии</h3>
+                <ul style="list-style: none; padding: 0; margin-top: 25px;">
+                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
+                        <span style="font-size: 1.5rem;">🎵</span>
+                        <div><strong>Гимн: "Mama ŠČ!" (Let 3).</strong> Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</div>
+                    </li>
+                    <li style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 15px;">
+                        <span style="font-size: 1.5rem;">📜</span>
+                        <div><strong>Печать Верачек.</strong> Физический артефакт, подтверждающий подлинность указов. Хранится в секретере.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="enemy" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава III. Энтропия</span>
+            <h2>Феномен "Галя"</h2>
+            <p>
+                Враг не всегда носит оружие. Иногда враг — это всепоглощающая глупость и суета. Мы называем это "Эффект Гали". Это вирус сознания.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
+                <div class="glass-panel" style="padding: 35px; border-radius: 24px; border-left: 5px solid #ccc;">
+                    <h4>Тип А: Шумная</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Громкая, пустая, требующая внимания. Она как статическое электричество — раздражает, но легко заземляется игнором.</p>
+                </div>
+                <div class="glass-panel" style="padding: 35px; border-radius: 24px; border-left: 5px solid var(--danger);">
+                    <h4>Тип Б: Латентная (Danger)</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="codex" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава IV. Уложение о Наказаниях</span>
+            <h2>Кодекс Империи</h2>
+            <div style="overflow-x: auto;">
+                <table class="codex-table">
+                    <thead><tr><th>№</th><th>Догма</th><th>Толкование</th></tr></thead>
+                    <tbody>
+                        <tr><td>I</td><td>Святость Личности</td><td>Честь Имперца неприкосновенна. Оскорбление приравнивается к измене.</td></tr>
+                        <tr><td>II</td><td>Пакт Ненападения</td><td>Физическое насилие внутри Круга запрещено под страхом изгнания.</td></tr>
+                        <tr><td>III</td><td>Целостность</td><td>Любая попытка расколоть общество карается баном. Интриги запрещены.</td></tr>
+                        <tr><td>IV</td><td>Финансовая Чистота</td><td>Запрет на вымогательство и рэкет (даже в шутку).</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="structure" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава V. Иерархия</span>
+            <h2>Лестница Власти</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="glass-panel" style="padding: 20px; border-left: 3px solid #ccc; border-radius: 16px;">
+                    <strong>01. Наблюдатель (The Watcher)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Неофит. Вы уже внутри, но вы под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не "Галя".</div>
+                </div>
+                <div class="glass-panel" style="padding: 20px; border-left: 3px solid var(--primary); border-radius: 16px;">
+                    <strong>02. Соратник (The Ally)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к голосовым чатам и сходкам.</div>
+                </div>
+                <div class="glass-panel" style="padding: 20px; border-left: 3px solid #111; border-radius: 16px;">
+                    <strong>03. Элита (The Architect)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Хранители ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</div>
+                </div>
+            </div>
+            <div style="margin-top: 60px; padding: 30px; border: 1px dashed var(--primary); border-radius: 20px; text-align: center;">
+                <p style="margin: 0; font-weight: 600; font-style: italic; color: var(--primary);">"Призыв дождя окончен. Наступает эра Великой Тишины."</p>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: #0a0a0a; color: #fff; padding: 80px 0;">
+        <div class="container" style="text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
+                <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Гости</a>
+                <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Новости</a>
+            </div>
+            <p style="opacity: 0.3; font-size: 0.75rem;">© 2026 VERACHKI EMPIRE.<br>Design by KC_Comms [oV] & Architecture by 미하이</p>
+        </div>
+    </footer>
+
+    <!-- APP INTERFACE (CHAT) -->
+    <section id="app-interface" class="hidden" style="padding-top: 20px; height: 100dvh; padding-bottom: 20px; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
+        <div class="container" style="height: 100%;">
+            <div class="chat-wrapper glass-panel">
+                <div class="chat-header">
+                    <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="showLanding()">
+                        <span style="font-size: 1.2rem; color: var(--primary);">❮</span>
+                        <span style="font-weight: 700; font-size: 0.8rem; color: var(--primary); letter-spacing: 0.05em;">В МИР</span>
+                    </div>
+                    <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
+                    <div style="width: 50px;"></div>
+                </div>
+                
+                <div class="chat-messages" id="messages-container">
+                    <div style="text-align: center; margin-top: 50px; color: #888; font-size: 0.85rem;">Подключение к нейросети...</div>
+                </div>
+                
+                <div id="media-preview-area">
+                    <div class="preview-content" style="display: flex; align-items: center; gap: 10px;">
+                        <span id="preview-icon">📎</span>
+                        <span id="preview-name" style="max-width: 200px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600;">file</span>
+                    </div>
+                    <span style="cursor: pointer; color: var(--danger); font-size: 1.2rem;" onclick="clearAttachment()">✕</span>
+                </div>
+
+                <div class="chat-input-area">
+                    <button class="media-btn" onclick="document.getElementById('file-upload').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </button>
+                    <input type="file" id="file-upload" class="hidden" accept="image/*,video/*,audio/*" onchange="handleFileSelect(this)">
+                    
+                    <button class="media-btn record-btn" id="record-btn" onclick="toggleRecording()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    </button>
+                    
+                    <input type="text" id="msg-input" placeholder="Передача сообщения..." autocomplete="off">
+                    
+                    <button id="send-btn" class="media-btn" style="background: #111; color: #fff;" onclick="sendMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('auth-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
+            <h2 id="auth-title">Доступ</h2>
+            <input type="text" id="reg-name" placeholder="Позывной (Имя)" style="display: none;">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Пароль">
+            <input type="text" id="invite-code" placeholder="Код Доступа (Alpha)" style="display: none;">
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleAuth()" id="auth-btn">Войти</button>
+            <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer; color: var(--primary); font-weight: 700;" onclick="toggleAuthMode()">Сменить протокол (Регистрация)</p>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('profile-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
+            <h2 id="p-name" style="margin-bottom: 5px;">User</h2>
+            <span id="p-rank" style="background: #111; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem;">RANK</span>
+            <div style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 15px; margin-top: 20px; text-align: left;">
+                <textarea id="p-about-edit" class="hidden" rows="3" placeholder="Досье..."></textarea>
+                <p id="p-about" style="margin: 0; font-size: 0.9rem;">-</p>
+            </div>
+            <div id="admin-controls" class="hidden" style="margin-top: 20px;">
+                <select id="p-rank-edit" style="margin-bottom: 10px;">
+                    <option value="Наблюдатель">Наблюдатель</option>
+                    <option value="Соратник">Соратник</option>
+                    <option value="Элита">Элита</option>
+                    <option value="Изгнан">ИЗГНАНИЕ</option>
+                </select>
+                <button class="btn-danger btn" onclick="saveProfileChanges()">Применить</button>
+            </div>
+            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 15px;" onclick="saveMyProfile()">Сохранить</button>
+        </div>
+    </div>
+    
+    <div id="image-viewer" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="viewer-img" style="max-width: 95%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
+    </div>
+
+    <div id="ban-screen" style="display: none; position: fixed; inset: 0; background: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center;">
+        <h1 style="color: red; margin-bottom: 20px;">ДОСТУП ЗАПРЕЩЕН</h1>
+        <p>Вы были изгнаны из Империи.</p>
+        <button class="btn-outline" onclick="logout()" style="margin-top: 20px;">Покинуть</button>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const PROJECT_ID = '69624669002d880cd7bb'; 
+        const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+        const DB_ID = '6962475a003af27425fb';
+        const MSG_COL = 'verachkichathistory'; 
+        const PROFILES_COL = 'profiles'; 
+        const STORAGE_ID = '696363f30004cb97e6a1'; 
+        const ADMIN_EMAIL = "kraacovstepa@gmail.com";
+        const SECRET_CODE = "GLEB2023";
+        const AI_KEY = 'AIzaSyDRFvaleLqI27OKTgDUW3RivkI3GQejHyk';
+
+        // INIT APPWRITE
+        const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
+        const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+        const account = new Account(client);
+        const db = new Databases(client);
+        const storage = new Storage(client);
+
+        // APP STATE
+        let state = {
+            user: null,
+            profile: null,
+            editingId: null,
+            isLogin: true,
+            currentProfileId: null,
+            attachment: null,
+            recorder: null,
+            chunks: [],
+            isRecording: false,
+            audioPlayer: null,
+            isUploading: false,
+            vibeInterval: null
+        };
+
+        // UTILITIES
+        function showToast(msg, type = 'info') {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            if(type === 'error') t.style.background = 'rgba(255, 59, 48, 0.9)';
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function scrollToBottom() { 
+            const c = document.getElementById('messages-container'); 
+            c.scrollTop = c.scrollHeight; 
+        }
+
+        // AUTHENTICATION & SESSION
+        async function checkSession() {
+            try {
+                state.user = await account.get();
+                try {
+                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
+                    if(res.documents.length > 0) state.profile = res.documents[0];
+                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
+                } catch(e) { console.log("Profile create/fetch error", e); }
+                
+                if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
+                showApp();
+            } catch (e) { showLanding(); }
+        }
+        checkSession();
+
+        function showApp() {
+            document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
+            document.querySelector('footer').style.display = 'none';
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('nav-guest').classList.add('hidden');
+            document.getElementById('nav-user').classList.remove('hidden');
+            closeModal('auth-modal');
+            if(state.profile) {
+                document.getElementById('nav-username').innerText = state.profile.username;
+                document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
+            }
+            loadMessages();
+            // Subscribe to Realtime events
+            client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
+            
+            // Start AI Vibe Check
+            analyzeVibe();
+            state.vibeInterval = setInterval(analyzeVibe, 300000); // 5 minutes interval
+        }
+
+        function showLanding() {
+            if(state.vibeInterval) clearInterval(state.vibeInterval);
+            document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('app-interface').classList.add('hidden');
+            document.querySelector('footer').style.display = 'block';
+            document.getElementById('nav-guest').classList.remove('hidden');
+            document.getElementById('nav-user').classList.add('hidden');
+            setTimeout(reveal, 100);
+            window.scrollTo(0, 0);
+        }
+
+        function toggleAuthMode() {
+            state.isLogin = !state.isLogin;
+            document.getElementById('auth-title').innerText = state.isLogin ? 'Доступ' : 'Присяга';
+            document.getElementById('auth-btn').innerText = state.isLogin ? 'Войти' : 'Вступить';
+            document.getElementById('reg-name').style.display = state.isLogin ? 'none' : 'block';
+            document.getElementById('invite-code').style.display = state.isLogin ? 'none' : 'block';
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            try {
+                if (state.isLogin) { await account.createEmailPasswordSession(email, pass); location.reload(); }
+                else { 
+                    if(document.getElementById('invite-code').value !== SECRET_CODE) throw new Error("Неверный код доступа");
+                    const name = document.getElementById('reg-name').value;
+                    await account.create(ID.unique(), email, pass, name); 
+                    await account.createEmailPasswordSession(email, pass); 
+                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" }); 
+                    location.reload(); 
+                }
+            } catch(e) { showToast(e.message, 'error'); }
+        }
+
+        async function logout() { await account.deleteSession('current'); location.reload(); }
+
+        // MEDIA HANDLING
+        function handleFileSelect(input) {
+            if(input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 50 * 1024 * 1024) {
+                    showToast("Файл слишком большой (>50МБ)", 'error');
+                    input.value = '';
+                    return;
+                }
+                let type = 'file';
+                if(file.type.startsWith('image/')) type = 'image';
+                else if(file.type.startsWith('video/')) type = 'video';
+                else if(file.type.startsWith('audio/')) type = 'audio';
+                
+                state.attachment = { file: file, type: type };
+                document.getElementById('media-preview-area').style.display = 'flex';
+                document.getElementById('preview-name').innerText = file.name;
+                document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : (type === 'video' ? '🎬' : '🎵');
+            }
+        }
+
+        function clearAttachment() { 
+            state.attachment = null; 
+            document.getElementById('file-upload').value = ''; 
+            document.getElementById('media-preview-area').style.display = 'none'; 
+        }
+
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (!state.isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    state.recorder = new MediaRecorder(stream);
+                    state.chunks = [];
+                    state.recorder.ondataavailable = event => state.chunks.push(event.data);
+                    state.recorder.onstop = () => {
+                        const audioBlob = new Blob(state.chunks, { type: 'audio/mp3' });
+                        const audioFile = new File([audioBlob], "voice_msg.mp3", { type: "audio/mp3" });
+                        state.attachment = { file: audioFile, type: 'audio' };
+                        sendMessage();
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    state.recorder.start();
+                    state.isRecording = true;
+                    btn.classList.add('recording');
+                    showToast('Запись... (Нажми еще раз чтобы отправить)');
+                } catch(e) { showToast("Нет доступа к микрофону", 'error'); }
+            } else { 
+                state.recorder.stop(); 
+                state.isRecording = false; 
+                btn.classList.remove('recording'); 
+            }
+        }
+
+        function toggleAudio(btn, src) {
+            const playerContainer = btn.parentElement;
+            const progress = playerContainer.querySelector('.audio-progress');
+            
+            if (state.audioPlayer && state.audioPlayer.src === src) {
+                if (state.audioPlayer.paused) {
+                    state.audioPlayer.play();
+                    btn.innerText = '❚❚';
+                } else {
+                    state.audioPlayer.pause();
+                    btn.innerText = '▶';
+                }
+            } else {
+                if (state.audioPlayer) {
+                    state.audioPlayer.pause();
+                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
+                }
+                state.audioPlayer = new Audio(src);
+                state.audioPlayer.play();
+                btn.innerText = '❚❚';
+                
+                state.audioPlayer.ontimeupdate = () => {
+                    if(state.audioPlayer.duration) {
+                        const percent = (state.audioPlayer.currentTime / state.audioPlayer.duration) * 100;
+                        progress.style.width = percent + '%';
+                    }
+                };
+                state.audioPlayer.onended = () => {
+                    btn.innerText = '▶';
+                    progress.style.width = '0%';
+                };
+            }
+        }
+
+        // CHAT LOGIC
+        async function loadMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            try {
+                const res = await db.listDocuments(DB_ID, MSG_COL, [Query.orderAsc('timestamp'), Query.limit(100)]);
+                res.documents.forEach(renderMessage);
+                scrollToBottom();
+            } catch(e) { console.error(e); }
+        }
+
+        function renderMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const existing = document.getElementById(msg.$id);
+            
+            if (existing) {
+                if (!existing.dataset.optimistic) {
+                    existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
+                    if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
+                        existing.querySelector('.msg-text').insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
+                    }
+                }
+                return;
+            }
+
+            const isMine = state.profile && msg.senderId === state.profile.username;
+            const isAdmin = state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'mine' : ''}`;
+            div.id = msg.$id;
+            if (msg.optimistic) div.dataset.optimistic = "true";
+
+            let controls = '';
+            if (!msg.optimistic) {
+                if(isMine) {
+                    controls = `<div class="controls">`;
+                    if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(msg.messageContent)}')">✎</span>`;
+                    controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
+                } else if(isAdmin) {
+                    controls = `<div class="controls"><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
+                }
+            }
+            
+            let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
+            
+            if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
+                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
+                
+                if (msg.fileType === 'image') {
+                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
+                } else if (msg.fileType === 'video') {
+                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
+                } else if (msg.fileType === 'audio') {
+                    contentHtml = `
+                    <div class="custom-audio-player">
+                        <div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div>
+                        <div class="audio-track"><div class="audio-progress"></div></div>
+                    </div>`;
+                }
+                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
+            }
+            
+            const author = isMine ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')" style="font-size:0.7rem; font-weight:700; color:var(--primary); display:block; margin-bottom:4px; cursor:pointer;">${msg.senderId}</span>`;
+            const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
+            
+            div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div>`;
+            container.appendChild(div);
+            
+            if(container.scrollHeight - container.scrollTop - container.clientHeight < 300 || isMine) scrollToBottom();
+        }
+
+        async function sendMessage() {
+            if (state.isUploading) return;
+
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if ((!text && !state.attachment) || !state.profile) return;
+            
+            if (state.editingId) {
+                try {
+                    await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
+                    state.editingId = null;
+                    document.getElementById('send-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+                    input.value = '';
+                } catch(e) { showToast("Ошибка редактирования", 'error'); }
+                return;
+            }
+
+            const sendBtn = document.getElementById('send-btn');
+            state.isUploading = true;
+            sendBtn.innerHTML = "•••";
+
+            // Optimistic UI
+            const tempId = "temp-" + Date.now();
+            const optimisticMsg = {
+                $id: tempId,
+                messageContent: text,
+                senderId: state.profile.username,
+                timestamp: new Date().toISOString(),
+                isEdited: false,
+                fileType: state.attachment ? state.attachment.type : null,
+                fileUrl: state.attachment ? URL.createObjectURL(state.attachment.file) : null,
+                optimistic: true
+            };
+            renderMessage(optimisticMsg);
+            
+            input.value = '';
+            const fileToUpload = state.attachment;
+            clearAttachment();
+
+            let fileId = null, fileType = null;
+            if (fileToUpload) {
+                try {
+                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
+                    fileId = uploaded.$id; 
+                    fileType = fileToUpload.type;
+                } catch(e) { 
+                    showToast("Ошибка загрузки файла. " + e.message, 'error'); 
+                    document.getElementById(tempId).remove();
+                    state.isUploading = false;
+                    sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+                    return; 
+                }
+            }
+            
+            try {
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
+                    messageContent: text, 
+                    senderId: state.profile.username, 
+                    timestamp: new Date().toISOString(), 
+                    isEdited: false, 
+                    fileId: fileId, 
+                    fileType: fileType 
+                });
+            } catch(e) { 
+                showToast("Ошибка отправки: " + e.message, 'error'); 
+                document.getElementById(tempId).remove(); 
+            } finally {
+                state.isUploading = false;
+                sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+            }
+        }
+
+        // REALTIME LOGIC
+        function handleRealtime(response) {
+            const ev = response.events[0];
+            const payload = response.payload;
+
+            // Handle DELETE
+            if(ev.includes('.delete')) {
+                const el = document.getElementById(payload.$id);
+                if(el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.8)';
+                    setTimeout(() => el.remove(), 300);
+                }
+                return;
+            }
+
+            // Handle UPDATE
+            if(ev.includes('.update')) {
+                const el = document.getElementById(payload.$id);
+                if(el) {
+                    const content = el.querySelector('.msg-text-content');
+                    if(content) content.innerText = payload.messageContent;
+                    const msgText = el.querySelector('.msg-text');
+                    if(msgText && !msgText.innerText.includes('(ред.)')) {
+                        msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
+                    }
+                }
+                return;
+            }
+
+            // Handle CREATE
+            if(ev.includes('.create')) {
+                // Check if this is my own message (optimistic UI duplicate check)
+                const isMine = state.profile && payload.senderId === state.profile.username;
+                
+                if (isMine) {
+                    // Try to find the optimistic message and remove it to replace with real one
+                    // or better, just leave it if it matches perfectly, but here we replace to ensure ID is correct
+                    const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
+                    tempMsgs.forEach(m => {
+                        if (m.querySelector('.msg-text-content').innerText === payload.messageContent) {
+                            m.remove();
+                        }
+                    });
+                }
+                
+                // If message already exists by ID (race condition), don't render
+                if(!document.getElementById(payload.$id)) {
+                    renderMessage(payload);
+                    scrollToBottom();
+                }
+            }
+        }
+
+        // AI VIBE CHECK (GEMINI)
+        async function analyzeVibe() {
+            const msgs = Array.from(document.querySelectorAll('.msg-text-content'))
+                .slice(-15)
+                .map(el => el.innerText)
+                .join("\n");
+
+            if(msgs.length < 5) return;
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_KEY}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `Analyze the mood of this chat history. Reply with ONE word only: ANGER (if angry/fighting), FUN (if funny/joking), SAD (if sad/depressed), or NEUTRAL.\n\nChat:\n${msgs}`
+                            }]
+                        }]
+                    })
+                });
+                
+                if (response.status === 429) {
+                    console.warn("AI Rate Limit (429). Skipping vibe check.");
+                    return;
+                }
+
+                const data = await response.json();
+                if(data.candidates && data.candidates[0]) {
+                    const mood = data.candidates[0].content.parts[0].text.trim().toUpperCase();
+                    applyTheme(mood);
+                }
+            } catch (e) { console.error("AI Error:", e); }
+        }
+
+        function applyTheme(mood) {
+            const b1 = document.querySelector('.blob-1');
+            const b2 = document.querySelector('.blob-2');
+            const b3 = document.querySelector('.blob-3');
+
+            // Reset transitions
+            [b1, b2, b3].forEach(b => b.style.transition = "background 2s ease");
+
+            if (mood.includes('ANGER')) {
+                b1.style.background = '#ff0000'; // Red
+                b2.style.background = '#800000'; // Maroon
+                b3.style.background = '#1a1a1a'; // Dark
+            } else if (mood.includes('FUN')) {
+                b1.style.background = '#ffeaa7'; // Yellow
+                b2.style.background = '#fdcb6e'; // Orange
+                b3.style.background = '#55efc4'; // Lime
+            } else if (mood.includes('SAD')) {
+                b1.style.background = '#0984e3'; // Blue
+                b2.style.background = '#636e72'; // Grey
+                b3.style.background = '#a29bfe'; // Purple
+            } else {
+                // Neutral
+                b1.style.background = 'var(--primary)';
+                b2.style.background = 'var(--secondary)';
+                b3.style.background = 'var(--accent)';
+            }
+        }
+
+        function startEdit(id, text) { 
+            const i = document.getElementById('msg-input'); i.value = text; i.focus(); 
+            state.editingId = id; document.getElementById('send-btn').innerText = "✓"; 
+        }
+        async function deleteMsg(id) { 
+            if(confirm('Удалить?')) await db.deleteDocument(DB_ID, MSG_COL, id); 
+        }
+
+        // PROFILE & MODALS
+        function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        async function openProfile(username) {
+            openModal('profile-modal'); document.getElementById('p-name').innerText = username;
+            document.getElementById('p-rank').innerText = "...";
+            document.getElementById('admin-controls').classList.add('hidden'); 
+            document.getElementById('p-save-self').classList.add('hidden'); 
+            document.getElementById('p-about-edit').classList.add('hidden'); 
+            document.getElementById('p-about').classList.remove('hidden');
+
+            try {
+                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                if(res.documents.length > 0) {
+                    const p = res.documents[0]; state.currentProfileId = p.$id; 
+                    document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
+                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
+                    
+                    if (state.profile && p.$id === state.profile.$id) {
+                        document.getElementById('p-about').classList.add('hidden'); 
+                        document.getElementById('p-about-edit').classList.remove('hidden'); 
+                        document.getElementById('p-about-edit').value = p.about || ""; 
+                        document.getElementById('p-save-self').classList.remove('hidden');
+                    }
+                    if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                        document.getElementById('admin-controls').classList.remove('hidden');
+                        document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
+                    }
+                }
+            } catch(e) {}
+        }
+        function openMyProfile() { if(state.profile) openProfile(state.profile.username); }
+        async function saveMyProfile() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); closeModal('profile-modal'); showToast("Сохранено"); }
+        async function saveProfileChanges() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); closeModal('profile-modal'); showToast("Статус обновлен"); }
+
+        // ANIMATION OBSERVER
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) { 
+                if (reveals[i].getBoundingClientRect().top < window.innerHeight - 50) reveals[i].classList.add("active"); 
+            }
+        }
+        window.addEventListener("scroll", reveal); reveal();
+
+        document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
+    </script>
+</body>
+
+</html>e the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: "" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
