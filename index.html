@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>VERACHKI | Empire of Silence</title>
     
-    <!-- FAVICON -->
     <link rel="icon" type="image/x-icon" href="cover.jpg">
 
-    <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;800&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Courier+New&display=swap" rel="stylesheet">
     
-    <!-- APPWRITE SDK -->
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
 
     <style>
@@ -245,17 +242,19 @@
         .nvg-mode .message { background: #000; color: #0f0; border: 1px solid #0f0; font-family: 'Courier New', monospace; }
         .nvg-mode .message.mine { background: #003300; color: #0f0; border: 1px solid #0f0; }
 
-        /* DEFCON WIDGET */
+        /* DEFCON WIDGET (FIXED) */
         .defcon-widget {
-            display: flex; gap: 5px; background: #000; padding: 5px 10px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2); margin-right: 15px;
+            display: flex; gap: 8px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3); margin-right: 15px; backdrop-filter: blur(10px);
+            z-index: 101; pointer-events: auto;
         }
         .defcon-lvl {
-            width: 20px; height: 20px; border-radius: 50%; background: #333; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #000;
-            transition: 0.3s;
+            width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: rgba(0,0,0,0.5);
+            transition: 0.3s; border: 2px solid transparent; opacity: 0.5;
         }
-        .defcon-lvl.active { box-shadow: 0 0 10px currentColor; color: #fff; transform: scale(1.2); }
+        .defcon-lvl:hover { transform: scale(1.1); opacity: 0.8; }
+        .defcon-lvl.active { box-shadow: 0 0 15px currentColor; color: #fff; transform: scale(1.2); opacity: 1; border-color: rgba(255,255,255,0.8); }
         
         /* DEFCON STATES */
         body.defcon-1 { animation: alarmPulse 2s infinite; }
@@ -263,22 +262,28 @@
         body.defcon-1 .blob-1, body.defcon-1 .blob-2, body.defcon-1 .blob-3 { background: #f00; opacity: 0.3; }
         @keyframes alarmPulse { 0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 50px 20px rgba(255,0,0,0.3); } 100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); } }
 
-        /* GEIGER WIDGET */
+        /* GEIGER WIDGET (GLASS STYLE) */
         #geiger-wrapper {
-            position: absolute; bottom: 80px; right: 20px; width: 80px; height: 50px;
-            background: #222; border: 2px solid #444; border-radius: 5px;
+            position: absolute; bottom: 85px; right: 25px; width: 90px; height: 60px;
+            background: rgba(255, 255, 255, 0.25); /* Glass */
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 50;
         }
         #geiger-screen {
-            width: 70px; height: 30px; background: #4a5d43; border: 1px solid #000;
+            width: 70px; height: 30px; 
+            background: rgba(0,0,0,0.05); /* Subtle inner dark */
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.3);
             position: relative; overflow: hidden;
         }
         #geiger-needle {
-            width: 2px; height: 25px; background: #000; position: absolute; bottom: -5px; left: 50%;
+            width: 2px; height: 25px; background: var(--danger); 
+            position: absolute; bottom: -5px; left: 50%; border-radius: 2px;
             transform-origin: bottom center; transform: rotate(-45deg); transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
         }
-        .geiger-label { font-size: 8px; color: #aaa; margin-top: 2px; font-family: monospace; }
+        .geiger-label { font-size: 8px; color: var(--primary); margin-top: 4px; font-weight: 800; letter-spacing: 1px; }
 
         /* DOSSIER PROFILE */
         .dossier-box {
@@ -290,7 +295,7 @@
         .dossier-stamp {
             position: absolute; top: 20px; right: 20px; border: 4px solid #d00; color: #d00;
             font-weight: 900; font-size: 1.5rem; padding: 5px 10px; transform: rotate(-15deg);
-            opacity: 0.8; mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='); /* Grunge texture placeholder */
+            opacity: 0.8; mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='); 
         }
         .dossier-photo {
             width: 100px; height: 120px; background: #ccc; border: 5px solid #fff;
@@ -345,6 +350,14 @@
         }
         input:focus, textarea:focus { background: #fff; border-color: var(--primary); }
 
+        /* USERS LIST MODAL */
+        .users-list { max-height: 300px; overflow-y: auto; text-align: left; margin-top: 20px; }
+        .user-item { 
+            padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+        }
+        .user-item:hover { background: rgba(255,255,255,0.4); border-radius: 10px; }
+        .u-rank { font-size: 0.7rem; background: #111; color: #fff; padding: 2px 8px; border-radius: 10px; }
+
         /* UTILS */
         .hidden { display: none !important; }
         .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
@@ -361,7 +374,6 @@
 </head>
 <body>
 
-    <!-- AURORA BACKGROUND -->
     <div class="aurora-bg">
         <div class="aurora-blob blob-1"></div>
         <div class="aurora-blob blob-2"></div>
@@ -376,11 +388,10 @@
             <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 10px 25px; font-size: 0.7rem;">Вход</button>
         </div>
         <div id="nav-user" class="hidden" style="display: flex; align-items: center; gap: 15px;">
-            <!-- DEFCON WIDGET -->
             <div class="defcon-widget">
-                <div class="defcon-lvl" style="background:#0f0" onclick="setDefcon(5)">5</div>
-                <div class="defcon-lvl" style="background:#ff0" onclick="setDefcon(3)">3</div>
-                <div class="defcon-lvl" style="background:#f00" onclick="setDefcon(1)">1</div>
+                <div class="defcon-lvl" id="def-5" style="background:#0f0" onclick="setDefcon(5)">5</div>
+                <div class="defcon-lvl" id="def-3" style="background:#ff0" onclick="setDefcon(3)">3</div>
+                <div class="defcon-lvl" id="def-1" style="background:#f00" onclick="setDefcon(1)">1</div>
             </div>
             
             <div style="text-align: right; cursor: pointer; line-height: 1.2;" onclick="openMyProfile()">
@@ -391,7 +402,6 @@
         </div>
     </nav>
 
-    <!-- LANDING CONTENT -->
     <section class="hero reveal">
         <div class="container">
             <div class="hero-grid">
@@ -533,14 +543,10 @@
         </div>
     </footer>
 
-    <!-- APP INTERFACE (CHAT) -->
     <section id="app-interface" class="hidden" style="padding-top: 20px; height: 100dvh; padding-bottom: 20px; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
         <div class="container" style="height: 100%;">
             <div class="chat-wrapper glass-panel">
-                <div class="radio-overlay"></div> <!-- ЭФФЕКТ ПОМЕХ -->
-                
-                <!-- GEIGER WIDGET -->
-                <div id="geiger-wrapper">
+                <div class="radio-overlay"></div> <div id="geiger-wrapper">
                     <div id="geiger-screen"><div id="geiger-needle"></div></div>
                     <div class="geiger-label">RAD LEVEL</div>
                 </div>
@@ -550,7 +556,10 @@
                         <span style="font-size: 1.2rem; color: var(--primary);">❮</span>
                         <span style="font-weight: 700; font-size: 0.8rem; color: var(--primary); letter-spacing: 0.05em;">В МИР</span>
                     </div>
-                    <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
+                        <button class="btn-outline" style="padding: 5px 10px; border-radius: 12px; font-size: 1.2rem; border: none;" onclick="openUserList()" title="Граждане">👥</button>
+                    </div>
                     <div style="width: 50px;"></div>
                 </div>
                 
@@ -567,7 +576,6 @@
                 </div>
 
                 <div class="chat-input-area">
-                    <!-- ОБЫЧНЫЙ РЕЖИМ -->
                     <div class="standard-input-group" style="display: flex; width: 100%; gap: 10px; align-items: center;">
                         <button class="media-btn" onclick="toggleNVG()" title="Ночное Видение">🔦</button>
                         <button class="media-btn" onclick="toggleRadioMode()" title="Режим Рации">📡</button>
@@ -583,7 +591,6 @@
                         </button>
                     </div>
 
-                    <!-- РЕЖИМ РАЦИИ -->
                     <button class="radio-btn-big" id="radio-ptt-btn">УДЕРЖИВАЙ ДЛЯ СВЯЗИ</button>
                     <button class="media-btn" onclick="toggleRadioMode()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none;" id="radio-exit-btn">✕</button>
                 </div>
@@ -591,7 +598,6 @@
         </div>
     </section>
 
-    <!-- MODALS -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="close-icon" onclick="closeModal('auth-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
@@ -602,6 +608,16 @@
             <input type="text" id="invite-code" placeholder="Код Доступа (Alpha)" style="display: none;">
             <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleAuth()" id="auth-btn">Войти</button>
             <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer; color: var(--primary); font-weight: 700;" onclick="toggleAuthMode()">Сменить протокол (Регистрация)</p>
+        </div>
+    </div>
+
+    <div id="users-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('users-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
+            <h2>Граждане Империи</h2>
+            <div id="users-list-container" class="users-list">
+                <p>Загрузка данных...</p>
+            </div>
         </div>
     </div>
 
@@ -775,12 +791,17 @@
 
         // --- NEW FEATURES LOGIC ---
 
-        // 1. DEFCON SYSTEM
+        // 1. DEFCON SYSTEM (FIXED)
         function setDefcon(level) {
             document.body.classList.remove('defcon-1');
+            // Visual feedback
+            document.querySelectorAll('.defcon-lvl').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`def-${level}`);
+            if(activeBtn) activeBtn.classList.add('active');
+
             if (level === 1) {
                 document.body.classList.add('defcon-1');
-                playGeigerClick(0.1); // Alarm sound placeholder
+                playGeigerClick(0.1); 
             }
         }
 
@@ -1176,6 +1197,34 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+        // USERS LIST FUNCTION
+        async function openUserList() {
+            openModal('users-modal');
+            const listContainer = document.getElementById('users-list-container');
+            listContainer.innerHTML = '<p>Загрузка архивов...</p>';
+            
+            try {
+                // Fetch all profiles
+                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.limit(100)]);
+                if (res.documents.length === 0) {
+                    listContainer.innerHTML = '<p>Список пуст.</p>';
+                    return;
+                }
+                
+                let html = '';
+                res.documents.forEach(user => {
+                    html += `
+                    <div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
+                        <span style="font-weight:700;">${user.username}</span>
+                        <span class="u-rank">${user.rank || 'Наблюдатель'}</span>
+                    </div>`;
+                });
+                listContainer.innerHTML = html;
+            } catch(e) {
+                listContainer.innerHTML = '<p style="color:red">Ошибка доступа к архивам.</p>';
+            }
+        }
+
         async function openProfile(username) {
             openModal('profile-modal'); document.getElementById('p-name').innerText = username;
             document.getElementById('p-rank').innerText = "...";
@@ -1204,7 +1253,13 @@
                 }
             } catch(e) {}
         }
-        function openMyProfile() { if(state.profile) openProfile(state.profile.username); }
+        function openMyProfile() { 
+            if(state.profile) {
+                openProfile(state.profile.username);
+            } else {
+                showToast("Профиль не загружен. Попробуйте обновить страницу.", "error");
+            }
+        }
         async function saveMyProfile() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); closeModal('profile-modal'); showToast("Сохранено"); }
         async function saveProfileChanges() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); closeModal('profile-modal'); showToast("Статус обновлен"); }
 
