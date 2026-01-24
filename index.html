@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>VERACHKI | Empire of Silence</title>
-    <link rel="icon" type="image/x-icon" href="ukf.jpg">
     
+    <!-- FAVICON -->
+    <link rel="icon" type="image/x-icon" href="cover.jpg">
+
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -601,7 +603,7 @@
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
             
             // Start AI Vibe Check
-            analyzeVibe();
+            // analyzeVibe(); // ОТКЛЮЧЕНО, ЧТОБЫ НЕ ТРАТИТЬ ЛИМИТЫ ПРИ ВХОДЕ
             state.vibeInterval = setInterval(analyzeVibe, 300000); // 5 minutes interval
         }
 
@@ -1048,6 +1050,4 @@
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
     </script>
 </body>
-
 </html>
-
