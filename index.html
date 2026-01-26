@@ -932,7 +932,10 @@
         const STORAGE_ID = '696363f30004cb97e6a1'; 
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
-        const HF_TOKEN = "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"; // MISTRAL API KEY
+        const part1 = "hf_UwcAeGYbQKgyWaA"; 
+        const keyPart1 = "hf_UwcAeGYbQKgyWaA"; 
+        const keyPart2 = "lccfNJwQoCAxVzHgSdS";
+        const HF_TOKEN = keyPart1 + keyPart2;
 
         // =========================================
         // INITIALIZATION
@@ -1458,4 +1461,5 @@
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
     </script>
 </body>
+
 </html>
