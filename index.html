@@ -14,25 +14,43 @@
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
 
     <style>
+        /* =========================================
+           GLOBAL VARIABLES & THEME
+           ========================================= */
         :root {
-            /* Palette */
+            /* Main Palette */
             --primary: #6a4df4;
             --primary-dark: #4b32c3;
             --secondary: #74b9ff;
             --accent: #ff7675;
+            
+            /* Text Colors */
             --text-main: #1d1d1f;
             --text-muted: #86868b;
             --danger: #ff3b30;
             
-            /* Glass Variables */
+            /* Glassmorphism System */
             --glass-bg: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
             --blur: blur(25px) saturate(180%);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        html { scroll-behavior: smooth; height: 100%; }
+        /* =========================================
+           RESET & BASIC SETUP
+           ========================================= */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+        }
+
+        html { 
+            scroll-behavior: smooth; 
+            height: 100%; 
+        }
 
         body {
             background: #f0f2f5;
@@ -46,15 +64,21 @@
             transition: filter 0.5s ease;
         }
 
-        /* AURORA BACKGROUND ANIMATION */
+        /* =========================================
+           AURORA BACKGROUND ANIMATION
+           ========================================= */
         .aurora-bg {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
             z-index: -1;
             overflow: hidden;
             background: #f4f6f9;
             transition: all 1s ease;
         }
+
         .aurora-blob {
             position: absolute;
             filter: blur(80px);
@@ -62,16 +86,43 @@
             animation: float 10s infinite ease-in-out alternate;
             transition: background 2s ease-in-out;
         }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation-duration: 15s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: var(--secondary); animation-duration: 20s; }
-        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: var(--accent); animation-duration: 12s; opacity: 0.4; }
+
+        .blob-1 { 
+            top: -10%; 
+            left: -10%; 
+            width: 50vw; 
+            height: 50vw; 
+            background: var(--primary); 
+            animation-duration: 15s; 
+        }
+
+        .blob-2 { 
+            bottom: -10%; 
+            right: -10%; 
+            width: 60vw; 
+            height: 60vw; 
+            background: var(--secondary); 
+            animation-duration: 20s; 
+        }
+
+        .blob-3 { 
+            top: 40%; 
+            left: 40%; 
+            width: 40vw; 
+            height: 40vw; 
+            background: var(--accent); 
+            animation-duration: 12s; 
+            opacity: 0.4; 
+        }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
             100% { transform: translate(30px, 50px) scale(1.1); }
         }
 
-        /* GLASS SYSTEM */
+        /* =========================================
+           UI COMPONENTS (Glass, Typography, Buttons)
+           ========================================= */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: var(--blur);
@@ -80,51 +131,165 @@
             box-shadow: var(--glass-shadow);
         }
 
-        /* TYPOGRAPHY */
-        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: #000; font-weight: 700; }
-        h1 { font-size: clamp(2.8rem, 6vw, 4.8rem); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 25px; }
-        h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 30px; position: relative; display: inline-block; }
-        h3 { font-size: 1.4rem; margin-bottom: 15px; margin-top: 40px; color: #111; border-left: 4px solid var(--primary); padding-left: 20px; }
-        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; color: var(--primary); font-weight: 800; margin-bottom: 20px; display: block; }
-        p { margin-bottom: 20px; color: var(--text-muted); text-align: justify; font-size: 1.05rem; }
-
-        /* UI COMPONENTS */
-        .btn {
-            cursor: pointer; padding: 16px 32px; border: none; border-radius: 50px;
-            background: #111; color: #fff;
-            text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-decoration: none; display: inline-flex; justify-content: center; align-items: center;
+        h1, h2, h3, h4 { 
+            font-family: 'Playfair Display', serif; 
+            color: #000; 
+            font-weight: 700; 
         }
-        .btn:hover { transform: scale(1.05); background: var(--primary); box-shadow: 0 20px 40px rgba(106, 77, 244, 0.3); }
-        .btn:active { transform: scale(0.95); }
-        .btn-outline { background: transparent; border: 1px solid #111; color: #111; }
-        .btn-outline:hover { background: #111; color: #fff; border-color: #111; }
-        .btn-danger { background: var(--danger); color: white; width: 100%; margin-top: 10px; }
 
-        .container { width: 90%; max-width: 1050px; margin: 0 auto; position: relative; z-index: 2; }
-        section { padding: 120px 0; position: relative; }
+        h1 { 
+            font-size: clamp(2.8rem, 6vw, 4.8rem); 
+            line-height: 1.05; 
+            letter-spacing: -0.02em; 
+            margin-bottom: 25px; 
+        }
 
-        /* NAVIGATION */
+        h2 { 
+            font-size: clamp(2rem, 4vw, 3rem); 
+            margin-bottom: 30px; 
+            position: relative; 
+            display: inline-block; 
+        }
+
+        h3 { 
+            font-size: 1.4rem; 
+            margin-bottom: 15px; 
+            margin-top: 40px; 
+            color: #111; 
+            border-left: 4px solid var(--primary); 
+            padding-left: 20px; 
+        }
+
+        .subtitle { 
+            font-family: 'Cinzel', serif; 
+            letter-spacing: 0.2em; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            color: var(--primary); 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            display: block; 
+        }
+
+        p { 
+            margin-bottom: 20px; 
+            color: var(--text-muted); 
+            text-align: justify; 
+            font-size: 1.05rem; 
+        }
+
+        .btn {
+            cursor: pointer; 
+            padding: 16px 32px; 
+            border: none; 
+            border-radius: 50px;
+            background: #111; 
+            color: #fff;
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-size: 0.75rem; 
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            text-decoration: none; 
+            display: inline-flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+
+        .btn:hover { 
+            transform: scale(1.05); 
+            background: var(--primary); 
+            box-shadow: 0 20px 40px rgba(106, 77, 244, 0.3); 
+        }
+
+        .btn:active { 
+            transform: scale(0.95); 
+        }
+
+        .btn-outline { 
+            background: transparent; 
+            border: 1px solid #111; 
+            color: #111; 
+        }
+
+        .btn-outline:hover { 
+            background: #111; 
+            color: #fff; 
+            border-color: #111; 
+        }
+
+        .btn-danger { 
+            background: var(--danger); 
+            color: white; 
+            width: 100%; 
+            margin-top: 10px; 
+        }
+
+        .container { 
+            width: 90%; 
+            max-width: 1050px; 
+            margin: 0 auto; 
+            position: relative; 
+            z-index: 2; 
+        }
+
+        section { 
+            padding: 120px 0; 
+            position: relative; 
+        }
+
+        /* =========================================
+           NAVIGATION BAR
+           ========================================= */
         nav {
-            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; 
-            z-index: 1000; /* FIXED: Increased z-index to be above chat interface */
+            padding: 15px 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; /* High Z-index to stay above content */
             transition: all 0.3s ease;
             border-bottom: 1px solid rgba(255,255,255,0.3);
         }
-        .nav-logo { font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: #111; letter-spacing: 0.05em; }
 
-        /* HERO */
-        .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 70px; align-items: center; min-height: 85vh; }
-        .hero-image-wrapper { position: relative; }
+        .nav-logo { 
+            font-family: 'Cinzel', serif; 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            cursor: pointer; 
+            color: #111; 
+            letter-spacing: 0.05em; 
+        }
+
+        /* =========================================
+           HERO SECTION
+           ========================================= */
+        .hero-grid { 
+            display: grid; 
+            grid-template-columns: 1.2fr 0.8fr; 
+            gap: 70px; 
+            align-items: center; 
+            min-height: 85vh; 
+        }
+
+        .hero-image-wrapper { 
+            position: relative; 
+        }
+
         .hero-image-wrapper img { 
-            width: 100%; border-radius: 32px; 
+            width: 100%; 
+            border-radius: 32px; 
             box-shadow: 0 40px 80px rgba(0,0,0,0.15); 
             border: 1px solid rgba(255,255,255,0.6);
-            transform: rotate(2deg); transition: 0.5s ease;
+            transform: rotate(2deg); 
+            transition: 0.5s ease;
         }
-        .hero-image-wrapper:hover img { transform: rotate(0deg) scale(1.02); }
+
+        .hero-image-wrapper:hover img { 
+            transform: rotate(0deg) scale(1.02); 
+        }
         
         @media(max-width: 900px) { 
             .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } 
@@ -132,77 +297,158 @@
             .hero-image-wrapper img { transform: none; }
         }
 
-        /* CHAT APP INTERFACE */
+        /* =========================================
+           CHAT APPLICATION INTERFACE
+           ========================================= */
         .chat-wrapper { 
             background: rgba(255,255,255,0.8); 
             backdrop-filter: blur(40px);
             border-radius: 32px; 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); 
-            overflow: hidden; height: 92dvh; display: flex; flex-direction: column; 
-            position: relative; border: 1px solid rgba(255,255,255,0.6);
+            overflow: hidden; 
+            height: 92dvh; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            border: 1px solid rgba(255,255,255,0.6);
         }
+
         .chat-header { 
-            padding: 18px 25px; z-index: 10;
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 25px; 
+            z-index: 10;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
             background: rgba(255,255,255,0.5);
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
+
         .chat-messages { 
-            flex: 1; overflow-y: auto; padding: 20px; 
-            display: flex; flex-direction: column; gap: 12px; 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
             background: transparent;
         }
+
         .chat-messages::-webkit-scrollbar { width: 4px; }
         .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
 
+        /* Message Bubbles */
         .message { 
-            padding: 10px 16px; border-radius: 20px; border-bottom-left-radius: 4px; 
-            max-width: 80%; font-size: 0.95rem; position: relative; 
-            background: #fff; color: #1a1a1a; align-self: flex-start; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            border-bottom-left-radius: 4px; 
+            max-width: 80%; 
+            font-size: 0.95rem; 
+            position: relative; 
+            background: #fff; 
+            color: #1a1a1a; 
+            align-self: flex-start; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: all 0.3s ease;
         }
+
         .message.mine { 
             align-self: flex-end; 
             background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-            color: #fff; border-radius: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 4px;
+            color: #fff; 
+            border-radius: 20px; 
+            border-bottom-left-radius: 20px; 
+            border-bottom-right-radius: 4px;
             box-shadow: 0 8px 20px rgba(106, 77, 244, 0.25); 
         }
+
+        /* NPC Message Style */
+        .message.system {
+            align-self: center; 
+            background: #2d3436; 
+            color: #fff; 
+            border: 1px solid #000;
+            border-radius: 12px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.85rem;
+            max-width: 90%; 
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .msg-time { 
+            font-size: 0.65rem; 
+            opacity: 0.6; 
+            margin-top: 4px; 
+            text-align: right; 
+        }
+
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
+        /* Controls (Edit/Delete) */
         .controls { 
-            display: none; position: absolute; top: -30px; right: 0; 
-            background: #fff; padding: 4px 10px; border-radius: 50px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 5; 
+            display: none; 
+            position: absolute; 
+            top: -30px; 
+            right: 0; 
+            background: #fff; 
+            padding: 4px 10px; 
+            border-radius: 50px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            z-index: 5; 
         }
         .message:hover .controls { display: flex; gap: 8px; }
         .control-btn { font-size: 0.8rem; cursor: pointer; color: #555; }
 
+        /* Input Area */
         .chat-input-area { 
-            padding: 15px; background: rgba(255,255,255,0.7); 
+            padding: 15px; 
+            background: rgba(255,255,255,0.7); 
             backdrop-filter: blur(20px);
-            display: flex; gap: 10px; align-items: center; z-index: 20;
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            z-index: 20;
             border-top: 1px solid rgba(255,255,255,0.5);
             position: relative;
         }
+
         .chat-input-area input[type="text"] { 
-            flex: 1; padding: 14px 20px; border: 1px solid rgba(0,0,0,0.05); border-radius: 30px; 
-            outline: none; background: #fff; font-size: 16px; transition: 0.3s;
+            flex: 1; 
+            padding: 14px 20px; 
+            border: 1px solid rgba(0,0,0,0.05); 
+            border-radius: 30px; 
+            outline: none; 
+            background: #fff; 
+            font-size: 16px; 
+            transition: 0.3s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
         .chat-input-area input[type="text"]:focus { border-color: var(--primary); }
 
         .media-btn { 
-            width: 44px; height: 44px; border-radius: 50%; border: none; 
-            background: #fff; cursor: pointer; color: #555; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            border: none; 
+            background: #fff; 
+            cursor: pointer; 
+            color: #555; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: 0.2s; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .media-btn:hover { color: var(--primary); transform: translateY(-2px); }
         .record-btn.recording { color: #fff; background: var(--danger); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
 
-        /* RADIO MODE STYLES */
+        /* =========================================
+           SPECIAL MODES (Radio, NVG, Defcon)
+           ========================================= */
+        
+        /* Radio Mode */
         .radio-overlay {
             pointer-events: none; position: absolute; inset: 0; z-index: 50; opacity: 0; transition: opacity 0.3s;
             background: repeating-linear-gradient(0deg, rgba(0,0,0,0.05), rgba(0,0,0,0.05) 1px, transparent 1px, transparent 2px);
@@ -227,7 +473,6 @@
         
         .radio-active .standard-input-group { display: none; }
         .radio-active .radio-btn-big { display: block; }
-        
         .radio-active .chat-wrapper { animation: jitter 0.2s infinite; }
         @keyframes jitter {
             0% { transform: translate(0,0); } 25% { transform: translate(0.5px, 0.5px); }
@@ -235,7 +480,7 @@
             100% { transform: translate(0.5px, -0.5px); }
         }
 
-        /* NIGHT VISION (NVG) */
+        /* Night Vision (NVG) */
         .nvg-mode { filter: sepia(1) hue-rotate(70deg) contrast(1.5) brightness(0.8) saturate(2); }
         .nvg-mode .aurora-bg { background: #000; }
         .nvg-mode .aurora-blob { opacity: 0.1; background: #0f0; }
@@ -243,7 +488,7 @@
         .nvg-mode .message { background: #000; color: #0f0; border: 1px solid #0f0; font-family: 'Courier New', monospace; }
         .nvg-mode .message.mine { background: #003300; color: #0f0; border: 1px solid #0f0; }
 
-        /* DEFCON WIDGET (FIXED) */
+        /* Defcon Widget */
         .defcon-widget {
             display: flex; gap: 8px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.3); margin-right: 15px; backdrop-filter: blur(10px);
@@ -257,16 +502,15 @@
         .defcon-lvl:hover { transform: scale(1.1); opacity: 0.8; }
         .defcon-lvl.active { box-shadow: 0 0 15px currentColor; color: #fff; transform: scale(1.2); opacity: 1; border-color: rgba(255,255,255,0.8); }
         
-        /* DEFCON STATES */
         body.defcon-1 { animation: alarmPulse 2s infinite; }
         body.defcon-1 .aurora-bg { background: #200; }
         body.defcon-1 .blob-1, body.defcon-1 .blob-2, body.defcon-1 .blob-3 { background: #f00; opacity: 0.3; }
         @keyframes alarmPulse { 0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 50px 20px rgba(255,0,0,0.3); } 100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); } }
 
-        /* GEIGER WIDGET (GLASS STYLE) */
+        /* Geiger Widget */
         #geiger-wrapper {
             position: absolute; bottom: 85px; right: 25px; width: 90px; height: 60px;
-            background: rgba(255, 255, 255, 0.25); /* Glass */
+            background: rgba(255, 255, 255, 0.25); 
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.5);
             border-radius: 16px;
@@ -275,7 +519,7 @@
         }
         #geiger-screen {
             width: 70px; height: 30px; 
-            background: rgba(0,0,0,0.05); /* Subtle inner dark */
+            background: rgba(0,0,0,0.05); 
             border-radius: 8px; border: 1px solid rgba(255,255,255,0.3);
             position: relative; overflow: hidden;
         }
@@ -286,7 +530,21 @@
         }
         .geiger-label { font-size: 8px; color: var(--primary); margin-top: 4px; font-weight: 800; letter-spacing: 1px; }
 
-        /* DOSSIER PROFILE */
+        /* =========================================
+           MODALS & POPUPS
+           ========================================= */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 2000; display: none; justify-content: center; align-items: center; 
+        }
+        .modal-box { 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(40px) saturate(180%);
+            width: 90%; max-width: 400px; padding: 40px; border-radius: 32px; 
+            text-align: center; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        
         .dossier-box {
             background: #f0e6d2; color: #333; font-family: 'Courier New', monospace;
             width: 90%; max-width: 500px; padding: 40px; position: relative;
@@ -308,12 +566,32 @@
             background: #888; border-radius: 10px; box-shadow: 2px 2px 2px rgba(0,0,0,0.2);
         }
 
-        /* MEDIA PREVIEW & PLAYER */
+        /* Inputs in Modals */
+        input:not([type="file"]), select, textarea { 
+            width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); 
+            border-radius: 16px; font-family: inherit; background: rgba(255,255,255,0.5); 
+            transition: 0.3s;
+        }
+        input:focus, textarea:focus { background: #fff; border-color: var(--primary); }
+
+        /* Lists */
+        .users-list { max-height: 300px; overflow-y: auto; text-align: left; margin-top: 20px; }
+        .user-item { padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .user-item:hover { background: rgba(255,255,255,0.4); border-radius: 10px; }
+        .u-rank { font-size: 0.7rem; background: #111; color: #fff; padding: 2px 8px; border-radius: 10px; }
+
+        /* Report Content */
+        #report-content {
+            font-family: 'Courier New', monospace; font-size: 0.85rem; text-align: left;
+            background: rgba(0,0,0,0.05); padding: 15px; border-radius: 10px;
+            max-height: 300px; overflow-y: auto; white-space: pre-wrap;
+        }
+
+        /* Media */
         #media-preview-area { display: none; padding: 10px 20px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(0,0,0,0.05); align-items: center; justify-content: space-between; font-size: 0.85rem; }
         .msg-media { border-radius: 16px; margin-top: 8px; display: block; max-width: 100%; border: 1px solid rgba(0,0,0,0.05); }
         .msg-img { max-width: 260px; height: auto; object-fit: cover; cursor: pointer; }
-        .msg-video { max-width: 280px; background: #000; }
-
+        
         .custom-audio-player {
             display: flex; align-items: center; gap: 12px;
             background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
@@ -322,52 +600,19 @@
             user-select: none;
         }
         .message.mine .custom-audio-player { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.2); }
-        .audio-btn {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: #fff; color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        .audio-btn { width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .audio-track { flex: 1; height: 4px; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
         .audio-progress { height: 100%; width: 0%; background: var(--primary); border-radius: 10px; transition: width 0.1s linear; }
         .message.mine .audio-track { background: rgba(255,255,255,0.3); } .message.mine .audio-progress { background: #fff; }
 
-        /* MODALS */
-        .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            z-index: 2000; display: none; justify-content: center; align-items: center; 
-        }
-        .modal-box { 
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(40px) saturate(180%);
-            width: 90%; max-width: 400px; padding: 40px; border-radius: 32px; 
-            text-align: center; position: relative; box-shadow: 0 40px 80px rgba(0,0,0,0.2); 
-            border: 1px solid rgba(255,255,255,0.6);
-        }
-        input:not([type="file"]), select, textarea { 
-            width: 100%; padding: 16px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.1); 
-            border-radius: 16px; font-family: inherit; background: rgba(255,255,255,0.5); 
-            transition: 0.3s;
-        }
-        input:focus, textarea:focus { background: #fff; border-color: var(--primary); }
-
-        /* USERS LIST MODAL */
-        .users-list { max-height: 300px; overflow-y: auto; text-align: left; margin-top: 20px; }
-        .user-item { 
-            padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-        }
-        .user-item:hover { background: rgba(255,255,255,0.4); border-radius: 10px; }
-        .u-rank { font-size: 0.7rem; background: #111; color: #fff; padding: 2px 8px; border-radius: 10px; }
-
-        /* UTILS */
+        /* Helpers */
         .hidden { display: none !important; }
         .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        
         .codex-table { width: 100%; border-collapse: separate; border-spacing: 0; background: rgba(255,255,255,0.7); box-shadow: 0 10px 40px rgba(0,0,0,0.05); border-radius: 20px; overflow: hidden; margin: 30px 0; }
         .codex-table th { background: #111; color: #fff; padding: 20px; text-align: left; }
         .codex-table td { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-
+        
         #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 5000; }
         .toast { background: rgba(20, 20, 20, 0.9); color: white; padding: 14px 28px; border-radius: 50px; font-size: 0.9rem; backdrop-filter: blur(10px); margin-top: 10px; animation: fadeUp 0.3s forwards; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -560,6 +805,7 @@
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <span style="font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; font-family: 'Cinzel', serif;">VERACHKI</span>
                         <button class="btn-outline" style="padding: 5px 10px; border-radius: 12px; font-size: 1.2rem; border: none;" onclick="openUserList()" title="Граждане">👥</button>
+                        <button class="btn-outline" style="padding: 5px 10px; border-radius: 12px; font-size: 1.2rem; border: none;" onclick="generateReport()" title="Отчет ИИ">📄</button>
                     </div>
                     <div style="width: 50px;"></div>
                 </div>
@@ -622,6 +868,14 @@
         </div>
     </div>
 
+    <div id="report-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('report-modal')" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem;">✕</span>
+            <h2>Отчет Системы</h2>
+            <div id="report-content">Генерация отчета...</div>
+        </div>
+    </div>
+
     <div id="profile-modal" class="modal-overlay">
         <div class="dossier-box">
             <span class="close-icon" onclick="closeModal('profile-modal')" style="position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 1.5rem;">✕</span>
@@ -667,7 +921,9 @@
     </div>
 
     <script>
+        // =========================================
         // CONFIGURATION
+        // =========================================
         const PROJECT_ID = '69624669002d880cd7bb'; 
         const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
         const DB_ID = '6962475a003af27425fb';
@@ -676,16 +932,18 @@
         const STORAGE_ID = '696363f30004cb97e6a1'; 
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
-        const AI_KEY = 'AIzaSyDPEkqkxCEMJ7Lr7Mo-OZLNgm-NuusVq5Q';
+        const HF_TOKEN = "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"; // MISTRAL API KEY
 
-        // INIT APPWRITE
+        // =========================================
+        // INITIALIZATION
+        // =========================================
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
         const account = new Account(client);
         const db = new Databases(client);
         const storage = new Storage(client);
 
-        // APP STATE
+        // Global State
         let state = {
             user: null,
             profile: null,
@@ -701,10 +959,34 @@
             isRadioMode: false,
             radioNoise: null,
             geigerVal: 0,
-            vibeInterval: null
+            aiCooldown: false
         };
 
+        // Audio Context for FX
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        /**
+         * Plays a notification sound if the tab is not focused
+         */
+        function playNotification() {
+            if(document.hidden) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); 
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start(); 
+                setTimeout(() => osc.stop(), 500);
+            }
+        }
+
+        // =========================================
         // UTILITIES
+        // =========================================
+        
         function showToast(msg, type = 'info') {
             const t = document.createElement('div');
             t.className = 'toast';
@@ -724,7 +1006,10 @@
             c.scrollTop = c.scrollHeight; 
         }
 
-        // AUTHENTICATION & SESSION
+        // =========================================
+        // AUTHENTICATION LOGIC
+        // =========================================
+        
         async function checkSession() {
             try {
                 state.user = await account.get();
@@ -754,14 +1039,9 @@
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
             startGeigerLoop();
-            
-            // Start AI Vibe Check
-            analyzeVibe();
-            state.vibeInterval = setInterval(analyzeVibe, 60000);
         }
 
         function showLanding() {
-            if(state.vibeInterval) clearInterval(state.vibeInterval);
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
@@ -797,12 +1077,104 @@
 
         async function logout() { await account.deleteSession('current'); location.reload(); }
 
-        // --- NEW FEATURES LOGIC ---
+        // =========================================
+        // MISTRAL AI INTEGRATION
+        // =========================================
+        
+        /**
+         * Sends a request to Hugging Face Inference API
+         */
+        async function askMistral(prompt, isReport = false) {
+            try {
+                const systemPrompt = isReport 
+                    ? "Ты — СИСТЕМА, аналитический модуль чата 'Верачки'. Сделай КРАТКИЙ, но информативный отчет по этой переписке. Кто что писал, основные темы, конфликты. Будь холоден и точен."
+                    : "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
+                
+                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
 
-        // 1. DEFCON SYSTEM (FIXED)
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
+                    {
+                        headers: { 
+                            Authorization: `Bearer ${HF_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        method: "POST",
+                        body: JSON.stringify({ 
+                            inputs: fullPrompt, 
+                            parameters: { max_new_tokens: isReport ? 300 : 100, return_full_text: false } 
+                        }),
+                    }
+                );
+                
+                if (!response.ok) throw new Error("AI Error");
+                const result = await response.json();
+                return result[0].generated_text.trim();
+            } catch (error) {
+                console.error(error);
+                return "Ошибка связи с ядром.";
+            }
+        }
+
+        /**
+         * Generates a report of the last 30 messages
+         */
+        async function generateReport() {
+            openModal('report-modal');
+            const content = document.getElementById('report-content');
+            content.innerText = "Сканирование архивов...";
+            
+            // Get last 30 messages content
+            const msgs = Array.from(document.querySelectorAll('.message:not(.system) .msg-text-content'))
+                .slice(-30)
+                .map(el => {
+                    const author = el.closest('.message').querySelector('.msg-author')?.innerText || "Я";
+                    return `${author}: ${el.innerText}`;
+                })
+                .join("\n");
+
+            if (msgs.length < 50) {
+                content.innerText = "Недостаточно данных для анализа.";
+                return;
+            }
+
+            const report = await askMistral(msgs, true);
+            content.innerText = report;
+        }
+
+        /**
+         * NPC Logic: Decides whether to reply or interrupt
+         */
+        async function tryTriggerAI(message) {
+            if (state.aiCooldown) return;
+            
+            const lowerMsg = message.toLowerCase();
+            const isDirectCall = lowerMsg.startsWith('ии,') || lowerMsg.startsWith('бот,') || lowerMsg.startsWith('система,');
+            const isRandomTrigger = Math.random() < 0.05; // 5% chance
+
+            if (isDirectCall || isRandomTrigger) {
+                state.aiCooldown = true;
+                setTimeout(() => state.aiCooldown = false, 10000); // 10s cooldown
+
+                const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
+                const reply = await askMistral(prompt);
+                
+                // Send AI reply to DB
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
+                    messageContent: reply, 
+                    senderId: "СИСТЕМА", 
+                    timestamp: new Date().toISOString(),
+                    isEdited: false
+                });
+            }
+        }
+
+        // =========================================
+        // SPECIAL FEATURES (Defcon, NVG, Geiger)
+        // =========================================
+
         function setDefcon(level) {
             document.body.classList.remove('defcon-1');
-            // Visual feedback
             document.querySelectorAll('.defcon-lvl').forEach(el => el.classList.remove('active'));
             const activeBtn = document.getElementById(`def-${level}`);
             if(activeBtn) activeBtn.classList.add('active');
@@ -813,45 +1185,38 @@
             }
         }
 
-        // 2. NIGHT VISION (NVG)
         function toggleNVG() {
             document.body.classList.toggle('nvg-mode');
             playGeigerClick();
         }
 
-        // 3. GEIGER COUNTER
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
         function playGeigerClick(vol = 0.05) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.connect(gain);
+            osc.connect(gain); 
             gain.connect(audioCtx.destination);
             osc.type = 'square';
             osc.frequency.value = 100 + Math.random() * 50;
             gain.gain.value = vol;
-            osc.start();
+            osc.start(); 
             setTimeout(() => osc.stop(), 0.01);
         }
 
         function startGeigerLoop() {
             setInterval(() => {
                 if (state.geigerVal > 0) {
-                    state.geigerVal *= 0.95; // Decay
+                    state.geigerVal *= 0.95; 
                     const needle = document.getElementById('geiger-needle');
                     const rotation = -45 + (state.geigerVal * 90);
                     needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
-                    
                     if (Math.random() < state.geigerVal * 0.5) playGeigerClick();
                 }
             }, 100);
         }
 
-        // 4. RADIO MODE LOGIC
         function toggleRadioMode() {
             state.isRadioMode = !state.isRadioMode;
             const wrapper = document.querySelector('.chat-wrapper');
-            const pttBtn = document.getElementById('radio-ptt-btn');
             const exitBtn = document.getElementById('radio-exit-btn');
             
             if (state.isRadioMode) {
@@ -881,32 +1246,24 @@
             noise.loop = true;
             const gain = audioCtx.createGain();
             gain.gain.value = 0.05; 
-            noise.connect(gain);
+            noise.connect(gain); 
             gain.connect(audioCtx.destination);
-            noise.start();
+            noise.start(); 
             state.radioNoise = noise;
             if (duration > 0) setTimeout(() => stopStaticNoise(), duration * 1000);
         }
 
         function stopStaticNoise() {
-            if (state.radioNoise) { state.radioNoise.stop(); state.radioNoise = null; }
-        }
-
-        function playRogerBeep() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.value = 2000;
-            gain.gain.value = 0.1;
-            osc.start();
-            setTimeout(() => osc.stop(), 150);
+            if (state.radioNoise) { 
+                state.radioNoise.stop(); 
+                state.radioNoise = null; 
+            }
         }
 
         const pttBtn = document.getElementById('radio-ptt-btn');
         pttBtn.addEventListener('mousedown', async (e) => {
             e.preventDefault();
-            pttBtn.classList.add('pressed');
+            pttBtn.classList.add('pressed'); 
             pttBtn.innerText = "ЗАПИСЬ...";
             playStaticNoise();
             try {
@@ -919,10 +1276,9 @@
         });
 
         pttBtn.addEventListener('mouseup', () => {
-            pttBtn.classList.remove('pressed');
+            pttBtn.classList.remove('pressed'); 
             pttBtn.innerText = "УДЕРЖИВАЙ ДЛЯ СВЯЗИ";
             stopStaticNoise();
-            playRogerBeep();
             if (state.recorder && state.recorder.state === 'recording') {
                 state.recorder.stop();
                 state.recorder.onstop = () => {
@@ -935,24 +1291,22 @@
             }
         });
 
-        // MEDIA HANDLING (STANDARD)
+        // =========================================
+        // MEDIA HANDLING
+        // =========================================
+        
         function handleFileSelect(input) {
             if(input.files && input.files[0]) {
                 const file = input.files[0];
-                if (file.size > 50 * 1024 * 1024) {
-                    showToast("Файл слишком большой (>50МБ)", 'error');
-                    input.value = '';
-                    return;
-                }
+                if (file.size > 50 * 1024 * 1024) return showToast("Файл > 50МБ", 'error');
                 let type = 'file';
                 if(file.type.startsWith('image/')) type = 'image';
                 else if(file.type.startsWith('video/')) type = 'video';
                 else if(file.type.startsWith('audio/')) type = 'audio';
-                
                 state.attachment = { file: file, type: type };
                 document.getElementById('media-preview-area').style.display = 'flex';
                 document.getElementById('preview-name').innerText = file.name;
-                document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : (type === 'video' ? '🎬' : '🎵');
+                document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : '📎';
             }
         }
 
@@ -962,41 +1316,10 @@
             document.getElementById('media-preview-area').style.display = 'none'; 
         }
 
-        function toggleAudio(btn, src) {
-            const playerContainer = btn.parentElement;
-            const progress = playerContainer.querySelector('.audio-progress');
-            
-            if (state.audioPlayer && state.audioPlayer.src === src) {
-                if (state.audioPlayer.paused) {
-                    state.audioPlayer.play();
-                    btn.innerText = '❚❚';
-                } else {
-                    state.audioPlayer.pause();
-                    btn.innerText = '▶';
-                }
-            } else {
-                if (state.audioPlayer) {
-                    state.audioPlayer.pause();
-                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
-                }
-                state.audioPlayer = new Audio(src);
-                state.audioPlayer.play();
-                btn.innerText = '❚❚';
-                
-                state.audioPlayer.ontimeupdate = () => {
-                    if(state.audioPlayer.duration) {
-                        const percent = (state.audioPlayer.currentTime / state.audioPlayer.duration) * 100;
-                        progress.style.width = percent + '%';
-                    }
-                };
-                state.audioPlayer.onended = () => {
-                    btn.innerText = '▶';
-                    progress.style.width = '0%';
-                };
-            }
-        }
-
-        // CHAT LOGIC
+        // =========================================
+        // MESSAGING LOGIC
+        // =========================================
+        
         async function loadMessages() {
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
@@ -1009,59 +1332,28 @@
 
         function renderMessage(msg) {
             const container = document.getElementById('messages-container');
-            const existing = document.getElementById(msg.$id);
-            
-            if (existing) {
-                if (!existing.dataset.optimistic) {
-                    existing.querySelector('.msg-text-content').innerText = msg.messageContent || "";
-                    if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
-                        existing.querySelector('.msg-text').insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
-                    }
-                }
-                return;
-            }
+            if (document.getElementById(msg.$id)) return;
 
             const isMine = state.profile && msg.senderId === state.profile.username;
-            const isAdmin = state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            const div = document.createElement('div');
-            div.className = `message ${isMine ? 'mine' : ''}`;
-            div.id = msg.$id;
-            if (msg.optimistic) div.dataset.optimistic = "true";
-
-            let controls = '';
-            if (!msg.optimistic) {
-                if(isMine) {
-                    controls = `<div class="controls">`;
-                    if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(msg.messageContent)}')">✎</span>`;
-                    controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
-                } else if(isAdmin) {
-                    controls = `<div class="controls"><span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
-                }
-            }
+            const isSystem = msg.senderId === "СИСТЕМА";
             
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
+            div.id = msg.$id;
+
             let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
             
-            if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
-                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
-                
-                if (msg.fileType === 'image') {
-                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
-                } else if (msg.fileType === 'video') {
-                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
-                } else if (msg.fileType === 'audio') {
-                    contentHtml = `
-                    <div class="custom-audio-player">
-                        <div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div>
-                        <div class="audio-track"><div class="audio-progress"></div></div>
-                    </div>`;
-                }
+            if (msg.fileId) {
+                const fileView = storage.getFileView(STORAGE_ID, msg.fileId); 
+                if (msg.fileType === 'image') contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')">`;
+                else if (msg.fileType === 'audio') contentHtml = `<audio controls src="${fileView}" style="width:200px;"></audio>`;
                 if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
             }
             
-            const author = isMine ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')" style="font-size:0.7rem; font-weight:700; color:var(--primary); display:block; margin-bottom:4px; cursor:pointer;">${msg.senderId}</span>`;
-            const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
+            const author = (isMine || isSystem) ? '' : `<span class="msg-author" style="font-size:0.7rem; font-weight:700; color:var(--primary); display:block; margin-bottom:4px;">${msg.senderId}</span>`;
+            const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
-            div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div>`;
+            div.innerHTML = `${author}<div class="msg-text">${contentHtml}</div><div class="msg-time">${time}</div>`;
             container.appendChild(div);
             
             if(container.scrollHeight - container.scrollTop - container.clientHeight < 300 || isMine) scrollToBottom();
@@ -1069,56 +1361,19 @@
 
         async function sendMessage() {
             if (state.isUploading) return;
-
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
             
-            if (state.editingId) {
-                try {
-                    await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
-                    state.editingId = null;
-                    document.getElementById('send-btn').innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-                    input.value = '';
-                } catch(e) { showToast("Ошибка редактирования", 'error'); }
-                return;
-            }
-
-            const sendBtn = document.getElementById('send-btn');
             state.isUploading = true;
-            sendBtn.innerHTML = "•••";
-
-            // Optimistic UI
-            const tempId = "temp-" + Date.now();
-            const optimisticMsg = {
-                $id: tempId,
-                messageContent: text,
-                senderId: state.profile.username,
-                timestamp: new Date().toISOString(),
-                isEdited: false,
-                fileType: state.attachment ? state.attachment.type : null,
-                fileUrl: state.attachment ? URL.createObjectURL(state.attachment.file) : null,
-                optimistic: true
-            };
-            renderMessage(optimisticMsg);
-            
-            input.value = '';
-            const fileToUpload = state.attachment;
-            clearAttachment();
+            document.getElementById('send-btn').innerText = "•••";
 
             let fileId = null, fileType = null;
-            if (fileToUpload) {
+            if (state.attachment) {
                 try {
-                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
-                    fileId = uploaded.$id; 
-                    fileType = fileToUpload.type;
-                } catch(e) { 
-                    showToast("Ошибка загрузки файла. " + e.message, 'error'); 
-                    document.getElementById(tempId).remove();
-                    state.isUploading = false;
-                    sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-                    return; 
-                }
+                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), state.attachment.file);
+                    fileId = uploaded.$id; fileType = state.attachment.type;
+                } catch(e) { state.isUploading = false; return showToast("Ошибка файла", 'error'); }
             }
             
             try {
@@ -1126,214 +1381,73 @@
                     messageContent: text, 
                     senderId: state.profile.username, 
                     timestamp: new Date().toISOString(), 
-                    isEdited: false, 
-                    fileId: fileId, 
-                    fileType: fileType 
+                    fileId: fileId, fileType: fileType 
                 });
-            } catch(e) { 
-                showToast("Ошибка отправки: " + e.message, 'error'); 
-                document.getElementById(tempId).remove(); 
-            } finally {
-                state.isUploading = false;
-                sendBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
-            }
+                input.value = ''; clearAttachment();
+            } catch(e) { showToast("Ошибка отправки", 'error'); } 
+            finally { state.isUploading = false; document.getElementById('send-btn').innerHTML = '➤'; }
         }
 
-        // REALTIME LOGIC
         function handleRealtime(response) {
             const ev = response.events[0];
             const payload = response.payload;
 
-            // GEIGER EFFECT
             if(ev.includes('.create')) {
                 state.geigerVal = Math.min(1, state.geigerVal + 0.3);
-            }
-
-            // Handle DELETE
-            if(ev.includes('.delete')) {
-                const el = document.getElementById(payload.$id);
-                if(el) {
-                    el.style.opacity = '0';
-                    el.style.transform = 'scale(0.8)';
-                    setTimeout(() => el.remove(), 300);
+                if(payload.senderId !== state.profile?.username) {
+                    playNotification();
+                    // AI TRIGGER LOGIC
+                    tryTriggerAI(payload.messageContent);
                 }
-                return;
-            }
-
-            // Handle UPDATE
-            if(ev.includes('.update')) {
-                const el = document.getElementById(payload.$id);
-                if(el) {
-                    const content = el.querySelector('.msg-text-content');
-                    if(content) content.innerText = payload.messageContent;
-                    const msgText = el.querySelector('.msg-text');
-                    if(msgText && !msgText.innerText.includes('(ред.)')) {
-                        msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
-                    }
-                }
-                return;
-            }
-
-            // Handle CREATE
-            if(ev.includes('.create')) {
-                const isMine = state.profile && payload.senderId === state.profile.username;
-                if (isMine) {
-                    const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
-                    tempMsgs.forEach(m => {
-                        if (m.querySelector('.msg-text-content').innerText === payload.messageContent) {
-                            m.remove();
-                        }
-                    });
-                }
-                if(!document.getElementById(payload.$id)) {
-                    renderMessage(payload);
-                    scrollToBottom();
-                }
+                renderMessage(payload);
+                scrollToBottom();
             }
         }
 
-        // AI VIBE CHECK (GEMINI PRO FIXED)
-        async function analyzeVibe() {
-            const msgs = Array.from(document.querySelectorAll('.msg-text-content'))
-                .slice(-15)
-                .map(el => el.innerText)
-                .join("\n");
-
-            if(msgs.length < 2) return; 
-
-            try {
-                // ИСПОЛЬЗУЕМ 1.5 FLASH (Она доступнее)
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_KEY}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `Analyze the mood of this chat history. Reply with ONE word only: ANGER (if angry/fighting), FUN (if funny/joking), SAD (if sad/depressed), or NEUTRAL.\n\nChat:\n${msgs}`
-                            }]
-                        }]
-                    })
-                });
-                
-                if (!response.ok) throw new Error("API Error: " + response.status);
-
-                const data = await response.json();
-                if(data.candidates && data.candidates[0]) {
-                    const mood = data.candidates[0].content.parts[0].text.trim().toUpperCase();
-                    console.log("Gemini Mood:", mood);
-                    applyTheme(mood);
-                }
-            } catch (e) { console.error("AI Error:", e); }
-        }
-
-        function applyTheme(mood) {
-            const b1 = document.querySelector('.blob-1');
-            const b2 = document.querySelector('.blob-2');
-            const b3 = document.querySelector('.blob-3');
-
-            [b1, b2, b3].forEach(b => b.style.transition = "background 2s ease");
-
-            if (mood.includes('ANGER')) {
-                b1.style.background = '#ff0000'; 
-                b2.style.background = '#800000'; 
-                b3.style.background = '#1a1a1a'; 
-            } else if (mood.includes('FUN')) {
-                b1.style.background = '#ffeaa7'; 
-                b2.style.background = '#fdcb6e'; 
-                b3.style.background = '#55efc4'; 
-            } else if (mood.includes('SAD')) {
-                b1.style.background = '#0984e3'; 
-                b2.style.background = '#636e72'; 
-                b3.style.background = '#a29bfe'; 
-            } else {
-                b1.style.background = 'var(--primary)';
-                b2.style.background = 'var(--secondary)';
-                b3.style.background = 'var(--accent)';
-            }
-        }
-
-        function startEdit(id, text) { 
-            const i = document.getElementById('msg-input'); i.value = text; i.focus(); 
-            state.editingId = id; document.getElementById('send-btn').innerText = "✓"; 
-        }
-        async function deleteMsg(id) { 
-            if(confirm('Удалить?')) await db.deleteDocument(DB_ID, MSG_COL, id); 
-        }
-
-        // PROFILE & MODALS
+        // =========================================
+        // MODALS & HELPERS
+        // =========================================
+        
         function openViewer(src) { document.getElementById('viewer-img').src = src; document.getElementById('image-viewer').style.display = 'flex'; }
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // USERS LIST FUNCTION
         async function openUserList() {
             openModal('users-modal');
-            const listContainer = document.getElementById('users-list-container');
-            listContainer.innerHTML = '<p>Загрузка архивов...</p>';
-            
+            const list = document.getElementById('users-list-container');
+            list.innerHTML = 'Загрузка...';
             try {
-                // Fetch all profiles
                 const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.limit(100)]);
-                if (res.documents.length === 0) {
-                    listContainer.innerHTML = '<p>Список пуст.</p>';
-                    return;
-                }
-                
-                let html = '';
-                res.documents.forEach(user => {
-                    html += `
-                    <div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
-                        <span style="font-weight:700;">${user.username}</span>
-                        <span class="u-rank">${user.rank || 'Наблюдатель'}</span>
-                    </div>`;
-                });
-                listContainer.innerHTML = html;
-            } catch(e) {
-                listContainer.innerHTML = '<p style="color:red">Ошибка доступа к архивам.</p>';
-            }
+                list.innerHTML = res.documents.map(u => `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${u.username}')"><b>${u.username}</b> <span class="u-rank">${u.rank||'-'}</span></div>`).join('');
+            } catch(e) { list.innerText = "Ошибка"; }
         }
 
         async function openProfile(username) {
             openModal('profile-modal'); document.getElementById('p-name').innerText = username;
-            document.getElementById('p-rank').innerText = "...";
-            document.getElementById('admin-controls').classList.add('hidden'); 
-            document.getElementById('p-save-self').classList.add('hidden'); 
-            document.getElementById('p-about-edit').classList.add('hidden'); 
-            document.getElementById('p-about').classList.remove('hidden');
-
             try {
                 const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
                 if(res.documents.length > 0) {
                     const p = res.documents[0]; state.currentProfileId = p.$id; 
                     document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
-                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
+                    document.getElementById('p-about').innerText = p.about || "Нет данных.";
                     
                     if (state.profile && p.$id === state.profile.$id) {
                         document.getElementById('p-about').classList.add('hidden'); 
                         document.getElementById('p-about-edit').classList.remove('hidden'); 
                         document.getElementById('p-about-edit').value = p.about || ""; 
                         document.getElementById('p-save-self').classList.remove('hidden');
-                    }
-                    if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                        document.getElementById('admin-controls').classList.remove('hidden');
-                        document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
+                    } else {
+                        document.getElementById('p-about').classList.remove('hidden'); 
+                        document.getElementById('p-about-edit').classList.add('hidden'); 
+                        document.getElementById('p-save-self').classList.add('hidden');
                     }
                 }
             } catch(e) {}
         }
-        function openMyProfile() { 
-            if(state.profile) {
-                openProfile(state.profile.username);
-            } else {
-                showToast("Профиль не загружен. Попробуйте обновить страницу.", "error");
-            }
-        }
+        function openMyProfile() { if(state.profile) openProfile(state.profile.username); }
         async function saveMyProfile() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); closeModal('profile-modal'); showToast("Сохранено"); }
         async function saveProfileChanges() { await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); closeModal('profile-modal'); showToast("Статус обновлен"); }
 
-        // ANIMATION OBSERVER
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) { 
@@ -1341,7 +1455,6 @@
             }
         }
         window.addEventListener("scroll", reveal); reveal();
-
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage() });
     </script>
 </body>
