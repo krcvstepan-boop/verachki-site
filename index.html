@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VERACHKI | Empire of Silence</title>
+    
+    <link rel="icon" type="image/x-icon" href="cover.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;800&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Courier+New&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+
+    <style>
+        /* MOBILE-OPTIMIZED STYLES */
+        :root {
+            /* Safe Area for Mobile Notch */
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-left: env(safe-area-inset-left);
+            --safe-right: env(safe-area-inset-right);
+            
+            /* Color Palette */
+            --primary: #6a4df4;
+            --primary-dark: #4b32c3;
+            --secondary: #74b9ff;
+            --accent: #ff7675;
+            
+            /* Text Colors */
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --danger: #ff3b30;
+            
+            /* Glassmorphism System */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --blur: blur(25px) saturate(180%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        body {
+            background: #f0f2f5;
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            transition: filter 0.5s ease;
+        }
+
+        /* Aurora Background */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #f4f6f9;
+            transition: all 1s ease;
+        }
+
+        .aurora-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+            transition: background 2s ease-in-out;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: var(--primary);
+            animation-duration: 15s;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: var(--secondary);
+            animation-duration: 20s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 40vw;
+            height: 40vw;
+            background: var(--accent);
+            animation-duration: 12s;
+            opacity: 0.4;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Typography - Mobile Optimized */
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: #000;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 4.8rem);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: clamp(1.6rem, 5vw, 3rem);
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 4vw, 1.4rem);
+            margin-bottom: 15px;
+            margin-top: 30px;
+            color: #111;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-size: clamp(0.65rem, 2vw, 0.75rem);
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            text-align: justify;
+            font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+            line-height: 1.7;
+        }
+
+        /* Buttons - Touch Optimized */
+        .btn {
+            cursor: pointer;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            background: #111;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: clamp(0.7rem, 2vw, 0.75rem);
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+            min-height: 44px;
+        }
+
+        .btn:hover, .btn:active {
+            transform: scale(1.05);
+            background: var(--primary);
+            box-shadow: 0 20px 40px rgba(106, 77, 244, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #111;
+            color: #111;
+        }
+
+        .btn-outline:hover, .btn-outline:active {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Layout - Safe Area Support */
+        .container {
+            width: 90%;
+            max-width: 1050px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            padding-left: max(5%, var(--safe-left));
+            padding-right: max(5%, var(--safe-right));
+        }
+
+        section {
+            padding: clamp(60px, 15vw, 120px) 0;
+            position: relative;
+        }
+
+        /* Navigation - Mobile First */
+        nav {
+            padding: 12px 5%;
+            padding-top: calc(12px + var(--safe-top));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .nav-logo {
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            cursor: pointer;
+            color: #111;
+            letter-spacing: 0.05em;
+        }
+
+        /* Defcon Widget */
+        .defcon-widget {
+            display: flex;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-right: 10px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+
+        .defcon-lvl {
+            width: clamp(20px, 6vw, 24px);
+            height: clamp(20px, 6vw, 24px);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(8px, 2.5vw, 10px);
+            font-weight: bold;
+            color: rgba(0,0,0,0.5);
+            transition: 0.3s;
+            border: 2px solid transparent;
+            opacity: 0.5;
+        }
+
+        .defcon-lvl:active {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+
+        .defcon-lvl.active {
+            box-shadow: 0 0 15px currentColor;
+            color: #fff;
+            transform: scale(1.2);
+            opacity: 1;
+            border-color: rgba(255,255,255,0.8);
+        }
+
+        /* Hero Section - Mobile First */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            align-items: center;
+            min-height: 70vh;
+        }
+
+        .hero-image-wrapper {
+            order: -1;
+        }
+
+        .hero-image-wrapper img {
+            width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: 0.5s ease;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media(min-width: 900px) {
+            .hero-grid {
+                grid-template-columns: 1.2fr 0.8fr;
+                gap: 70px;
+                min-height: 85vh;
+            }
+            .hero-image-wrapper {
+                order: 0;
+            }
+            .hero-image-wrapper img {
+                border-radius: 32px;
+                transform: rotate(2deg);
+            }
+            .hero-image-wrapper:hover img {
+                transform: rotate(0deg) scale(1.02);
+            }
+            .hero-content {
+                text-align: left;
+            }
+            .btn-group {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Chat Application - Critical Mobile Optimization */
+        .chat-wrapper {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(40px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            height: 100dvh;
+            height: calc(100dvh - var(--safe-top));
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        @media(min-width: 768px) {
+            .chat-wrapper {
+                height: 90vh;
+                border-radius: 32px;
+            }
+        }
+
+        .chat-header {
+            padding: 15px 18px;
+            padding-top: calc(15px + var(--safe-top));
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.6);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .chat-header-left, .chat-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .chat-header-center span {
+            font-weight: 800;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            letter-spacing: 0.1em;
+            font-family: 'Cinzel', serif;
+        }
+
+        .header-btn {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-btn:active {
+            transform: scale(0.9);
+            background: rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+            min-height: 44px;
+        }
+
+        .back-btn:active {
+            background: rgba(0,0,0,0.05);
+            transform: scale(0.95);
+        }
+
+        .back-btn span:first-child {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .back-btn span:last-child {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Message Styling - Mobile Optimized */
+        .message {
+            padding: 10px 14px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            max-width: 85%;
+            font-size: clamp(0.9rem, 2.5vw, 0.95rem);
+            position: relative;
+            background: #fff;
+            color: #1a1a1a;
+            align-self: flex-start;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .message.mine {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            border-radius: 18px;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 6px 18px rgba(106, 77, 244, 0.25);
+        }
+
+        .message.system {
+            align-self: center;
+            background: #2d3436;
+            color: #fff;
+            border: 1px solid #000;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.8rem, 2vw, 0.85rem);
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .msg-time {
+            font-size: clamp(0.6rem, 1.8vw, 0.65rem);
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .msg-author {
+            font-size: clamp(0.65rem, 2vw, 0.7rem);
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .controls {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .message:hover .controls,
+        .message:active .controls {
+            opacity: 1;
+        }
+
+        .control-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+        }
+
+        .control-btn:active {
+            transform: scale(0.85);
+        }
+
+        /* Media in messages */
+        .msg-media {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-bottom: 6px;
+        }
+
+        .msg-img {
+            cursor: pointer;
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .msg-video {
+            max-height: 250px;
+        }
+
+        /* Audio Player */
+        .custom-audio-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 12px;
+            min-width: 200px;
+        }
+
+        .audio-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .audio-btn:active {
+            transform: scale(0.9);
+        }
+
+        .audio-track {
+            flex: 1;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audio-progress {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* Chat Input Area - Critical for Mobile */
+        #media-preview-area {
+            display: none;
+            position: absolute;
+            top: -65px;
+            left: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 15px;
+            border-radius: 16px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            z-index: 30;
+        }
+
+        .preview-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        #preview-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        #preview-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .chat-input-area {
+            padding: 12px 15px;
+            padding-bottom: calc(12px + var(--safe-bottom));
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            z-index: 20;
+            border-top: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .standard-input-group {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chat-input-area input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px;
+            outline: none;
+            background: #fff;
+            font-size: 15px;
+            transition: 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            min-width: 0;
+        }
+
+        .chat-input-area input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(106, 77, 244, 0.15);
+        }
+
+        .media-btn {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .media-btn:active {
+            transform: scale(0.9);
+            background: #f0f0f0;
+        }
+
+        #send-btn {
+            background: #111;
+            color: #fff;
+        }
+
+        #send-btn:active {
+            background: var(--primary);
+        }
+
+        /* Geiger Widget - Mobile Responsive */
+        #geiger-wrapper {
+            position: absolute;
+            bottom: clamp(75px, 20vw, 85px);
+            right: clamp(15px, 5vw, 25px);
+            width: clamp(70px, 20vw, 90px);
+            height: clamp(50px, 15vw, 60px);
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 50;
+        }
+
+        #geiger-screen {
+            width: 80%;
+            height: 50%;
+            background: rgba(0,0,0,0.05);
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #geiger-needle {
+            width: 2px;
+            height: 85%;
+            background: var(--danger);
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: rotate(-45deg);
+            transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+        }
+
+        .geiger-label {
+            font-size: clamp(6px, 2vw, 8px);
+            color: var(--primary);
+            margin-top: 3px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* Radio Mode */
+        .radio-overlay {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.05), rgba(0,0,0,0.05) 1px, transparent 1px, transparent 2px);
+            mix-blend-mode: overlay;
+        }
+
+        .radio-active .radio-overlay { opacity: 1; }
+        
+        .radio-btn-big {
+            display: none;
+            width: 100%;
+            height: 50px;
+            background: #2d3436;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            letter-spacing: 2px;
+            border: 2px solid #636e72;
+            border-radius: 50px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .radio-btn-big.pressed {
+            background: #e74c3c;
+            transform: scale(0.98);
+        }
+
+        .radio-active .standard-input-group { display: none; }
+        .radio-active .radio-btn-big { display: block; }
+        .radio-active .chat-wrapper { animation: jitter 0.2s infinite; }
+
+        @keyframes jitter {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(0.5px, 0.5px); }
+            50% { transform: translate(-0.5px, -0.5px); }
+            75% { transform: translate(-0.5px, 0.5px); }
+            100% { transform: translate(0.5px, -0.5px); }
+        }
+
+        /* Defcon 1 */
+        body.defcon-1 { animation: alarmPulse 2s infinite; }
+        body.defcon-1 .aurora-bg { background: #200; }
+        body.defcon-1 .blob-1, body.defcon-1 .blob-2, body.defcon-1 .blob-3 { background: #f00; opacity: 0.3; }
+        @keyframes alarmPulse {
+            0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); }
+            50% { box-shadow: inset 0 0 50px 20px rgba(255,0,0,0.3); }
+            100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); }
+        }
+
+        /* Night Vision */
+        .nvg-mode {
+            filter: sepia(1) hue-rotate(70deg) contrast(1.5) brightness(0.8) saturate(2);
+        }
+        .nvg-mode .aurora-bg { background: #000; }
+        .nvg-mode .message { background: #000; color: #0f0; border: 1px solid #0f0; font-family: 'Courier New', monospace; }
+
+        /* Modals - Mobile Optimized */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(40px);
+            width: 100%;
+            max-width: 400px;
+            padding: clamp(30px, 8vw, 40px);
+            border-radius: 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.6);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .close-icon:active {
+            background: rgba(0,0,0,0.05);
+            transform: scale(0.9);
+        }
+
+        input:not([type="file"]), select, textarea {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.6);
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(106, 77, 244, 0.15);
+        }
+
+        /* Profile Dossier */
+        .dossier-box {
+            background: #f0e6d2;
+            color: #333;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            max-width: 500px;
+            padding: clamp(25px, 6vw, 40px);
+            position: relative;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #d4c5a8;
+            border-radius: 12px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media(min-width: 768px) {
+            .dossier-box {
+                transform: rotate(-1deg);
+            }
+        }
+
+        .dossier-stamp {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            border: 3px solid #d00;
+            color: #d00;
+            font-weight: 900;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            padding: 3px 8px;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+        }
+
+        /* Lists */
+        .users-list { 
+            max-height: 50vh; 
+            overflow-y: auto; 
+            text-align: left; 
+            margin-top: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .user-item { 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+            min-height: 44px;
+        }
+        
+        .user-item:active { 
+            background: rgba(0,0,0,0.05); 
+        }
+        
+        .u-rank { 
+            font-size: clamp(0.65rem, 2vw, 0.7rem); 
+            background: #111; 
+            color: #fff; 
+            padding: 3px 10px; 
+            border-radius: 10px; 
+        }
+
+        #report-content {
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.8rem, 2vw, 0.85rem);
+            text-align: left;
+            background: rgba(0,0,0,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 50vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Utils */
+        .hidden { display: none !important; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        .codex-table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            background: rgba(255,255,255,0.7); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            margin: 30px 0;
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+        }
+        .codex-table th { 
+            background: #111; 
+            color: #fff; 
+            padding: clamp(12px, 3vw, 20px); 
+            text-align: left; 
+        }
+        .codex-table td { 
+            padding: clamp(12px, 3vw, 20px); 
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
+        }
+
+        #toast-container { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 5000;
+            max-width: 90%;
+        }
+        .toast { 
+            background: rgba(20, 20, 20, 0.95); 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 50px; 
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem); 
+            backdrop-filter: blur(10px); 
+            margin-top: 10px; 
+            animation: fadeUp 0.3s forwards;
+            text-align: center;
+        }
+        @keyframes fadeUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(20px, 4vw, 40px);
+            margin-top: 30px;
+        }
+
+        @media(min-width: 600px) {
+            .card-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        .card-panel {
+            padding: clamp(20px, 5vw, 30px);
+            border-radius: 20px;
+        }
+
+        #image-viewer {
+            padding: 20px;
+        }
+
+        #viewer-img {
+            max-width: 95%;
+            max-height: 85vh;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+
+        #nav-user {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 2vw, 15px);
+        }
+
+        #nav-user > div {
+            text-align: right;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+
+        #nav-username {
+            font-weight: 700;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        }
+
+        #nav-rank {
+            font-size: clamp(0.6rem, 2vw, 0.65rem);
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        /* Improved Scrollbar */
+        .chat-messages::-webkit-scrollbar,
+        .users-list::-webkit-scrollbar,
+        #report-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .users-list::-webkit-scrollbar-track,
+        #report-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .users-list::-webkit-scrollbar-thumb,
+        #report-content::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aurora-bg">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <nav class="glass-panel">
+        <div class="nav-logo" onclick="location.reload()">VERACHKI.</div>
+        
+        <div id="nav-guest">
+            <button class="btn btn-outline" onclick="openModal('auth-modal')" style="padding: 8px 20px;">Вход</button>
+        </div>
+        
+        <div id="nav-user" class="hidden">
+            <div class="defcon-widget">
+                <div class="defcon-lvl" id="def-5" style="background:#0f0" onclick="setDefcon(5)">5</div>
+                <div class="defcon-lvl" id="def-3" style="background:#ff0" onclick="setDefcon(3)">3</div>
+                <div class="defcon-lvl" id="def-1" style="background:#f00" onclick="setDefcon(1)">1</div>
+            </div>
+            
+            <div onclick="openMyProfile()">
+                <div id="nav-username">User</div>
+                <div id="nav-rank">Имперец</div>
+            </div>
+            <button class="btn" style="padding: 8px 16px;" onclick="logout()">Выход</button>
+        </div>
+    </nav>
+
+    <section class="hero reveal">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <span class="subtitle">Империя Тишины // Est. 2023</span>
+                    <h1>Мы строим Храм<br>Посреди цифрового шума.</h1>
+                    <p>
+                        Добро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, 
+                        VERACHKI остаются островом аналоговой честности. Мы — не просто чат. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.
+                    </p>
+                    <p>
+                        Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.
+                    </p>
+                    <div class="btn-group">
+                        <button class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
+                        <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Изучить Архивы</button>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper reveal">
+                    <img src="cover.jpg" alt="Символ Империи" onerror="this.src='https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="history" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава I. Хроники Разлома</span>
+            <h2>Тень Архитектора и Великий Холод</h2>
+            <p>
+                История Империи написана не чернилами, а доверием и его осколками. В 2023 году, в школьных коридорах, Глеб был одним из нас. Он был Архитектором ранних дней. Но амбиции часто затмевают верность. Произошел "Великий Разлом" — предательство, которое раскололо наше единство и научило нас закрывать двери на замки.
+            </p>
+            <p>
+                Теперь между нами и Глебом — демилитаризованная зона. Мы видимся в школе, киваем друг другу, иногда даже гуляем по нейтральным паркам. Но это не дружба. Это холодная дипломатия. Как две сверхдержавы, мы сосуществуем, помня о ядерном чемоданчике обид. Он — призрак прошлого, который больше не имеет власти над нашим будущим.
+            </p>
+        </div>
+    </section>
+
+    <section id="geography" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава II. Сакральная География</span>
+            <h2>Места Силы и Забытые Руины</h2>
+            <div class="card-grid">
+                <div class="glass-panel card-panel">
+                    <h3 style="margin-top:0;">Цоколь НБВ</h3>
+                    <p style="font-size: 0.9rem;">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика этого места настолько плотная, что здесь глохнет сотовая связь. Это сердце Империи.</p>
+                </div>
+                <div class="glass-panel card-panel">
+                    <h3 style="margin-top:0;">Святилище Б (Lost)</h3>
+                    <p style="font-size: 0.9rem;">Мертвый дом на колесах. Ржавый ковчег, стоявший с весны 2023. Мы осквернили его своим присутствием, оставив слишком много следов. Духи места разгневались. Теперь вход туда запечатан. Это памятник нашей неосторожности.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="margin-top: 40px; padding: clamp(25px, 6vw, 40px); border-radius: 20px;">
+                <h3 style="margin-top: 0; border: none; padding: 0;">Королевские Регалии</h3>
+                <ul style="list-style: none; padding: 0; margin-top: 20px;">
+                    <li style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 12px;">
+                        <span style="font-size: 1.5rem;">🎵</span>
+                        <div><strong>Гимн: "Mama ŠČ!" (Let 3).</strong> Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</div>
+                    </li>
+                    <li style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 12px;">
+                        <span style="font-size: 1.5rem;">📜</span>
+                        <div><strong>Печать Верачек.</strong> Физический артефакт, подтверждающий подлинность указов. Хранится в секретере.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="enemy" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава III. Энтропия</span>
+            <h2>Феномен "Галя"</h2>
+            <p>
+                Враг не всегда носит оружие. Иногда враг — это всепоглощающая глупость и суета. Мы называем это "Эффект Гали". Это вирус сознания.
+            </p>
+            <div class="card-grid">
+                <div class="glass-panel card-panel" style="border-left: 5px solid #ccc;">
+                    <h4>Тип А: Шумная</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Громкая, пустая, требующая внимания. Она как статическое электричество — раздражает, но легко заземляется игнором.</p>
+                </div>
+                <div class="glass-panel card-panel" style="border-left: 5px solid var(--danger);">
+                    <h4>Тип Б: Латентная (Danger)</h4>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="codex" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава IV. Уложение о Наказаниях</span>
+            <h2>Кодекс Империи</h2>
+            <div style="overflow-x: auto;">
+                <table class="codex-table">
+                    <thead><tr><th>№</th><th>Догма</th><th>Толкование</th></tr></thead>
+                    <tbody>
+                        <tr><td>I</td><td>Святость Личности</td><td>Честь Имперца неприкосновенна. Оскорбление приравнивается к измене.</td></tr>
+                        <tr><td>II</td><td>Пакт Ненападения</td><td>Физическое насилие внутри Круга запрещено под страхом изгнания.</td></tr>
+                        <tr><td>III</td><td>Целостность</td><td>Любая попытка расколоть общество карается баном. Интриги запрещены.</td></tr>
+                        <tr><td>IV</td><td>Финансовая Чистота</td><td>Запрет на вымогательство и рэкет (даже в шутку).</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="structure" class="reveal">
+        <div class="container">
+            <span class="subtitle">Глава V. Иерархия</span>
+            <h2>Лестница Власти</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="glass-panel" style="padding: 18px; border-left: 3px solid #ccc; border-radius: 16px;">
+                    <strong>01. Наблюдатель (The Watcher)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Неофит. Вы уже внутри, но вы под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не "Галя".</div>
+                </div>
+                <div class="glass-panel" style="padding: 18px; border-left: 3px solid var(--primary); border-radius: 16px;">
+                    <strong>02. Соратник (The Ally)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к голосовым чатам и сходкам.</div>
+                </div>
+                <div class="glass-panel" style="padding: 18px; border-left: 3px solid #111; border-radius: 16px;">
+                    <strong>03. Элита (The Architect)</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Хранители ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</div>
+                </div>
+            </div>
+            <div style="margin-top: 50px; padding: 25px; border: 1px dashed var(--primary); border-radius: 20px; text-align: center;">
+                <p style="margin: 0; font-weight: 600; font-style: italic; color: var(--primary);">"Призыв дождя окончен. Наступает эра Великой Тишины."</p>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: #0a0a0a; color: #fff; padding: clamp(40px, 10vw, 80px) 0;">
+        <div class="container" style="text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
+                <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Гости</a>
+                <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Новости</a>
+            </div>
+            <p style="opacity: 0.3; font-size: clamp(0.7rem, 2vw, 0.75rem);">© 2026 VERACHKI EMPIRE.<br>Design by KC_Comms [oV] & Architecture by 미하이</p>
+        </div>
+    </footer>
+
+    <section id="app-interface" class="hidden" style="padding: 0; height: 100dvh; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
+        <div class="container" style="height: 100%; max-width: 100%; width: 100%; padding: 0;">
+            <div class="chat-wrapper glass-panel">
+                <div class="radio-overlay"></div>
+                
+                <div id="geiger-wrapper">
+                    <div id="geiger-screen"><div id="geiger-needle"></div></div>
+                    <div class="geiger-label">RAD LEVEL</div>
+                </div>
+
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="back-btn" onclick="showLanding()">
+                            <span>❮</span>
+                            <span>В МИР</span>
+                        </div>
+                    </div>
+                    <div class="chat-header-center">
+                        <span>VERACHKI</span>
+                    </div>
+                    <div class="chat-header-right">
+                        <button class="header-btn" onclick="openUserList()" title="Граждане">👥</button>
+                        <button class="header-btn" onclick="generateReport()" title="Отчет ИИ">📄</button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="messages-container">
+                    <div style="text-align: center; margin-top: 50px; color: #888; font-size: 0.85rem;">Подключение к нейросети...</div>
+                </div>
+                
+                <div id="media-preview-area">
+                    <div class="preview-content">
+                        <span id="preview-icon">📎</span>
+                        <span id="preview-name">file</span>
+                    </div>
+                    <span style="cursor: pointer; color: var(--danger); font-size: 1.3rem; flex-shrink: 0;" onclick="clearAttachment()">✕</span>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="standard-input-group">
+                        <button class="media-btn" onclick="toggleNVG()" title="Ночное Видение">🔦</button>
+                        <button class="media-btn" onclick="toggleRadioMode()" title="Режим Рации">📡</button>
+                        <button class="media-btn" onclick="document.getElementById('file-upload').click()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        </button>
+                        <input type="file" id="file-upload" class="hidden" accept="image/*,video/*,audio/*" onchange="handleFileSelect(this)">
+                        
+                        <input type="text" id="msg-input" placeholder="Передача сообщения..." autocomplete="off">
+                        
+                        <button id="send-btn" class="media-btn" onclick="sendMessage()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+
+                    <button class="radio-btn-big" id="radio-ptt-btn">УДЕРЖИВАЙ ДЛЯ СВЯЗИ</button>
+                    <button class="media-btn" onclick="toggleRadioMode()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none;" id="radio-exit-btn">✕</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('auth-modal')">✕</span>
+            <h2 id="auth-title">Доступ</h2>
+            <input type="text" id="reg-name" placeholder="Позывной (Имя)" style="display: none;">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Пароль">
+            <input type="text" id="invite-code" placeholder="Код Доступа (Alpha)" style="display: none;">
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleAuth()" id="auth-btn">Войти</button>
+            <p style="margin-top: 20px; font-size: 0.8rem; cursor: pointer; color: var(--primary); font-weight: 700;" onclick="toggleAuthMode()">Сменить протокол (Регистрация)</p>
+        </div>
+    </div>
+
+    <div id="users-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-icon" onclick="closeModal('users-modal')">✕</span>
+            <h2>Граждане Империи</h2>
+            <div id="users-list-container" class="users-list">
+                <p>Загрузка данных...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <span class="close-icon" onclick="closeModal('report-modal')">✕</span>
+            <h2>Отчет Системы</h2>
+            <div id="report-content">Генерация отчета...</div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay">
+        <div class="dossier-box">
+            <span class="close-icon" onclick="closeModal('profile-modal')">✕</span>
+            <div class="dossier-stamp">СОВЕРШЕННО СЕКРЕТНО</div>
+            <div style="margin-top: 30px; text-align: left;">
+                <h2 id="p-name" style="margin: 0; font-size: 1.5rem; border-bottom: 2px solid #333;">AGENT</h2>
+                <div style="margin-top: 10px;">
+                    <strong>РАНГ:</strong> <span id="p-rank">...</span><br>
+                    <strong>СТАТУС:</strong> АКТИВЕН
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: left; border-top: 1px dashed #333; padding-top: 10px;">
+                <strong>ДОСЬЕ:</strong>
+                <textarea id="p-about-edit" class="hidden" rows="4" style="background: transparent; border: none; font-family: 'Courier New'; width: 100%; resize: none;" placeholder="Введите данные..."></textarea>
+                <p id="p-about" style="margin: 5px 0;">-</p>
+            </div>
+            
+            <div id="admin-controls" class="hidden" style="margin-top: 20px; border-top: 2px solid #d00; padding-top: 10px;">
+                <select id="p-rank-edit" style="margin-bottom: 10px; background: #fff;">
+                    <option value="Наблюдатель">Наблюдатель</option>
+                    <option value="Соратник">Соратник</option>
+                    <option value="Элита">Элита</option>
+                    <option value="Изгнан">ИЗГНАНИЕ</option>
+                </select>
+                <button class="btn-danger btn" onclick="saveProfileChanges()">Применить</button>
+            </div>
+            <button id="p-save-self" class="btn hidden" style="width: 100%; margin-top: 15px;" onclick="saveMyProfile()">Сохранить</button>
+        </div>
+    </div>
+    
+    <div id="image-viewer" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="viewer-img">
+    </div>
+
+    <div id="ban-screen" style="display: none; position: fixed; inset: 0; background: #fff; z-index: 9999; flex-direction: column; justify-content: center; align-items: center;">
+        <h1 style="color: red; margin-bottom: 20px;">ДОСТУП ЗАПРЕЩЕН</h1>
+        <p>Вы были изгнаны из Империи.</p>
+        <button class="btn-outline" onclick="logout()" style="margin-top: 20px;">Покинуть</button>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const PROJECT_ID = '69624669002d880cd7bb'; 
+        const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+        const DB_ID = '6962475a003af27425fb';
+        const MSG_COL = 'verachkichathistory'; 
+        const PROFILES_COL = 'profiles'; 
+        const STORAGE_ID = '696363f30004cb97e6a1'; 
+        const ADMIN_EMAIL = "kraacovstepa@gmail.com";
+        const SECRET_CODE = "GLEB2023";
+        
+        const keyP1 = "hf_UwcAeGYbQKgyWa";
+        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
+        const HF_TOKEN = keyP1 + keyP2; 
+
+        // APPWRITE SETUP
+        const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
+        const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
+        const account = new Account(client);
+        const db = new Databases(client);
+        const storage = new Storage(client);
+
+        // GLOBAL STATE
+        let state = {
+            user: null,
+            profile: null,
+            editingId: null,
+            isLogin: true,
+            currentProfileId: null,
+            attachment: null,
+            recorder: null,
+            chunks: [],
+            isRecording: false,
+            audioPlayer: null,
+            isUploading: false,
+            isRadioMode: false,
+            radioNoise: null,
+            geigerVal: 0,
+            aiCooldown: false
+        };
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // MOBILE OPTIMIZATION: Prevent double-tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, {passive: false});
+
+        // MOBILE OPTIMIZATION: Viewport height fix
+        function setVH() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        window.addEventListener('load', setVH);
+        window.addEventListener('resize', setVH);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setVH, 100);
+        });
+
+        function playNotification() {
+            if(document.hidden) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); 
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start(); 
+                setTimeout(() => osc.stop(), 500);
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerText = msg;
+            if(type === 'error') t.style.background = 'rgba(255, 59, 48, 0.9)';
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(20px)';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function scrollToBottom() { 
+            const c = document.getElementById('messages-container'); 
+            requestAnimationFrame(() => {
+                c.scrollTop = c.scrollHeight;
+            });
+        }
+
+        async function checkSession() {
+            try {
+                state.user = await account.get();
+                try {
+                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
+                    if(res.documents.length > 0) state.profile = res.documents[0];
+                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
+                } catch(e) { console.log("Profile create/fetch error", e); }
+                
+                if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
+                showApp();
+            } catch (e) { showLanding(); }
+        }
+        checkSession();
+
+        function showApp() {
+            document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
+            document.querySelector('footer').style.display = 'none';
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('nav-guest').classList.add('hidden');
+            document.getElementById('nav-user').classList.remove('hidden');
+            closeModal('auth-modal');
+            if(state.profile) {
+                document.getElementById('nav-username').innerText = state.profile.username;
+                document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
+            }
+            loadMessages();
+            client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
+            startGeigerLoop();
+        }
+
+        function showLanding() {
+            // MOBILE OPTIMIZATION: Cleanup on exit
+            if (state.audioPlayer) {
+                state.audioPlayer.pause();
+                state.audioPlayer = null;
+            }
+            if (state.recorder && state.recorder.state === 'recording') {
+                state.recorder.stop();
+                state.recorder.stream.getTracks().forEach(t => t.stop());
+            }
+            
+            document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('app-interface').classList.add('hidden');
+            document.querySelector('footer').style.display = 'block';
+            document.getElementById('nav-guest').classList.remove('hidden');
+            document.getElementById('nav-user').classList.add('hidden');
+            setTimeout(reveal, 100);
+            window.scrollTo(0, 0);
+        }
+
+        function toggleAuthMode() {
+            state.isLogin = !state.isLogin;
+            document.getElementById('auth-title').innerText = state.isLogin ? 'Доступ' : 'Присяга';
+            document.getElementById('auth-btn').innerText = state.isLogin ? 'Войти' : 'Вступить';
+            document.getElementById('reg-name').style.display = state.isLogin ? 'none' : 'block';
+            document.getElementById('invite-code').style.display = state.isLogin ? 'none' : 'block';
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            try {
+                if (state.isLogin) { 
+                    await account.createEmailPasswordSession(email, pass); 
+                    location.reload(); 
+                } else { 
+                    if(document.getElementById('invite-code').value !== SECRET_CODE) throw new Error("Неверный код доступа");
+                    const name = document.getElementById('reg-name').value;
+                    await account.create(ID.unique(), email, pass, name); 
+                    await account.createEmailPasswordSession(email, pass); 
+                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" }); 
+                    location.reload(); 
+                }
+            } catch(e) { showToast(e.message, 'error'); }
+        }
+
+        async function logout() { 
+            await account.deleteSession('current'); 
+            location.reload(); 
+        }
+
+        async function askMistral(prompt, isReport = false) {
+            try {
+                const systemPrompt = isReport 
+                    ? "Ты — СИСТЕМА, аналитический модуль чата 'Верачки'. Сделай КРАТКИЙ, но информативный отчет по этой переписке. Кто что писал, основные темы, конфликты. Будь холоден и точен."
+                    : "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
+                
+                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
+
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
+                    {
+                        headers: { 
+                            Authorization: `Bearer ${HF_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        method: "POST",
+                        body: JSON.stringify({ 
+                            inputs: fullPrompt, 
+                            parameters: { max_new_tokens: isReport ? 300 : 100, return_full_text: false } 
+                        }),
+                    }
+                );
+                
+                if (!response.ok) throw new Error("AI Error");
+                const result = await response.json();
+                return result[0].generated_text.trim();
+            } catch (error) {
+                console.error(error);
+                return "Ошибка связи с ядром.";
+            }
+        }
+
+        async function generateReport() {
+            openModal('report-modal');
+            const content = document.getElementById('report-content');
+            content.innerText = "Сканирование архивов...";
+            
+            const msgs = Array.from(document.querySelectorAll('.message:not(.system) .msg-text-content'))
+                .slice(-30)
+                .map(el => {
+                    const author = el.closest('.message').querySelector('.msg-author')?.innerText || "Я";
+                    return `${author}: ${el.innerText}`;
+                })
+                .join("\n");
+
+            if (msgs.length < 50) {
+                content.innerText = "Недостаточно данных для анализа.";
+                return;
+            }
+
+            const report = await askMistral(msgs, true);
+            content.innerText = report;
+        }
+
+        async function tryTriggerAI(message) {
+            if (state.aiCooldown) return;
+            
+            const lowerMsg = message.toLowerCase();
+            const isDirectCall = lowerMsg.startsWith('ии,') || lowerMsg.startsWith('бот,') || lowerMsg.startsWith('система,');
+            const isRandomTrigger = Math.random() < 0.05;
+
+            if (isDirectCall || isRandomTrigger) {
+                state.aiCooldown = true;
+                setTimeout(() => state.aiCooldown = false, 10000);
+
+                const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
+                const reply = await askMistral(prompt);
+                
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
+                    messageContent: reply, 
+                    senderId: "СИСТЕМА", 
+                    timestamp: new Date().toISOString(),
+                    isEdited: false
+                });
+            }
+        }
+
+        function setDefcon(level) {
+            document.body.classList.remove('defcon-1');
+            document.querySelectorAll('.defcon-lvl').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`def-${level}`);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            if (level === 1) {
+                document.body.classList.add('defcon-1');
+                playGeigerClick(0.1); 
+            }
+        }
+
+        function toggleNVG() {
+            document.body.classList.toggle('nvg-mode');
+            playGeigerClick();
+        }
+
+        function playGeigerClick(vol = 0.05) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); 
+            gain.connect(audioCtx.destination);
+            osc.type = 'square';
+            osc.frequency.value = 100 + Math.random() * 50;
+            gain.gain.value = vol;
+            osc.start(); 
+            setTimeout(() => osc.stop(), 0.01);
+        }
+
+        function startGeigerLoop() {
+            setInterval(() => {
+                if (state.geigerVal > 0) {
+                    state.geigerVal *= 0.95;
+                    const needle = document.getElementById('geiger-needle');
+                    const rotation = -45 + (state.geigerVal * 90);
+                    needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
+                    
+                    if (Math.random() < state.geigerVal * 0.5) playGeigerClick();
+                }
+            }, 100);
+        }
+
+        function toggleRadioMode() {
+            state.isRadioMode = !state.isRadioMode;
+            const wrapper = document.querySelector('.chat-wrapper');
+            const exitBtn = document.getElementById('radio-exit-btn');
+            
+            if (state.isRadioMode) {
+                wrapper.classList.add('radio-active');
+                exitBtn.style.display = 'block';
+                playStaticNoise(0.2); 
+            } else {
+                wrapper.classList.remove('radio-active');
+                exitBtn.style.display = 'none';
+                stopStaticNoise();
+            }
+        }
+
+        function createNoiseBuffer() {
+            const bufferSize = audioCtx.sampleRate * 2; 
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            return buffer;
+        }
+        const noiseBuffer = createNoiseBuffer();
+
+        function playStaticNoise(duration = 0) {
+            if (state.radioNoise) state.radioNoise.stop();
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0.05; 
+            noise.connect(gain); 
+            gain.connect(audioCtx.destination);
+            noise.start(); 
+            state.radioNoise = noise;
+            if (duration > 0) setTimeout(() => stopStaticNoise(), duration * 1000);
+        }
+
+        function stopStaticNoise() {
+            if (state.radioNoise) { 
+                state.radioNoise.stop(); 
+                state.radioNoise = null; 
+            }
+        }
+
+        const pttBtn = document.getElementById('radio-ptt-btn');
+        
+        // MOBILE OPTIMIZATION: Touch Events
+        pttBtn.addEventListener('touchstart', async (e) => {
+            e.preventDefault();
+            pttBtn.classList.add('pressed'); 
+            pttBtn.innerText = "ЗАПИСЬ...";
+            playStaticNoise();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.recorder = new MediaRecorder(stream);
+                state.chunks = [];
+                state.recorder.ondataavailable = e => state.chunks.push(e.data);
+                state.recorder.start();
+            } catch(e) { showToast("Нет микрофона", 'error'); }
+        });
+
+        pttBtn.addEventListener('touchend', () => {
+            pttBtn.classList.remove('pressed'); 
+            pttBtn.innerText = "УДЕРЖИВАЙ ДЛЯ СВЯЗИ";
+            stopStaticNoise();
+            if (state.recorder && state.recorder.state === 'recording') {
+                state.recorder.stop();
+                state.recorder.onstop = () => {
+                    const audioBlob = new Blob(state.chunks, { type: 'audio/mp3' });
+                    const audioFile = new File([audioBlob], "radio_msg.mp3", { type: "audio/mp3" });
+                    state.attachment = { file: audioFile, type: 'audio' };
+                    sendMessage();
+                    state.recorder.stream.getTracks().forEach(t => t.stop());
+                };
+            }
+        });
+
+        // Desktop Events
+        pttBtn.addEventListener('mousedown', async (e) => {
+            e.preventDefault();
+            pttBtn.classList.add('pressed'); 
+            pttBtn.innerText = "ЗАПИСЬ...";
+            playStaticNoise();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.recorder = new MediaRecorder(stream);
+                state.chunks = [];
+                state.recorder.ondataavailable = e => state.chunks.push(e.data);
+                state.recorder.start();
+            } catch(e) { showToast("Нет микрофона", 'error'); }
+        });
+
+        pttBtn.addEventListener('mouseup', () => {
+            pttBtn.classList.remove('pressed'); 
+            pttBtn.innerText = "УДЕРЖИВАЙ ДЛЯ СВЯЗИ";
+            stopStaticNoise();
+            if (state.recorder && state.recorder.state === 'recording') {
+                state.recorder.stop();
+                state.recorder.onstop = () => {
+                    const audioBlob = new Blob(state.chunks, { type: 'audio/mp3' });
+                    const audioFile = new File([audioBlob], "radio_msg.mp3", { type: "audio/mp3" });
+                    state.attachment = { file: audioFile, type: 'audio' };
+                    sendMessage();
+                    state.recorder.stream.getTracks().forEach(t => t.stop());
+                };
+            }
+        });
+
+        function handleFileSelect(input) {
+            if(input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 50 * 1024 * 1024) {
+                    showToast("Файл слишком большой (>50МБ)", 'error');
+                    input.value = '';
+                    return;
+                }
+                let type = 'file';
+                if(file.type.startsWith('image/')) type = 'image';
+                else if(file.type.startsWith('video/')) type = 'video';
+                else if(file.type.startsWith('audio/')) type = 'audio';
+                
+                state.attachment = { file: file, type: type };
+                document.getElementById('media-preview-area').style.display = 'flex';
+                document.getElementById('preview-name').innerText = file.name;
+                document.getElementById('preview-icon').innerText = type === 'image' ? '🖼' : (type === 'video' ? '🎬' : '🎵');
+            }
+        }
+
+        function clearAttachment() { 
+            state.attachment = null; 
+            document.getElementById('file-upload').value = ''; 
+            document.getElementById('media-preview-area').style.display = 'none'; 
+        }
+
+        function toggleAudio(btn, src) {
+            const playerContainer = btn.parentElement;
+            const progress = playerContainer.querySelector('.audio-progress');
+            
+            if (state.audioPlayer && state.audioPlayer.src === src) {
+                if (state.audioPlayer.paused) {
+                    state.audioPlayer.play();
+                    btn.innerText = '❚❚';
+                } else {
+                    state.audioPlayer.pause();
+                    btn.innerText = '▶';
+                }
+            } else {
+                if (state.audioPlayer) {
+                    state.audioPlayer.pause();
+                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
+                }
+                state.audioPlayer = new Audio(src);
+                state.audioPlayer.play();
+                btn.innerText = '❚❚';
+                
+                state.audioPlayer.ontimeupdate = () => {
+                    if(state.audioPlayer.duration) {
+                        const percent = (state.audioPlayer.currentTime / state.audioPlayer.duration) * 100;
+                        progress.style.width = percent + '%';
+                    }
+                };
+                state.audioPlayer.onended = () => {
+                    btn.innerText = '▶';
+                    progress.style.width = '0%';
+                };
+            }
+        }
+
+        async function loadMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '<div style="text-align:center;margin-top:50px;color:#888;font-size:0.85rem;">Загрузка...</div>';
+            try {
+                const res = await db.listDocuments(DB_ID, MSG_COL, [Query.orderAsc('timestamp'), Query.limit(100)]);
+                container.innerHTML = '';
+                res.documents.forEach(renderMessage);
+                scrollToBottom();
+            } catch(e) { 
+                console.error(e); 
+                container.innerHTML = '<div style="text-align:center;margin-top:50px;color:red;">Ошибка загрузки</div>';
+            }
+        }
+
+        function renderMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const existing = document.getElementById(msg.$id);
+            
+            if (existing) {
+                if (!existing.dataset.optimistic) {
+                    const textContent = existing.querySelector('.msg-text-content');
+                    if(textContent) textContent.innerText = msg.messageContent || "";
+                    if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
+                        const msgText = existing.querySelector('.msg-text');
+                        if(msgText) msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
+                    }
+                }
+                return;
+            }
+
+            const isMine = state.profile && msg.senderId === state.profile.username;
+            const isSystem = msg.senderId === "СИСТЕМА";
+            
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
+            div.id = msg.$id;
+            if (msg.optimistic) div.dataset.optimistic = "true";
+
+            let controls = '';
+            if (!msg.optimistic && !isSystem && isMine) {
+                controls = `<div class="controls">`;
+                if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', \`${escapeHtml(msg.messageContent)}\`)">✎</span>`;
+                controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
+            }
+            
+            let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
+            
+            if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
+                const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
+                
+                if (msg.fileType === 'image') {
+                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
+                } else if (msg.fileType === 'video') {
+                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
+                } else if (msg.fileType === 'audio') {
+                    contentHtml = `<div class="custom-audio-player"><div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div><div class="audio-track"><div class="audio-progress"></div></div></div>`;
+                }
+                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
+            }
+            
+            const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
+            const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
+            const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div><div class="msg-time">${time}</div>`;
+            container.appendChild(div);
+            
+            if(container.scrollHeight - container.scrollTop - container.clientHeight < 300 || isMine) scrollToBottom();
+        }
+
+        async function sendMessage() {
+            if (state.isUploading) return;
+
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if ((!text && !state.attachment) || !state.profile) return;
+            
+            if (state.editingId) {
+                try {
+                    await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
+                    state.editingId = null;
+                    document.getElementById('send-btn').innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+                    input.value = '';
+                } catch(e) { showToast("Ошибка редактирования", 'error'); }
+                return;
+            }
+
+            const sendBtn = document.getElementById('send-btn');
+            state.isUploading = true;
+            sendBtn.innerHTML = "•••";
+
+            const tempId = "temp-" + Date.now();
+            const optimisticMsg = {
+                $id: tempId,
+                messageContent: text,
+                senderId: state.profile.username,
+                timestamp: new Date().toISOString(),
+                isEdited: false,
+                fileType: state.attachment ? state.attachment.type : null,
+                fileUrl: state.attachment ? URL.createObjectURL(state.attachment.file) : null,
+                optimistic: true
+            };
+            renderMessage(optimisticMsg);
+            
+            input.value = '';
+            const fileToUpload = state.attachment;
+            clearAttachment();
+
+            let fileId = null, fileType = null;
+            if (fileToUpload) {
+                try {
+                    const uploaded = await storage.createFile(STORAGE_ID, ID.unique(), fileToUpload.file);
+                    fileId = uploaded.$id; 
+                    fileType = fileToUpload.type;
+                } catch(e) { 
+                    showToast("Ошибка загрузки файла", 'error'); 
+                    document.getElementById(tempId).remove();
+                    state.isUploading = false;
+                    sendBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+                    return; 
+                }
+            }
+            
+            try {
+                await db.createDocument(DB_ID, MSG_COL, ID.unique(), { 
+                    messageContent: text, 
+                    senderId: state.profile.username, 
+                    timestamp: new Date().toISOString(), 
+                    isEdited: false, 
+                    fileId: fileId, 
+                    fileType: fileType 
+                });
+            } catch(e) { 
+                showToast("Ошибка отправки", 'error'); 
+                document.getElementById(tempId).remove(); 
+            } finally {
+                state.isUploading = false;
+                sendBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+            }
+        }
+
+        function handleRealtime(response) {
+            const ev = response.events[0];
+            const payload = response.payload;
+
+            if(ev.includes('.create')) {
+                state.geigerVal = Math.min(1, state.geigerVal + 0.3);
+                
+                if(payload.senderId !== state.profile.username) {
+                    playNotification();
+                    if(payload.senderId !== "СИСТЕМА") {
+                        tryTriggerAI(payload.messageContent);
+                    }
+                }
+            }
+
+            if(ev.includes('.delete')) {
+                const el = document.getElementById(payload.$id);
+                if(el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.8)';
+                    setTimeout(() => el.remove(), 300);
+                }
+                return;
+            }
+
+            if(ev.includes('.update')) {
+                const el = document.getElementById(payload.$id);
+                if(el) {
+                    const content = el.querySelector('.msg-text-content');
+                    if(content) content.innerText = payload.messageContent;
+                    const msgText = el.querySelector('.msg-text');
+                    if(msgText && !msgText.innerText.includes('(ред.)')) {
+                        msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
+                    }
+                }
+                return;
+            }
+
+            if(ev.includes('.create')) {
+                const isMine = state.profile && payload.senderId === state.profile.username;
+                if (isMine) {
+                    const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
+                    tempMsgs.forEach(m => {
+                        const textContent = m.querySelector('.msg-text-content');
+                        if (textContent && textContent.innerText === payload.messageContent) {
+                            m.remove();
+                        }
+                    });
+                }
+                if(!document.getElementById(payload.$id)) {
+                    renderMessage(payload);
+                    scrollToBottom();
+                }
+            }
+        }
+
+        function startEdit(id, text) { 
+            const i = document.getElementById('msg-input'); 
+            i.value = text; 
+            i.focus(); 
+            state.editingId = id; 
+            document.getElementById('send-btn').innerText = "✓"; 
+        }
+        
+        async function deleteMsg(id) { 
+            if(confirm('Удалить?')) await db.deleteDocument(DB_ID, MSG_COL, id); 
+        }
+
+        function openViewer(src) { 
+            document.getElementById('viewer-img').src = src; 
+            document.getElementById('image-viewer').style.display = 'flex'; 
+        }
+        
+        function openModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        
+        function closeModal(id) { 
+            document.getElementById(id).style.display = 'none'; 
+        }
+
+        async function openUserList() {
+            openModal('users-modal');
+            const listContainer = document.getElementById('users-list-container');
+            listContainer.innerHTML = '<p>Загрузка архивов...</p>';
+            
+            try {
+                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.limit(100)]);
+                if (res.documents.length === 0) {
+                    listContainer.innerHTML = '<p>Список пуст.</p>';
+                    return;
+                }
+                
+                let html = '';
+                res.documents.forEach(user => {
+                    html += `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
+                        <span style="font-weight:700;">${user.username}</span>
+                        <span class="u-rank">${user.rank || 'Наблюдатель'}</span>
+                    </div>`;
+                });
+                listContainer.innerHTML = html;
+            } catch(e) {
+                listContainer.innerHTML = '<p style="color:red">Ошибка доступа к архивам.</p>';
+            }
+        }
+
+        async function openProfile(username) {
+            openModal('profile-modal'); 
+            document.getElementById('p-name').innerText = username;
+            document.getElementById('p-rank').innerText = "...";
+            document.getElementById('admin-controls').classList.add('hidden'); 
+            document.getElementById('p-save-self').classList.add('hidden'); 
+            document.getElementById('p-about-edit').classList.add('hidden'); 
+            document.getElementById('p-about').classList.remove('hidden');
+
+            try {
+                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                if(res.documents.length > 0) {
+                    const p = res.documents[0]; 
+                    state.currentProfileId = p.$id; 
+                    document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
+                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
+                    
+                    if (state.profile && p.$id === state.profile.$id) {
+                        document.getElementById('p-about').classList.add('hidden'); 
+                        document.getElementById('p-about-edit').classList.remove('hidden'); 
+                        document.getElementById('p-about-edit').value = p.about || ""; 
+                        document.getElementById('p-save-self').classList.remove('hidden');
+                    }
+                    if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                        document.getElementById('admin-controls').classList.remove('hidden');
+                        document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
+                    }
+                }
+            } catch(e) {}
+        }
+        
+        function openMyProfile() { 
+            if(state.profile) {
+                openProfile(state.profile.username);
+            } else {
+                showToast("Профиль не загружен", "error");
+            }
+        }
+        
+        async function saveMyProfile() { 
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); 
+            closeModal('profile-modal'); 
+            showToast("Сохранено"); 
+        }
+        
+        async function saveProfileChanges() { 
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); 
+            closeModal('profile-modal'); 
+            showToast("Статус обновлен"); 
+        }
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) { 
+                if (reveals[i].getBoundingClientRect().top < window.innerHeight - 50) reveals[i].classList.add("active"); 
+            }
+        }
+        window.addEventListener("scroll", reveal); 
+        reveal();
+
+        document.getElementById('msg-input').addEventListener('keypress', (e) => { 
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // MOBILE OPTIMIZATION: Auto focus on desktop only
+        if (window.innerWidth >= 768) {
+            document.getElementById('msg-input').addEventListener('focus', () => {
+                setTimeout(() => {
+                    document.getElementById('msg-input').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 300);
+            });
+        }
+    </script>
+</body>
+</html>
