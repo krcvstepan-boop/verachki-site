@@ -15,13 +15,18 @@
         // ENIGMA ENCRYPTION SYSTEM
         const encryptedMessages = {};
 
+        const RANDOM_CHARS = '#@!$%^&*()_+-=[]{}|;:,.<>?/~';
         function getRandomChar() {
-            const chars = '#@!$%^&*()_+-=[]{}|;:,.<>?/~';
-            return chars[Math.floor(Math.random() * chars.length)];
+            return RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
         }
 
         function scrambleText(text) {
-            return text.split('').map(c => c.trim() === '' ? c : getRandomChar()).join('');
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                result += (c.trim() === '') ? c : getRandomChar();
+            }
+            return result;
         }
 
         function decryptMessage(textId, btnId) {
@@ -32,18 +37,25 @@
             if (btn) btn.style.display = 'none';
 
             const originalText = encryptedMessages[textId];
+            const originalChars = originalText.split('');
+            const len = originalChars.length;
             let revealIndex = 0;
 
             const interval = setInterval(() => {
-                const currentText = originalText.split('').map((char, index) => {
-                    if (index < revealIndex) return char;
-                    return char.trim() === '' ? char : getRandomChar();
-                }).join('');
+                let result = '';
+                for (let i = 0; i < len; i++) {
+                    if (i < revealIndex) {
+                        result += originalChars[i];
+                    } else {
+                        const c = originalChars[i];
+                        result += (c.trim() === '') ? c : getRandomChar();
+                    }
+                }
 
-                el.innerText = currentText;
+                el.innerText = result;
                 revealIndex += 0.5;
 
-                if (revealIndex >= originalText.length) {
+                if (revealIndex >= len) {
                     clearInterval(interval);
                     el.innerText = originalText;
                     el.classList.remove('encrypted');
@@ -143,13 +155,17 @@
             }, 3000);
         }
 
+        const htmlEscapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+
         function escapeHtml(text) {
             if (!text) return "";
-            return text.replace(/&/g, "&amp;")
-                       .replace(/</g, "&lt;")
-                       .replace(/>/g, "&gt;")
-                       .replace(/"/g, "&quot;")
-                       .replace(/'/g, "&#039;");
+            return text.replace(/[&<>"']/g, m => htmlEscapes[m]);
         }
 
         function escapeJs(text) {
