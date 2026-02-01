@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // ENIGMA ENCRYPTION SYSTEM
         const encryptedMessages = {};
 
@@ -254,19 +250,30 @@
             location.reload();
         }
 
-        async function askMistral(prompt, isReport = false) {
+        async function askMistral(userPrompt, isReport = false) {
             try {
+                let token = localStorage.getItem('HF_TOKEN');
+                if (!token) {
+                    if (isReport) {
+                        token = prompt("СИСТЕМА: Требуется ключ Hugging Face (Read). Введите ключ:");
+                        if (token) localStorage.setItem('HF_TOKEN', token);
+                        else return "Доступ запрещен.";
+                    } else {
+                        return "СИСТЕМА: AI недоступен (нет ключа).";
+                    }
+                }
+
                 const systemPrompt = isReport
                     ? "Ты — СИСТЕМА, аналитический модуль чата 'Верачки'. Сделай КРАТКИЙ, но информативный отчет по этой переписке. Кто что писал, основные темы, конфликты. Будь холоден и точен."
                     : "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
-                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
+                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${userPrompt} [/INST]`;
 
                 const response = await fetch(
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -277,7 +284,13 @@
                     }
                 );
 
-                if (!response.ok) throw new Error("AI Error");
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('HF_TOKEN');
+                        return "Ошибка доступа. Ключ сброшен.";
+                    }
+                    throw new Error("AI Error");
+                }
                 const result = await response.json();
                 return result[0].generated_text.trim();
             } catch (error) {
