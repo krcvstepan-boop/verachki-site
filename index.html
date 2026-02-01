@@ -1130,6 +1130,26 @@
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
         }
+
+        /* Enigma Encryption Styles */
+        .decipher-icon {
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            transition: transform 0.2s;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .decipher-icon:hover {
+            transform: scale(1.2);
+            color: var(--accent);
+        }
+        .encrypted {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
@@ -1451,6 +1471,46 @@
         const keyP1 = "hf_UwcAeGYbQKgyWa";
         const keyP2 = "AlccfNJwQoCAxVzHgSdS";
         const HF_TOKEN = keyP1 + keyP2; 
+
+        // ENIGMA ENCRYPTION SYSTEM
+        const encryptedMessages = {};
+
+        function getRandomChar() {
+            const chars = '#@!$%^&*()_+-=[]{}|;:,.<>?/~';
+            return chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        function scrambleText(text) {
+            return text.split('').map(c => c.trim() === '' ? c : getRandomChar()).join('');
+        }
+
+        function decryptMessage(textId, btnId) {
+            const el = document.getElementById(textId);
+            const btn = document.getElementById(btnId);
+            if (!el || !encryptedMessages[textId]) return;
+
+            if (btn) btn.style.display = 'none';
+
+            const originalText = encryptedMessages[textId];
+            let revealIndex = 0;
+
+            const interval = setInterval(() => {
+                const currentText = originalText.split('').map((char, index) => {
+                    if (index < revealIndex) return char;
+                    return char.trim() === '' ? char : getRandomChar();
+                }).join('');
+
+                el.innerText = currentText;
+                revealIndex += 0.5;
+
+                if (revealIndex >= originalText.length) {
+                    clearInterval(interval);
+                    el.innerText = originalText;
+                    el.classList.remove('encrypted');
+                    delete encryptedMessages[textId];
+                }
+            }, 30);
+        }
 
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -1933,7 +1993,15 @@
             if (existing) {
                 if (!existing.dataset.optimistic) {
                     const textContent = existing.querySelector('.msg-text-content');
-                    if(textContent) textContent.innerText = msg.messageContent || "";
+                    if(textContent) {
+                         const uniqueId = msg.$id;
+                         const textId = `enc-${uniqueId}`;
+                         encryptedMessages[textId] = msg.messageContent || "";
+                         textContent.innerText = scrambleText(msg.messageContent || "");
+                         textContent.classList.add('encrypted');
+                         const btn = existing.querySelector('.decipher-icon');
+                         if(btn) btn.style.display = 'inline-block';
+                    }
                     if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
                         const msgText = existing.querySelector('.msg-text');
                         if(msgText) msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
@@ -1957,7 +2025,20 @@
                 controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
             }
             
-            let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
+            const uniqueId = msg.$id || `temp-${Math.random().toString(36).substr(2, 9)}`;
+            const textId = `enc-${uniqueId}`;
+            const btnId = `btn-${uniqueId}`;
+
+            let encryptedHtml = '';
+            if (msg.messageContent) {
+                encryptedMessages[textId] = msg.messageContent;
+                const scrambled = scrambleText(msg.messageContent);
+                encryptedHtml = `<span id="${textId}" class="msg-text-content encrypted">${scrambled}</span><span id="${btnId}" class="decipher-icon" onclick="decryptMessage('${textId}', '${btnId}')" title="Расшифровать">🔒</span>`;
+            } else {
+                encryptedHtml = `<span class="msg-text-content"></span>`;
+            }
+
+            let contentHtml = encryptedHtml;
             
             if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
                 const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId); 
@@ -1969,7 +2050,7 @@
                 } else if (msg.fileType === 'audio') {
                     contentHtml = `<div class="custom-audio-player"><div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div><div class="audio-track"><div class="audio-progress"></div></div></div>`;
                 }
-                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${escapeHtml(msg.messageContent)}</div>`;
+                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${encryptedHtml}</div>`;
             }
             
             const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
@@ -2081,8 +2162,31 @@
             if(ev.includes('.update')) {
                 const el = document.getElementById(payload.$id);
                 if(el) {
-                    const content = el.querySelector('.msg-text-content');
-                    if(content) content.innerText = payload.messageContent;
+                    const textId = `enc-${payload.$id}`;
+                    const btnId = `btn-${payload.$id}`;
+
+                    if(payload.messageContent) {
+                        encryptedMessages[textId] = payload.messageContent;
+
+                        let content = document.getElementById(textId);
+                        if(!content) content = el.querySelector('.msg-text-content');
+
+                        if(content) {
+                            content.innerText = scrambleText(payload.messageContent);
+                            content.classList.add('encrypted');
+                            content.id = textId;
+
+                            let btn = document.getElementById(btnId);
+                            if(!btn) btn = el.querySelector('.decipher-icon');
+
+                            if(btn) {
+                                btn.style.display = 'inline-block';
+                            } else {
+                                content.insertAdjacentHTML('afterend', `<span id="${btnId}" class="decipher-icon" onclick="decryptMessage('${textId}', '${btnId}')" title="Расшифровать">🔒</span>`);
+                            }
+                        }
+                    }
+
                     const msgText = el.querySelector('.msg-text');
                     if(msgText && !msgText.innerText.includes('(ред.)')) {
                         msgText.insertAdjacentHTML('beforeend', " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>");
@@ -2096,8 +2200,13 @@
                 if (isMine) {
                     const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
                     tempMsgs.forEach(m => {
+                        const textId = `enc-${m.id}`;
+                        const storedContent = encryptedMessages[textId];
                         const textContent = m.querySelector('.msg-text-content');
-                        if (textContent && textContent.innerText === payload.messageContent) {
+
+                        if ((storedContent && storedContent === payload.messageContent) ||
+                            (textContent && textContent.innerText === payload.messageContent)) {
+                            delete encryptedMessages[textId];
                             m.remove();
                         }
                     });
