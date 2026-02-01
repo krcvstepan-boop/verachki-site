@@ -2255,13 +2255,12 @@
                     return;
                 }
                 
-                let html = '';
-                res.documents.forEach(user => {
-                    html += `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
+                const html = res.documents.map(user =>
+                    `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
                         <span style="font-weight:700;">${user.username}</span>
                         <span class="u-rank">${user.rank || 'Наблюдатель'}</span>
-                    </div>`;
-                });
+                    </div>`
+                ).join('');
                 listContainer.innerHTML = html;
             } catch(e) {
                 listContainer.innerHTML = '<p style="color:red">Ошибка доступа к архивам.</p>';
