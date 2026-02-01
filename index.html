@@ -2371,13 +2371,31 @@
             showToast("Статус обновлен"); 
         }
 
+        let revealObserver;
         function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) { 
-                if (reveals[i].getBoundingClientRect().top < window.innerHeight - 50) reveals[i].classList.add("active"); 
+            if (revealObserver) {
+                revealObserver.disconnect();
             }
+
+            var reveals = document.querySelectorAll(".reveal");
+
+            revealObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            reveals.forEach(function(reveal) {
+                if (!reveal.classList.contains("active")) {
+                    revealObserver.observe(reveal);
+                }
+            });
         }
-        window.addEventListener("scroll", reveal); 
         reveal();
 
         document.getElementById('msg-input').addEventListener('keypress', (e) => { 
