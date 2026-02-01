@@ -1523,6 +1523,7 @@
         let state = {
             user: null,
             profile: null,
+            profileCache: new Map(),
             editingId: null,
             isLogin: true,
             currentProfileId: null,
@@ -1606,7 +1607,10 @@
                 state.user = await account.get();
                 try {
                     const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
-                    if(res.documents.length > 0) state.profile = res.documents[0];
+                if(res.documents.length > 0) {
+                    state.profile = res.documents[0];
+                    state.profileCache.set(state.profile.username, state.profile);
+                }
                     else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
                 } catch(e) { console.log("Profile create/fetch error", e); }
                 
@@ -2289,9 +2293,18 @@
             document.getElementById('p-about').classList.remove('hidden');
 
             try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
-                if(res.documents.length > 0) {
-                    const p = res.documents[0]; 
+                let p;
+                if (state.profileCache.has(username)) {
+                    p = state.profileCache.get(username);
+                } else {
+                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                    if(res.documents.length > 0) {
+                        p = res.documents[0];
+                        state.profileCache.set(username, p);
+                    }
+                }
+
+                if (p) {
                     state.currentProfileId = p.$id; 
                     document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
                     document.getElementById('p-about').innerText = p.about || "Данных нет.";
@@ -2319,13 +2332,29 @@
         }
         
         async function saveMyProfile() { 
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); 
+            const newAbout = document.getElementById('p-about-edit').value;
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: newAbout });
+
+            if (state.profile) {
+                state.profile.about = newAbout;
+                state.profileCache.set(state.profile.username, state.profile);
+            }
+
             closeModal('profile-modal'); 
             showToast("Сохранено"); 
         }
         
         async function saveProfileChanges() { 
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); 
+            const newRank = document.getElementById('p-rank-edit').value;
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: newRank });
+
+            const username = document.getElementById('p-name').innerText;
+            if (state.profileCache.has(username)) {
+                const p = state.profileCache.get(username);
+                p.rank = newRank;
+                state.profileCache.set(username, p);
+            }
+
             closeModal('profile-modal'); 
             showToast("Статус обновлен"); 
         }
