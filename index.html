@@ -743,55 +743,6 @@
             background: var(--primary);
         }
 
-        /* Geiger Widget - Mobile Responsive */
-        #geiger-wrapper {
-            position: absolute;
-            bottom: clamp(75px, 20vw, 85px);
-            right: clamp(15px, 5vw, 25px);
-            width: clamp(70px, 20vw, 90px);
-            height: clamp(50px, 15vw, 60px);
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 50;
-        }
-
-        #geiger-screen {
-            width: 80%;
-            height: 50%;
-            background: rgba(0,0,0,0.05);
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        #geiger-needle {
-            width: 2px;
-            height: 85%;
-            background: var(--danger);
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            border-radius: 2px;
-            transform-origin: bottom center;
-            transform: rotate(-45deg);
-            transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
-        }
-
-        .geiger-label {
-            font-size: clamp(6px, 2vw, 8px);
-            color: var(--primary);
-            margin-top: 3px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
 
         /* Radio Mode */
         .radio-overlay {
@@ -1330,11 +1281,6 @@
             <div class="chat-wrapper glass-panel">
                 <div class="radio-overlay"></div>
                 
-                <div id="geiger-wrapper">
-                    <div id="geiger-screen"><div id="geiger-needle"></div></div>
-                    <div class="geiger-label">RAD LEVEL</div>
-                </div>
-
                 <div class="chat-header">
                     <div class="chat-header-left">
                         <div class="back-btn" onclick="showLanding()">
@@ -1534,7 +1480,6 @@
             isUploading: false,
             isRadioMode: false,
             radioNoise: null,
-            geigerVal: 0,
             aiCooldown: false
         };
 
@@ -1629,7 +1574,6 @@
             }
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
-            startGeigerLoop();
         }
 
         function showLanding() {
@@ -1768,38 +1712,11 @@
 
             if (level === 1) {
                 document.body.classList.add('defcon-1');
-                playGeigerClick(0.1); 
             }
         }
 
         function toggleNVG() {
             document.body.classList.toggle('nvg-mode');
-            playGeigerClick();
-        }
-
-        function playGeigerClick(vol = 0.05) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); 
-            gain.connect(audioCtx.destination);
-            osc.type = 'square';
-            osc.frequency.value = 100 + Math.random() * 50;
-            gain.gain.value = vol;
-            osc.start(); 
-            setTimeout(() => osc.stop(), 0.01);
-        }
-
-        function startGeigerLoop() {
-            setInterval(() => {
-                if (state.geigerVal > 0) {
-                    state.geigerVal *= 0.95;
-                    const needle = document.getElementById('geiger-needle');
-                    const rotation = -45 + (state.geigerVal * 90);
-                    needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
-                    
-                    if (Math.random() < state.geigerVal * 0.5) playGeigerClick();
-                }
-            }, 100);
         }
 
         function toggleRadioMode() {
@@ -2139,7 +2056,6 @@
             const payload = response.payload;
 
             if(ev.includes('.create')) {
-                state.geigerVal = Math.min(1, state.geigerVal + 0.3);
                 
                 if(payload.senderId !== state.profile.username) {
                     playNotification();
