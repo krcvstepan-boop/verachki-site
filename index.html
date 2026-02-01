@@ -1523,6 +1523,7 @@
         let state = {
             user: null,
             profile: null,
+            profileCache: new Map(),
             editingId: null,
             isLogin: true,
             currentProfileId: null,
@@ -2277,26 +2278,35 @@
             document.getElementById('p-about-edit').classList.add('hidden'); 
             document.getElementById('p-about').classList.remove('hidden');
 
-            try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
-                if(res.documents.length > 0) {
-                    const p = res.documents[0]; 
-                    state.currentProfileId = p.$id; 
-                    document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
-                    document.getElementById('p-about').innerText = p.about || "Данных нет.";
-                    
-                    if (state.profile && p.$id === state.profile.$id) {
-                        document.getElementById('p-about').classList.add('hidden'); 
-                        document.getElementById('p-about-edit').classList.remove('hidden'); 
-                        document.getElementById('p-about-edit').value = p.about || ""; 
-                        document.getElementById('p-save-self').classList.remove('hidden');
+            let p = null;
+            if (state.profileCache.has(username)) {
+                p = state.profileCache.get(username);
+            } else {
+                try {
+                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                    if(res.documents.length > 0) {
+                        p = res.documents[0];
+                        state.profileCache.set(username, p);
                     }
-                    if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                        document.getElementById('admin-controls').classList.remove('hidden');
-                        document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
-                    }
+                } catch(e) {}
+            }
+
+            if (p) {
+                state.currentProfileId = p.$id;
+                document.getElementById('p-rank').innerText = p.rank || "Имперец";
+                document.getElementById('p-about').innerText = p.about || "Данных нет.";
+
+                if (state.profile && p.$id === state.profile.$id) {
+                    document.getElementById('p-about').classList.add('hidden');
+                    document.getElementById('p-about-edit').classList.remove('hidden');
+                    document.getElementById('p-about-edit').value = p.about || "";
+                    document.getElementById('p-save-self').classList.remove('hidden');
                 }
-            } catch(e) {}
+                if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                    document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('p-rank-edit').value = p.rank || "Наблюдатель";
+                }
+            }
         }
         
         function openMyProfile() { 
@@ -2308,13 +2318,27 @@
         }
         
         async function saveMyProfile() { 
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); 
+            const newAbout = document.getElementById('p-about-edit').value;
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: newAbout });
+
+            if (state.profile) {
+                state.profile.about = newAbout;
+                if (state.profileCache.has(state.profile.username)) {
+                    state.profileCache.get(state.profile.username).about = newAbout;
+                }
+            }
             closeModal('profile-modal'); 
             showToast("Сохранено"); 
         }
         
         async function saveProfileChanges() { 
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); 
+            const newRank = document.getElementById('p-rank-edit').value;
+            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: newRank });
+
+            const username = document.getElementById('p-name').innerText;
+            if (state.profileCache.has(username)) {
+                state.profileCache.get(username).rank = newRank;
+            }
             closeModal('profile-modal'); 
             showToast("Статус обновлен"); 
         }
