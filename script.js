@@ -145,7 +145,21 @@
 
         function escapeHtml(text) {
             if (!text) return "";
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
+        }
+
+        function escapeJs(text) {
+            if (!text) return "";
+            return text.replace(/\\/g, '\\\\')
+                       .replace(/'/g, "\\'")
+                       .replace(/"/g, '\\"')
+                       .replace(/`/g, '\\`')
+                       .replace(/\n/g, '\\n')
+                       .replace(/\r/g, '\\r');
         }
 
         function scrollToBottom() {
@@ -552,7 +566,7 @@
             let controls = '';
             if (!msg.optimistic && !isSystem && isMine) {
                 controls = `<div class="controls">`;
-                if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', \`${escapeHtml(msg.messageContent)}\`)">✎</span>`;
+                if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(escapeJs(msg.messageContent))}')">✎</span>`;
                 controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
             }
 
@@ -584,7 +598,7 @@
                 if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${encryptedHtml}</div>`;
             }
 
-            const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${msg.senderId}')">${msg.senderId}</span>`;
+            const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${escapeHtml(escapeJs(msg.senderId))}')">${escapeHtml(msg.senderId)}</span>`;
             const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
             const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
@@ -834,9 +848,9 @@
                 }
 
                 const html = res.documents.map(user =>
-                    `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${user.username}')">
-                        <span style="font-weight:700;">${user.username}</span>
-                        <span class="u-rank">${user.rank || 'Наблюдатель'}</span>
+                    `<div class="user-item" onclick="closeModal('users-modal'); openProfile('${escapeHtml(escapeJs(user.username))}')">
+                        <span style="font-weight:700;">${escapeHtml(user.username)}</span>
+                        <span class="u-rank">${escapeHtml(user.rank || 'Наблюдатель')}</span>
                     </div>`
                 ).join('');
                 listContainer.innerHTML = html;
