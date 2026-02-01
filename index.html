@@ -1790,16 +1790,27 @@
         }
 
         function startGeigerLoop() {
-            setInterval(() => {
+            let lastTime = 0;
+            const needle = document.getElementById('geiger-needle');
+            const loop = (time) => {
+                if (!lastTime) lastTime = time;
+                const dt = Math.min(time - lastTime, 100); // Cap dt to avoid huge jumps
+                lastTime = time;
+
                 if (state.geigerVal > 0) {
-                    state.geigerVal *= 0.95;
-                    const needle = document.getElementById('geiger-needle');
-                    const rotation = -45 + (state.geigerVal * 90);
-                    needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
+                    state.geigerVal *= Math.pow(0.95, dt / 100);
+                    if (state.geigerVal < 0.001) state.geigerVal = 0;
+
+                    if (needle) {
+                        const rotation = -45 + (state.geigerVal * 90);
+                        needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
+                    }
                     
-                    if (Math.random() < state.geigerVal * 0.5) playGeigerClick();
+                    if (Math.random() < state.geigerVal * 0.5 * (dt / 100)) playGeigerClick();
                 }
-            }, 100);
+                requestAnimationFrame(loop);
+            };
+            requestAnimationFrame(loop);
         }
 
         function toggleRadioMode() {
