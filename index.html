@@ -1475,7 +1475,8 @@
             isRadioMode: false,
             radioNoise: null,
             geigerVal: 0,
-            aiCooldown: false
+            aiCooldown: false,
+            profileCache: new Map()
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2169,9 +2170,18 @@
             document.getElementById('p-about').classList.remove('hidden');
 
             try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
-                if(res.documents.length > 0) {
-                    const p = res.documents[0]; 
+                let p;
+                if (state.profileCache.has(username)) {
+                    p = state.profileCache.get(username);
+                } else {
+                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                    if(res.documents.length > 0) {
+                        p = res.documents[0];
+                        state.profileCache.set(username, p);
+                    }
+                }
+
+                if (p) {
                     state.currentProfileId = p.$id; 
                     document.getElementById('p-rank').innerText = p.rank || "Имперец"; 
                     document.getElementById('p-about').innerText = p.about || "Данных нет.";
@@ -2200,12 +2210,15 @@
         
         async function saveMyProfile() { 
             await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: document.getElementById('p-about-edit').value }); 
+            state.profileCache.delete(state.profile.username);
             closeModal('profile-modal'); 
             showToast("Сохранено"); 
         }
         
         async function saveProfileChanges() { 
             await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: document.getElementById('p-rank-edit').value }); 
+            const username = document.getElementById('p-name').innerText;
+            if(username) state.profileCache.delete(username);
             closeModal('profile-modal'); 
             showToast("Статус обновлен"); 
         }
