@@ -51,27 +51,35 @@ class SoulAvatarSystem {
         this.camera.position.z = 3.5;
 
         // Shared Lighting (Static)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // Reduced for better contrast
         this.scene.add(ambientLight);
 
-        const pointLight = new THREE.PointLight(0xffffff, 0.8);
+        const pointLight = new THREE.PointLight(0xffffff, 1.2);
         pointLight.position.set(5, 5, 5);
         this.scene.add(pointLight);
 
-        const pointLight2 = new THREE.PointLight(this.secondaryColor, 0.8);
+        const pointLight2 = new THREE.PointLight(this.secondaryColor, 1.0);
         pointLight2.position.set(-5, -5, 2);
         this.scene.add(pointLight2);
 
-        // Shared Material (Phong is faster and handles simple lights better for "fake glass")
-        this.sharedMaterial = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            emissive: 0x111111,
-            specular: 0xffffff,
-            shininess: 100,
-            transparent: true,
-            opacity: 0.7,
+        // Rim light for definition
+        const pointLight3 = new THREE.PointLight(0xffffff, 1.0);
+        pointLight3.position.set(0, 5, -5);
+        this.scene.add(pointLight3);
+
+        // Shared Material (Physical for "Liquid Glass" look)
+        this.sharedMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xf0f8ff,   // AliceBlue (Slightly cool white)
+            emissive: 0x004444, // Enhanced Cyan glow for visibility on white
+            roughness: 0.05,   // Ultra Polished
+            metalness: 0.2,    // Higher metalness for "Crystal" reflections
+            transmission: 0.1, // Almost opaque to ensure it stands out against white
+            thickness: 1.5,    // Volume
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.05,
+            ior: 1.7,          // High Index of Refraction (Crystal-like)
             side: THREE.FrontSide,
-            flatShading: true // Enhances the "fractal/crystal" look
+            flatShading: true // Faceted look for "Crystal" vibe
         });
 
         // Start animation loop
@@ -104,14 +112,15 @@ class SoulAvatarSystem {
     createGeometryData(username, xp) {
         const hash = this.stringToHash(username);
 
-        let detail = 0;
-        let noiseMagnitude = 0.1;
+        // Determine complexity
+        let layers = 0;
+        if (xp >= 50) layers = 3;      // Complex Lotus
+        else if (xp >= 21) layers = 2; // Blooming
+        else if (xp >= 6) layers = 1;  // Bud/Simple
+        else layers = 0;               // Seed
 
-        if (xp >= 50) { detail = 3; noiseMagnitude = 0.8; }
-        else if (xp >= 21) { detail = 2; noiseMagnitude = 0.5; }
-        else if (xp >= 6) { detail = 1; noiseMagnitude = 0.3; }
-
-        const geometry = new THREE.IcosahedronGeometry(1, detail);
+        // Reduced segments for faceted "Crystal" look with flatShading
+        const geometry = new THREE.SphereGeometry(1, 32, 32);
         const positionAttribute = geometry.attributes.position;
         const vertex = new THREE.Vector3();
 
@@ -121,20 +130,63 @@ class SoulAvatarSystem {
             return x - Math.floor(x);
         };
 
+        const petalFreq = 3 + Math.floor(random() * 4); // 3 to 6 petals
+        const petalAmp = 0.2 + (random() * 0.3); // Depth of petals
+
         for (let i = 0; i < positionAttribute.count; i++) {
             vertex.fromBufferAttribute(positionAttribute, i);
-            const spikeFactor = 1.0 + (random() * noiseMagnitude);
-            vertex.multiplyScalar(spikeFactor);
+
+            // Convert to spherical
+            let r = vertex.length();
+            let theta = Math.atan2(vertex.z, vertex.x);
+            let phi = Math.acos(vertex.y / r);
+
+            if (layers === 0) {
+                // Level 0: Seed / Teardrop
+                vertex.y *= 1.5; // Elongate
+                // Taper logic: wider at bottom, narrower at top
+                const yNorm = vertex.y / 1.5;
+                const taper = 0.8 - 0.4 * yNorm;
+                vertex.x *= taper;
+                vertex.z *= taper;
+            } else {
+                // Level 1+: Lotus Petals
+                let displacement = 0;
+
+                // Base Petals
+                displacement += Math.sin(theta * petalFreq) * Math.sin(phi * 3) * petalAmp;
+
+                if (layers >= 2) {
+                     // Inner/Offset Petals
+                     displacement += Math.sin(theta * petalFreq * 1.5 + Math.PI) * Math.sin(phi * 5) * (petalAmp * 0.5);
+                }
+
+                if (layers >= 3) {
+                     // Surface Texture/Detail
+                     displacement += Math.sin(theta * 10) * Math.sin(phi * 10) * 0.05;
+                }
+
+                // Apply displacement
+                r = 1.0 + Math.abs(displacement);
+
+                // Reconstruct from spherical coordinates
+                vertex.set(
+                    r * Math.sin(phi) * Math.cos(theta),
+                    r * Math.cos(phi),
+                    r * Math.sin(phi) * Math.sin(theta)
+                );
+            }
+
             positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
         }
 
         geometry.computeVertexNormals();
 
-        const baseSpeed = 0.005 + (xp * 0.0001);
+        const baseSpeed = 0.002 + (xp * 0.0001); // Slower, more majestic
 
         return {
             geometry: geometry,
-            speed: baseSpeed + (random() * 0.01),
+            speed: baseSpeed + (random() * 0.005),
             rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
         };
     }
@@ -197,24 +249,28 @@ class SoulAvatarSystem {
             this.profileCamera.position.z = 3.5;
 
             // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             this.profileScene.add(ambientLight);
-            const pointLight = new THREE.PointLight(0xffffff, 1);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1.2);
             pointLight.position.set(5, 5, 5);
             this.profileScene.add(pointLight);
-            const pointLight2 = new THREE.PointLight(this.secondaryColor, 0.8);
+
+            const pointLight2 = new THREE.PointLight(this.secondaryColor, 1.0);
             pointLight2.position.set(-5, -5, 2);
             this.profileScene.add(pointLight2);
+
+            const pointLight3 = new THREE.PointLight(0xffffff, 1.0);
+            pointLight3.position.set(0, 5, -5);
+            this.profileScene.add(pointLight3);
         }
 
-        // Handle Resize based on CSS size
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        if (canvas.width !== width || canvas.height !== height) {
-             this.profileRenderer.setSize(width, height, false);
-             this.profileCamera.aspect = width / height;
-             this.profileCamera.updateProjectionMatrix();
-        }
+        // Handle Resize based on CSS size (Initial)
+        const width = canvas.clientWidth || 300; // Fallback to ensure render
+        const height = canvas.clientHeight || 300;
+        this.profileRenderer.setSize(width, height, false);
+        this.profileCamera.aspect = width / height;
+        this.profileCamera.updateProjectionMatrix();
 
         // Create/Update Mesh
         if (this.profileMesh) {
@@ -235,6 +291,15 @@ class SoulAvatarSystem {
              }
 
              this.profileRequestId = requestAnimationFrame(animate);
+
+             // Dynamic Resize
+             const w = canvas.clientWidth;
+             const h = canvas.clientHeight;
+             if (w && h && (canvas.width !== w || canvas.height !== h)) {
+                 this.profileRenderer.setSize(w, h, false);
+                 this.profileCamera.aspect = w / h;
+                 this.profileCamera.updateProjectionMatrix();
+             }
 
              const time = performance.now();
              this.profileMesh.rotation.x = time * speed * rotationAxis.x * 0.1;
