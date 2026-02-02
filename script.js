@@ -977,3 +977,59 @@
                 }, 300);
             });
         }
+
+        // COUNTDOWN SYSTEM
+        function startCountdown() {
+            const targetDate = new Date('2026-06-01T00:00:00').getTime();
+            const elYears = document.getElementById('cd-years');
+            const elDays = document.getElementById('cd-days');
+            const elHours = document.getElementById('cd-hours');
+            const elMinutes = document.getElementById('cd-minutes');
+            const elSeconds = document.getElementById('cd-seconds');
+            const elMs = document.getElementById('cd-ms');
+
+            function update() {
+                const now = new Date();
+                const diff = targetDate - now.getTime();
+
+                if (diff <= 0) {
+                    // Countdown finished
+                    const timer = document.getElementById('countdown-timer');
+                    if (timer) timer.style.display = 'none';
+                    return;
+                }
+
+                // Calculate Years and Days specifically as requested
+                let tempDate = new Date(now);
+                let years = 0;
+                while (true) {
+                    tempDate.setFullYear(tempDate.getFullYear() + 1);
+                    if (tempDate.getTime() > targetDate) {
+                        tempDate.setFullYear(tempDate.getFullYear() - 1);
+                        break;
+                    }
+                    years++;
+                }
+
+                const remainingTime = targetDate - tempDate.getTime();
+
+                const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                const ms = Math.floor(remainingTime % 1000);
+
+                if(elYears) elYears.innerText = years;
+                if(elDays) elDays.innerText = days;
+                if(elHours) elHours.innerText = hours.toString().padStart(2, '0');
+                if(elMinutes) elMinutes.innerText = minutes.toString().padStart(2, '0');
+                if(elSeconds) elSeconds.innerText = seconds.toString().padStart(2, '0');
+                if(elMs) elMs.innerText = ms.toString().padStart(3, '0');
+
+                requestAnimationFrame(update);
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        startCountdown();
