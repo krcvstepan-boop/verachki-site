@@ -32,7 +32,7 @@ class SoulAvatarSystem {
             precision: "mediump" // optimization for mobile
         });
 
-        this.renderer.setClearColor(0x000000, 0); // Force transparency
+        this.renderer.setClearColor(0xffffff, 0); // Force transparency
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
