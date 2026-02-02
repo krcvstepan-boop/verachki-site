@@ -3,7 +3,7 @@
         const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
         const DB_ID = '6962475a003af27425fb';
         const MSG_COL = 'verachkichathistory';
-        const PROFILES_COL = 'profiles';
+        const PROFILES_COLLECTION_ID = 'profiles';
         const STORAGE_ID = '696363f30004cb97e6a1';
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
@@ -20,7 +20,7 @@
         const storage = new Storage(client);
 
         // GLOBAL STATE
-        let state = {
+        var state = {
             user: null,
             profile: null,
             profileCache: new Map(),
@@ -139,7 +139,7 @@
             try {
                 state.user = await account.get();
                 try {
-                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
+                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.equal('email', state.user.email)]);
                     if(res.documents.length > 0) {
                         state.profile = res.documents[0];
                         // Init new fields if missing (lazy migration)
@@ -147,7 +147,7 @@
                         if (state.profile.flower_xp === undefined) state.profile.flower_xp = 0;
                         state.profileCache.set(state.profile.username, state.profile);
                     }
-                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), {
+                    else state.profile = await db.createDocument(DB_ID, PROFILES_COLLECTION_ID, ID.unique(), {
                         username: state.user.name,
                         email: state.user.email,
                         rank: "Наблюдатель",
@@ -253,7 +253,7 @@
                     const name = document.getElementById('reg-name').value;
                     await account.create(ID.unique(), email, pass, name);
                     await account.createEmailPasswordSession(email, pass);
-                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), {
+                    await db.createDocument(DB_ID, PROFILES_COLLECTION_ID, ID.unique(), {
                         username: name,
                         email: email,
                         rank: "Наблюдатель",
@@ -795,7 +795,7 @@
             listContainer.innerHTML = '<p>Загрузка архивов...</p>';
 
             try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.limit(100)]);
+                const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.limit(100)]);
                 if (res.documents.length === 0) {
                     listContainer.innerHTML = '<p>Список пуст.</p>';
                     return;
@@ -891,30 +891,64 @@
         }
 
         async function claimEther() {
-            if (!state.profile) return;
+            if (!state.user) return; // Must be logged in
             const today = getMSKDate();
 
-            if (state.profile.last_claim_date === today) {
+            // Optimistic check if profile exists locally
+            if (state.profile && state.profile.last_claim_date === today) {
                 showToast("Уже собрано сегодня", "error");
                 return;
             }
 
             try {
-                const newEther = (state.profile.ether || 0) + 1;
-                await db.updateDocument(DB_ID, PROFILES_COL, state.profile.$id, {
+                // Determine ID: Profile ID if exists, otherwise User ID
+                const docId = state.profile ? state.profile.$id : state.user.$id;
+                const currentEther = state.profile ? (state.profile.ether || 0) : 0;
+                const newEther = currentEther + 1;
+
+                await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, docId, {
                     ether: newEther,
                     last_claim_date: today
                 });
 
-                state.profile.ether = newEther;
-                state.profile.last_claim_date = today;
-                state.profileCache.set(state.profile.username, state.profile);
+                // Update local state if successful
+                if (state.profile) {
+                    state.profile.ether = newEther;
+                    state.profile.last_claim_date = today;
+                    state.profileCache.set(state.profile.username, state.profile);
+                    updateFlowerUI(state.profile);
+                }
 
-                updateFlowerUI(state.profile);
                 showToast("+1 Эфир получен");
-                playNotification(); // Reuse sound
+                playNotification();
+
             } catch(e) {
-                showToast("Ошибка сбора", "error");
+                // FIX: Auto-Create Logic
+                if (e.code === 404) {
+                     try {
+                        const newProfile = await db.createDocument(DB_ID, PROFILES_COLLECTION_ID, state.user.$id, {
+                            username: state.user.name,
+                            email: state.user.email,
+                            rank: "Наблюдатель",
+                            about: "",
+                            ether: 1,
+                            flower_xp: 0,
+                            last_claim_date: today
+                        });
+
+                        state.profile = newProfile;
+                        state.profileCache.set(state.profile.username, state.profile);
+                        updateFlowerUI(state.profile);
+                        showToast("+1 Эфир получен (Профиль создан)");
+                        playNotification();
+                     } catch (createErr) {
+                         console.error(createErr);
+                         showToast("Ошибка создания профиля", "error");
+                     }
+                } else {
+                    console.error(e);
+                    showToast("Ошибка сбора", "error");
+                }
             }
         }
 
@@ -925,7 +959,7 @@
                 const newEther = state.profile.ether - 1;
                 const newXp = (state.profile.flower_xp || 0) + 1;
 
-                await db.updateDocument(DB_ID, PROFILES_COL, state.profile.$id, {
+                await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.profile.$id, {
                     ether: newEther,
                     flower_xp: newXp
                 });
@@ -975,7 +1009,7 @@
                 if (state.profileCache.has(username)) {
                     p = state.profileCache.get(username);
                 } else {
-                    const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('username', username)]);
+                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.equal('username', username)]);
                     if(res.documents.length > 0) {
                         p = res.documents[0];
                         state.profileCache.set(username, p);
@@ -983,6 +1017,14 @@
                 }
 
                 if (p) {
+                    // Update Profile Avatar
+                    if (typeof AvatarSystem !== 'undefined' && AvatarSystem.renderProfileAvatar) {
+                        const canvas = document.getElementById('profile-flower-canvas');
+                        if (canvas) {
+                            AvatarSystem.renderProfileAvatar(canvas, p.username, p.flower_xp || 0);
+                        }
+                    }
+
                     state.currentProfileId = p.$id;
                     document.getElementById('p-rank').innerText = p.rank || "Имперец";
                     document.getElementById('p-about').innerText = p.about || "Данных нет.";
@@ -1015,7 +1057,7 @@
 
         async function saveMyProfile() {
             const newAbout = document.getElementById('p-about-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { about: newAbout });
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { about: newAbout });
 
             if (state.profile) {
                 state.profile.about = newAbout;
@@ -1028,7 +1070,7 @@
 
         async function saveProfileChanges() {
             const newRank = document.getElementById('p-rank-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COL, state.currentProfileId, { rank: newRank });
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { rank: newRank });
 
             const username = document.getElementById('p-name').innerText;
             if (state.profileCache.has(username)) {

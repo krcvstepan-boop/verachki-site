@@ -191,7 +191,7 @@
                 <a href="https://t.me/VerochkiPublic" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Гости</a>
                 <a href="https://t.me/VerachkiNews" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.2);">Telegram: Новости</a>
             </div>
-            <p style="opacity: 0.3; font-size: clamp(0.7rem, 2vw, 0.75rem);">© 2026 VERACHKI EMPIRE.<br>Design by KC_Comms [oV] & Architecture by 미하이</p>
+            <p style="opacity: 0.3; font-size: clamp(0.7rem, 2vw, 0.75rem);">© 2026 ИМПЕРИЯ ВЕРАЧКИ.<br>Дизайн: KC_Comms [oV] & Архитектура: 미하이</p>
         </div>
     </footer>
 
@@ -293,24 +293,28 @@
     </div>
 
     <div id="profile-modal" class="modal-overlay">
-        <div class="dossier-box">
+        <div class="glass-profile-modal">
             <span class="close-icon" onclick="closeModal('profile-modal')">✕</span>
-            <div class="dossier-stamp">СОВЕРШЕННО СЕКРЕТНО</div>
-            <div style="margin-top: 30px; text-align: left;">
-                <h2 id="p-name" style="margin: 0; font-size: 1.5rem; border-bottom: 2px solid #333;">AGENT</h2>
-                <div style="margin-top: 10px;">
-                    <strong>РАНГ:</strong> <span id="p-rank">...</span><br>
-                    <strong>СТАТУС:</strong> АКТИВЕН
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <canvas id="profile-flower-canvas" width="250" height="250" style="width: 250px; height: 250px; display: block; margin: 0 auto;"></canvas>
+            </div>
+
+            <div style="text-align: center;">
+                <h2 id="p-name" style="margin: 0; font-size: 1.8rem; border: none;">АГЕНТ</h2>
+                <div style="margin-top: 10px; font-size: 0.9rem;">
+                    <strong>РАНГ:</strong> <span id="p-rank">...</span> | <strong>СТАТУС:</strong> АКТИВЕН
                 </div>
             </div>
-            <div style="margin-top: 20px; text-align: left; border-top: 1px dashed #333; padding-top: 10px;">
+
+            <div style="margin-top: 20px; text-align: left; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px;">
                 <strong>ДОСЬЕ:</strong>
-                <textarea id="p-about-edit" class="hidden" rows="4" style="background: transparent; border: none; font-family: 'Courier New'; width: 100%; resize: none;" placeholder="Введите данные..."></textarea>
+                <textarea id="p-about-edit" class="hidden" rows="4" style="background: transparent; border: none; font-family: 'Manrope', sans-serif; width: 100%; resize: none;" placeholder="Введите данные..."></textarea>
                 <p id="p-about" style="margin: 5px 0;">-</p>
             </div>
 
             <!-- TAMAGOTCHI SECTION -->
-            <div id="flower-controls" class="flower-panel hidden">
+            <div id="flower-controls" class="flower-panel hidden" style="border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);">
                 <div class="flower-stats">
                     <div class="stat-box">
                         <span class="stat-label">СТАДИЯ</span>
