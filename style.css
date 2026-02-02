@@ -907,40 +907,32 @@
             box-shadow: 0 4px 12px rgba(106, 77, 244, 0.15);
         }
 
-        /* Profile Dossier */
-        .dossier-box {
-            background: #f0e6d2;
-            color: #333;
-            font-family: 'Courier New', monospace;
+        /* Profile Modal - Liquid Glass */
+        .glass-profile-modal {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: clamp(30px, 8vw, 40px);
             width: 100%;
             max-width: 500px;
-            padding: clamp(25px, 6vw, 40px);
             position: relative;
-            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid #d4c5a8;
-            border-radius: 12px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.1);
             max-height: 90vh;
             overflow-y: auto;
+            color: #1d1d1f;
+            font-family: 'Manrope', sans-serif;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
         }
 
-        @media(min-width: 768px) {
-            .dossier-box {
-                transform: rotate(-1deg);
-            }
-        }
-
-        .dossier-stamp {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            border: 3px solid #d00;
-            color: #d00;
-            font-weight: 900;
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            padding: 3px 8px;
-            transform: rotate(-15deg);
-            opacity: 0.8;
-        }
+    .glass-profile-modal h1,
+    .glass-profile-modal h2,
+    .glass-profile-modal h3,
+    .glass-profile-modal h4 {
+        font-family: 'Manrope', sans-serif;
+        color: inherit;
+    }
 
         /* Flower / Tamagotchi Panel */
         .flower-panel {

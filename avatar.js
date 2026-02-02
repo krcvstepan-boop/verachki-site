@@ -18,6 +18,14 @@ class SoulAvatarSystem {
         // Configuration
         this.baseColor = 0x6a4df4;
         this.secondaryColor = 0x74b9ff;
+
+        // Profile Renderer State
+        this.profileRenderer = null;
+        this.profileScene = null;
+        this.profileCamera = null;
+        this.profileMesh = null;
+        this.profileCanvas = null;
+        this.profileRequestId = null;
     }
 
     init() {
@@ -93,21 +101,8 @@ class SoulAvatarSystem {
         return Math.abs(hash);
     }
 
-    getMesh(username, xp = 0) {
-        // Cache key includes XP now to force regeneration on level up
-        // Simplified: We check if cached mesh exists. If so, we assume it's correct unless explicitly updated.
-        // The calling code (script.js) should call updateAvatar(username, newXp) when XP changes.
-        if (this.meshes.has(username)) {
-            return this.meshes.get(username);
-        }
-
+    createGeometryData(username, xp) {
         const hash = this.stringToHash(username);
-
-        // Growth Logic
-        // Lvl 1: 0-5 XP -> Detail 0, Minimal Noise
-        // Lvl 2: 6-20 XP -> Detail 1, Low Noise
-        // Lvl 3: 21-50 XP -> Detail 2, Med Noise
-        // Lvl 4: 50+ XP -> Detail 3, High Noise (Spiky)
 
         let detail = 0;
         let noiseMagnitude = 0.1;
@@ -120,14 +115,12 @@ class SoulAvatarSystem {
         const positionAttribute = geometry.attributes.position;
         const vertex = new THREE.Vector3();
 
-        // Deterministic RNG based on hash
         let seed = hash;
         const random = () => {
             const x = Math.sin(seed++) * 10000;
             return x - Math.floor(x);
         };
 
-        // Displace vertices
         for (let i = 0; i < positionAttribute.count; i++) {
             vertex.fromBufferAttribute(positionAttribute, i);
             const spikeFactor = 1.0 + (random() * noiseMagnitude);
@@ -137,15 +130,27 @@ class SoulAvatarSystem {
 
         geometry.computeVertexNormals();
 
-        const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
-
-        // Speed slightly increases with level
         const baseSpeed = 0.005 + (xp * 0.0001);
+
+        return {
+            geometry: geometry,
+            speed: baseSpeed + (random() * 0.01),
+            rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
+        };
+    }
+
+    getMesh(username, xp = 0) {
+        if (this.meshes.has(username)) {
+            return this.meshes.get(username);
+        }
+
+        const { geometry, speed, rotationAxis } = this.createGeometryData(username, xp);
+        const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
 
         const data = {
             mesh: mesh,
-            speed: baseSpeed + (random() * 0.01),
-            rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
+            speed: speed,
+            rotationAxis: rotationAxis
         };
 
         this.meshes.set(username, data);
@@ -161,6 +166,83 @@ class SoulAvatarSystem {
         }
         // Force regeneration
         this.getMesh(username, xp);
+    }
+
+    renderProfileAvatar(canvas, username, xp) {
+        if (!window.THREE) return;
+
+        // Cancel old loop
+        if (this.profileRequestId) {
+            cancelAnimationFrame(this.profileRequestId);
+            this.profileRequestId = null;
+        }
+
+        // Initialize Profile Renderer if needed
+        if (!this.profileRenderer || this.profileCanvas !== canvas) {
+            if (this.profileRenderer) {
+                this.profileRenderer.dispose();
+            }
+            this.profileCanvas = canvas;
+            this.profileRenderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                alpha: true,
+                antialias: true,
+                powerPreference: "high-performance"
+            });
+            this.profileRenderer.setClearColor(0xffffff, 0);
+            this.profileRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            this.profileScene = new THREE.Scene();
+            this.profileCamera = new THREE.PerspectiveCamera(50, canvas.width / canvas.height, 0.1, 100);
+            this.profileCamera.position.z = 3.5;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            this.profileScene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 5, 5);
+            this.profileScene.add(pointLight);
+            const pointLight2 = new THREE.PointLight(this.secondaryColor, 0.8);
+            pointLight2.position.set(-5, -5, 2);
+            this.profileScene.add(pointLight2);
+        }
+
+        // Handle Resize based on CSS size
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (canvas.width !== width || canvas.height !== height) {
+             this.profileRenderer.setSize(width, height, false);
+             this.profileCamera.aspect = width / height;
+             this.profileCamera.updateProjectionMatrix();
+        }
+
+        // Create/Update Mesh
+        if (this.profileMesh) {
+            this.profileScene.remove(this.profileMesh);
+            if(this.profileMesh.geometry) this.profileMesh.geometry.dispose();
+            this.profileMesh = null;
+        }
+
+        const { geometry, speed, rotationAxis } = this.createGeometryData(username, xp);
+        this.profileMesh = new THREE.Mesh(geometry, this.sharedMaterial);
+        this.profileScene.add(this.profileMesh);
+
+        // Animation Loop
+        const animate = () => {
+             if (canvas.offsetParent === null) {
+                 this.profileRequestId = requestAnimationFrame(animate);
+                 return;
+             }
+
+             this.profileRequestId = requestAnimationFrame(animate);
+
+             const time = performance.now();
+             this.profileMesh.rotation.x = time * speed * rotationAxis.x * 0.1;
+             this.profileMesh.rotation.y = time * speed * rotationAxis.y * 0.1;
+
+             this.profileRenderer.render(this.profileScene, this.profileCamera);
+        };
+        animate();
     }
 
     animate() {
