@@ -68,6 +68,7 @@
             opacity: 0.6;
             animation: float 10s infinite ease-in-out alternate;
             transition: background 2s ease-in-out;
+            will-change: transform;
         }
 
         .blob-1 {
@@ -110,6 +111,7 @@
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
+            transform: translateZ(0);
         }
 
         /* Typography - Mobile Optimized */
@@ -1134,5 +1136,28 @@
             }
             .time-block {
                 min-width: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .glass-panel {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            .chat-wrapper {
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aurora-blob {
+                animation: none;
+            }
+            *, *::before, *::after {
+                animation-duration: 0.001s !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001s !important;
+                scroll-behavior: auto !important;
             }
         }

@@ -65,8 +65,10 @@
         }
 
         function setVH() {
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            requestAnimationFrame(() => {
+                let vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            });
         }
         window.addEventListener('load', setVH);
         window.addEventListener('resize', throttle(setVH, 100));
@@ -883,19 +885,18 @@
             const elMinutes = document.getElementById('cd-minutes');
             const elSeconds = document.getElementById('cd-seconds');
             const elMs = document.getElementById('cd-ms');
+            const timer = document.getElementById('countdown-timer');
 
-            function update() {
+            function updateTime() {
                 const now = new Date();
                 const diff = targetDate - now.getTime();
 
                 if (diff <= 0) {
-                    // Countdown finished
-                    const timer = document.getElementById('countdown-timer');
                     if (timer) timer.style.display = 'none';
                     return;
                 }
 
-                // Calculate Years and Days specifically as requested
+                // Calculate Years (Once per second is fine)
                 let tempDate = new Date(now);
                 let years = 0;
                 while (true) {
@@ -908,24 +909,29 @@
                 }
 
                 const remainingTime = targetDate - tempDate.getTime();
-
                 const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-                const ms = Math.floor(remainingTime % 1000);
 
                 if(elYears) elYears.innerText = years;
                 if(elDays) elDays.innerText = days;
                 if(elHours) elHours.innerText = hours.toString().padStart(2, '0');
                 if(elMinutes) elMinutes.innerText = minutes.toString().padStart(2, '0');
                 if(elSeconds) elSeconds.innerText = seconds.toString().padStart(2, '0');
-                if(elMs) elMs.innerText = ms.toString().padStart(3, '0');
-
-                requestAnimationFrame(update);
             }
 
-            requestAnimationFrame(update);
+            function updateMs() {
+                const diff = targetDate - Date.now();
+                if (diff <= 0) return;
+                const ms = Math.floor(diff % 1000);
+                if(elMs) elMs.innerText = ms.toString().padStart(3, '0');
+                requestAnimationFrame(updateMs);
+            }
+
+            setInterval(updateTime, 1000);
+            updateTime();
+            requestAnimationFrame(updateMs);
         }
 
         startCountdown();

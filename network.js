@@ -98,15 +98,11 @@ async function initGraph() {
         })
         .nodeThreeObject(node => {
             if (node.group === 'user') {
-                const geometry = new THREE.SphereGeometry(node.val, 32, 32);
-                const material = new THREE.MeshPhysicalMaterial({
+                const geometry = new THREE.SphereGeometry(node.val, 16, 16);
+                const material = new THREE.MeshLambertMaterial({
                     color: 0x00ffff,
                     transparent: true,
-                    opacity: 0.6,
-                    roughness: 0,
-                    metalness: 0.1,
-                    clearcoat: 1,
-                    transmission: 0.2
+                    opacity: 0.6
                 });
                 const mesh = new THREE.Mesh(geometry, material);
                 return mesh;
@@ -129,6 +125,11 @@ async function initGraph() {
     const distance = 400;
 
     function animate() {
+        if (document.hidden) {
+            setTimeout(animate, 1000);
+            return;
+        }
+
         if (Graph) {
             angle += 0.001;
             Graph.cameraPosition({
