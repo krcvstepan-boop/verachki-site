@@ -416,11 +416,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
         }
 
         .header-btn:active {
             transform: scale(0.9);
             background: rgba(0,0,0,0.05);
+        }
+
+        .header-btn-text {
+            display: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #111;
+        }
+
+        @media(min-width: 768px) {
+            .header-btn-text {
+                display: inline;
+            }
         }
 
         .back-btn {
@@ -471,6 +486,7 @@
             z-index: 5;
             width: 100%;
             height: 100%;
+            background: transparent !important;
         }
 
         .message-row {
