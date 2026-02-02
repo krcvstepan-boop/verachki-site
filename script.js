@@ -12,46 +12,6 @@
         const keyP2 = "AlccfNJwQoCAxVzHgSdS";
         const HF_TOKEN = keyP1 + keyP2;
 
-        // ENIGMA ENCRYPTION SYSTEM
-        const encryptedMessages = {};
-
-        function getRandomChar() {
-            const chars = '#@!$%^&*()_+-=[]{}|;:,.<>?/~';
-            return chars[Math.floor(Math.random() * chars.length)];
-        }
-
-        function scrambleText(text) {
-            return text.split('').map(c => c.trim() === '' ? c : getRandomChar()).join('');
-        }
-
-        function decryptMessage(textId, btnId) {
-            const el = document.getElementById(textId);
-            const btn = document.getElementById(btnId);
-            if (!el || !encryptedMessages[textId]) return;
-
-            if (btn) btn.style.display = 'none';
-
-            const originalText = encryptedMessages[textId];
-            let revealIndex = 0;
-
-            const interval = setInterval(() => {
-                const currentText = originalText.split('').map((char, index) => {
-                    if (index < revealIndex) return char;
-                    return char.trim() === '' ? char : getRandomChar();
-                }).join('');
-
-                el.innerText = currentText;
-                revealIndex += 0.5;
-
-                if (revealIndex >= originalText.length) {
-                    clearInterval(interval);
-                    el.innerText = originalText;
-                    el.classList.remove('encrypted');
-                    delete encryptedMessages[textId];
-                }
-            }, 30);
-        }
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -75,7 +35,6 @@
             isUploading: false,
             isRadioMode: false,
             radioNoise: null,
-            geigerVal: 0,
             aiCooldown: false
         };
 
@@ -174,33 +133,53 @@
                 state.user = await account.get();
                 try {
                     const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
-                if(res.documents.length > 0) {
-                    state.profile = res.documents[0];
-                    state.profileCache.set(state.profile.username, state.profile);
-                }
+                    if(res.documents.length > 0) {
+                        state.profile = res.documents[0];
+                        state.profileCache.set(state.profile.username, state.profile);
+                    }
                     else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
                 } catch(e) { console.log("Profile create/fetch error", e); }
 
                 if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
-                showApp();
-            } catch (e) { showLanding(); }
+                updateLandingState(true);
+            } catch (e) { updateLandingState(false); }
         }
         checkSession();
+
+        function updateLandingState(isLoggedIn) {
+            const heroBtn = document.getElementById('hero-main-btn');
+            if (isLoggedIn) {
+                document.getElementById('nav-guest').classList.add('hidden');
+                document.getElementById('nav-user').classList.remove('hidden');
+
+                if (state.profile) {
+                    document.getElementById('nav-username').innerText = state.profile.username;
+                    document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
+                }
+
+                if (heroBtn) {
+                    heroBtn.innerText = "ВОЙТИ В ЧАТ";
+                    heroBtn.onclick = showApp;
+                }
+            } else {
+                document.getElementById('nav-guest').classList.remove('hidden');
+                document.getElementById('nav-user').classList.add('hidden');
+
+                if (heroBtn) {
+                    heroBtn.innerText = "Принять Присягу";
+                    heroBtn.onclick = () => openModal('auth-modal');
+                }
+            }
+        }
 
         function showApp() {
             document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
             document.querySelector('footer').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
-            document.getElementById('nav-guest').classList.add('hidden');
-            document.getElementById('nav-user').classList.remove('hidden');
+
             closeModal('auth-modal');
-            if(state.profile) {
-                document.getElementById('nav-username').innerText = state.profile.username;
-                document.getElementById('nav-rank').innerText = state.profile.rank || "Имперец";
-            }
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
-            startGeigerLoop();
         }
 
         function showLanding() {
@@ -217,8 +196,9 @@
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
-            document.getElementById('nav-guest').classList.remove('hidden');
-            document.getElementById('nav-user').classList.add('hidden');
+
+            updateLandingState(!!state.user);
+
             setTimeout(reveal, 100);
             window.scrollTo(0, 0);
         }
@@ -339,49 +319,11 @@
 
             if (level === 1) {
                 document.body.classList.add('defcon-1');
-                playGeigerClick(0.1);
             }
         }
 
         function toggleNVG() {
             document.body.classList.toggle('nvg-mode');
-            playGeigerClick();
-        }
-
-        function playGeigerClick(vol = 0.05) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'square';
-            osc.frequency.value = 100 + Math.random() * 50;
-            gain.gain.value = vol;
-            osc.start();
-            setTimeout(() => osc.stop(), 0.01);
-        }
-
-        function startGeigerLoop() {
-            let lastTime = 0;
-            const needle = document.getElementById('geiger-needle');
-            const loop = (time) => {
-                if (!lastTime) lastTime = time;
-                const dt = Math.min(time - lastTime, 100); // Cap dt to avoid huge jumps
-                lastTime = time;
-
-                if (state.geigerVal > 0) {
-                    state.geigerVal *= Math.pow(0.95, dt / 100);
-                    if (state.geigerVal < 0.001) state.geigerVal = 0;
-
-                    if (needle) {
-                        const rotation = -45 + (state.geigerVal * 90);
-                        needle.style.transform = `rotate(${Math.min(45, rotation)}deg)`;
-                    }
-
-                    if (Math.random() < state.geigerVal * 0.5 * (dt / 100)) playGeigerClick();
-                }
-                requestAnimationFrame(loop);
-            };
-            requestAnimationFrame(loop);
         }
 
         function toggleRadioMode() {
@@ -570,20 +512,7 @@
                 controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
             }
 
-            const uniqueId = msg.$id || `temp-${Math.random().toString(36).substr(2, 9)}`;
-            const textId = `enc-${uniqueId}`;
-            const btnId = `btn-${uniqueId}`;
-
-            let encryptedHtml = '';
-            if (msg.messageContent) {
-                encryptedMessages[textId] = msg.messageContent;
-                const scrambled = scrambleText(msg.messageContent);
-                encryptedHtml = `<span id="${textId}" class="msg-text-content encrypted">${scrambled}</span><span id="${btnId}" class="decipher-icon" onclick="decryptMessage('${textId}', '${btnId}')" title="Расшифровать">🔒</span>`;
-            } else {
-                encryptedHtml = `<span class="msg-text-content"></span>`;
-            }
-
-            let contentHtml = encryptedHtml;
+            let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
 
             if (msg.fileId || (msg.optimistic && msg.fileUrl)) {
                 const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId);
@@ -595,7 +524,7 @@
                 } else if (msg.fileType === 'audio') {
                     contentHtml = `<div class="custom-audio-player"><div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div><div class="audio-track"><div class="audio-progress"></div></div></div>`;
                 }
-                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;">${encryptedHtml}</div>`;
+                if (msg.messageContent) contentHtml += `<div style="margin-top:8px;"><span class="msg-text-content">${escapeHtml(msg.messageContent)}</span></div>`;
             }
 
             const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${escapeHtml(escapeJs(msg.senderId))}')">${escapeHtml(msg.senderId)}</span>`;
@@ -631,14 +560,8 @@
             if (existing) {
                 if (!existing.dataset.optimistic) {
                     const textContent = existing.querySelector('.msg-text-content');
-                    if(textContent) {
-                         const uniqueId = msg.$id;
-                         const textId = `enc-${uniqueId}`;
-                         encryptedMessages[textId] = msg.messageContent || "";
-                         textContent.innerText = scrambleText(msg.messageContent || "");
-                         textContent.classList.add('encrypted');
-                         const btn = existing.querySelector('.decipher-icon');
-                         if(btn) btn.style.display = 'inline-block';
+                    if(textContent && msg.messageContent) {
+                         textContent.innerText = msg.messageContent;
                     }
                     if (msg.isEdited && !existing.innerText.includes('(ред.)')) {
                         const msgText = existing.querySelector('.msg-text');
@@ -731,8 +654,6 @@
             const payload = response.payload;
 
             if(ev.includes('.create')) {
-                state.geigerVal = Math.min(1, state.geigerVal + 0.3);
-
                 if(payload.senderId !== state.profile.username) {
                     playNotification();
                     if(payload.senderId !== "СИСТЕМА") {
@@ -754,29 +675,9 @@
             if(ev.includes('.update')) {
                 const el = document.getElementById(payload.$id);
                 if(el) {
-                    const textId = `enc-${payload.$id}`;
-                    const btnId = `btn-${payload.$id}`;
-
                     if(payload.messageContent) {
-                        encryptedMessages[textId] = payload.messageContent;
-
-                        let content = document.getElementById(textId);
-                        if(!content) content = el.querySelector('.msg-text-content');
-
-                        if(content) {
-                            content.innerText = scrambleText(payload.messageContent);
-                            content.classList.add('encrypted');
-                            content.id = textId;
-
-                            let btn = document.getElementById(btnId);
-                            if(!btn) btn = el.querySelector('.decipher-icon');
-
-                            if(btn) {
-                                btn.style.display = 'inline-block';
-                            } else {
-                                content.insertAdjacentHTML('afterend', `<span id="${btnId}" class="decipher-icon" onclick="decryptMessage('${textId}', '${btnId}')" title="Расшифровать">🔒</span>`);
-                            }
-                        }
+                        let content = el.querySelector('.msg-text-content');
+                        if(content) content.innerText = payload.messageContent;
                     }
 
                     const msgText = el.querySelector('.msg-text');
@@ -792,13 +693,8 @@
                 if (isMine) {
                     const tempMsgs = document.querySelectorAll('[data-optimistic="true"]');
                     tempMsgs.forEach(m => {
-                        const textId = `enc-${m.id}`;
-                        const storedContent = encryptedMessages[textId];
                         const textContent = m.querySelector('.msg-text-content');
-
-                        if ((storedContent && storedContent === payload.messageContent) ||
-                            (textContent && textContent.innerText === payload.messageContent)) {
-                            delete encryptedMessages[textId];
+                        if (textContent && textContent.innerText === payload.messageContent) {
                             m.remove();
                         }
                     });
