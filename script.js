@@ -198,6 +198,7 @@
         function showApp() {
             document.querySelectorAll('section:not(#app-interface)').forEach(el => el.classList.add('hidden'));
             document.querySelector('footer').style.display = 'none';
+            document.querySelector('nav').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
 
             closeModal('auth-modal');
@@ -224,6 +225,7 @@
             document.querySelectorAll('section').forEach(el => el.classList.remove('hidden'));
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
+            document.querySelector('nav').style.display = 'flex';
 
             updateLandingState(!!state.user);
 
