@@ -201,6 +201,8 @@
             document.querySelector('nav').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
 
+            stopCountdownTimer();
+
             closeModal('auth-modal');
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
@@ -226,6 +228,8 @@
             document.getElementById('app-interface').classList.add('hidden');
             document.querySelector('footer').style.display = 'block';
             document.querySelector('nav').style.display = 'flex';
+
+            startCountdownTimer();
 
             updateLandingState(!!state.user);
 
@@ -1105,61 +1109,99 @@
         }
 
         // COUNTDOWN SYSTEM
-        function startCountdown() {
-            const targetDate = new Date('2026-06-01T00:00:00').getTime();
-            const elYears = document.getElementById('cd-years');
-            const elDays = document.getElementById('cd-days');
-            const elHours = document.getElementById('cd-hours');
-            const elMinutes = document.getElementById('cd-minutes');
-            const elSeconds = document.getElementById('cd-seconds');
-            const elMs = document.getElementById('cd-ms');
-            const timer = document.getElementById('countdown-timer');
+        const CD_TARGET = new Date('2026-06-01T00:00:00').getTime();
+        let countdownInterval = null;
+        let countdownRaf = null;
 
-            function updateTime() {
-                const now = new Date();
-                const diff = targetDate - now.getTime();
+        // Cache DOM elements
+        const cdElements = {
+            years: null,
+            days: null,
+            hours: null,
+            minutes: null,
+            seconds: null,
+            ms: null,
+            timer: null
+        };
 
-                if (diff <= 0) {
-                    if (timer) timer.style.display = 'none';
-                    return;
-                }
+        function updateCountdownTime() {
+            const now = new Date();
+            const diff = CD_TARGET - now.getTime();
 
-                // Calculate Years (Once per second is fine)
-                let tempDate = new Date(now);
-                let years = 0;
-                while (true) {
-                    tempDate.setFullYear(tempDate.getFullYear() + 1);
-                    if (tempDate.getTime() > targetDate) {
-                        tempDate.setFullYear(tempDate.getFullYear() - 1);
-                        break;
-                    }
-                    years++;
-                }
-
-                const remainingTime = targetDate - tempDate.getTime();
-                const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-
-                if(elYears) elYears.innerText = years;
-                if(elDays) elDays.innerText = days;
-                if(elHours) elHours.innerText = hours.toString().padStart(2, '0');
-                if(elMinutes) elMinutes.innerText = minutes.toString().padStart(2, '0');
-                if(elSeconds) elSeconds.innerText = seconds.toString().padStart(2, '0');
+            if (diff <= 0) {
+                stopCountdownTimer();
+                return;
             }
 
-            function updateMs() {
-                const diff = targetDate - Date.now();
-                if (diff <= 0) return;
-                const ms = Math.floor(diff % 1000);
-                if(elMs) elMs.innerText = ms.toString().padStart(3, '0');
-                requestAnimationFrame(updateMs);
+            // Calculate Years
+            let tempDate = new Date(now);
+            let years = 0;
+            while (true) {
+                tempDate.setFullYear(tempDate.getFullYear() + 1);
+                if (tempDate.getTime() > CD_TARGET) {
+                    tempDate.setFullYear(tempDate.getFullYear() - 1);
+                    break;
+                }
+                years++;
             }
 
-            setInterval(updateTime, 1000);
-            updateTime();
-            requestAnimationFrame(updateMs);
+            const remainingTime = CD_TARGET - tempDate.getTime();
+            const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+            if(cdElements.years) cdElements.years.innerText = years;
+            if(cdElements.days) cdElements.days.innerText = days;
+            if(cdElements.hours) cdElements.hours.innerText = hours.toString().padStart(2, '0');
+            if(cdElements.minutes) cdElements.minutes.innerText = minutes.toString().padStart(2, '0');
+            if(cdElements.seconds) cdElements.seconds.innerText = seconds.toString().padStart(2, '0');
         }
 
-        startCountdown();
+        function updateCountdownMs() {
+            const diff = CD_TARGET - Date.now();
+
+            if (diff <= 0) return;
+            const ms = Math.floor(diff % 1000);
+            if(cdElements.ms) cdElements.ms.innerText = ms.toString().padStart(3, '0');
+
+            countdownRaf = requestAnimationFrame(updateCountdownMs);
+        }
+
+        function startCountdownTimer() {
+            if (countdownInterval) return;
+
+            if (cdElements.timer) cdElements.timer.style.display = 'flex';
+
+            updateCountdownTime();
+            countdownInterval = setInterval(updateCountdownTime, 1000);
+
+            if (countdownRaf) cancelAnimationFrame(countdownRaf);
+            updateCountdownMs();
+        }
+
+        function stopCountdownTimer() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (countdownRaf) {
+                cancelAnimationFrame(countdownRaf);
+                countdownRaf = null;
+            }
+            if (cdElements.timer) cdElements.timer.style.display = 'none';
+        }
+
+        function initCountdown() {
+            cdElements.years = document.getElementById('cd-years');
+            cdElements.days = document.getElementById('cd-days');
+            cdElements.hours = document.getElementById('cd-hours');
+            cdElements.minutes = document.getElementById('cd-minutes');
+            cdElements.seconds = document.getElementById('cd-seconds');
+            cdElements.ms = document.getElementById('cd-ms');
+            cdElements.timer = document.getElementById('countdown-timer');
+
+            startCountdownTimer();
+        }
+
+        initCountdown();
