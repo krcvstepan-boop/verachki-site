@@ -909,29 +909,44 @@
 
         /* Profile Modal - Liquid Glass */
         .glass-profile-modal {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             border-radius: 24px;
             padding: clamp(30px, 8vw, 40px);
             width: 100%;
             max-width: 500px;
             position: relative;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 40px rgba(255,255,255,0.5);
             max-height: 90vh;
             overflow-y: auto;
-            color: #1d1d1f;
-            font-family: 'Manrope', sans-serif;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+            color: #333333;
+            font-family: 'Manrope', sans-serif !important;
+            text-shadow: none;
         }
 
     .glass-profile-modal h1,
     .glass-profile-modal h2,
     .glass-profile-modal h3,
-    .glass-profile-modal h4 {
-        font-family: 'Manrope', sans-serif;
-        color: inherit;
+    .glass-profile-modal h4,
+    .glass-profile-modal p,
+    .glass-profile-modal span,
+    .glass-profile-modal div,
+    .glass-profile-modal strong {
+        font-family: 'Manrope', sans-serif !important;
+        color: #333333;
+    }
+
+    /* 3D Flower Visibility Fix */
+    #profile-flower-canvas {
+        width: 100% !important;
+        height: 350px !important;
+        display: block !important;
+        margin: 0 auto 20px auto !important;
+        z-index: 10;
+        position: relative;
+        background: radial-gradient(circle at center, rgba(106, 77, 244, 0.2) 0%, transparent 70%);
     }
 
         /* Flower / Tamagotchi Panel */

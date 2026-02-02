@@ -272,11 +272,9 @@
             location.reload();
         }
 
-        async function askMistral(prompt, isReport = false) {
+        async function askMistral(prompt) {
             try {
-                const systemPrompt = isReport
-                    ? "Ты — СИСТЕМА, аналитический модуль чата 'Верачки'. Сделай КРАТКИЙ, но информативный отчет по этой переписке. Кто что писал, основные темы, конфликты. Будь холоден и точен."
-                    : "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
+                const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
 
@@ -290,7 +288,7 @@
                         method: "POST",
                         body: JSON.stringify({
                             inputs: fullPrompt,
-                            parameters: { max_new_tokens: isReport ? 300 : 100, return_full_text: false }
+                            parameters: { max_new_tokens: 100, return_full_text: false }
                         }),
                     }
                 );
@@ -300,30 +298,8 @@
                 return result[0].generated_text.trim();
             } catch (error) {
                 console.error(error);
-                return "Ошибка связи с ядром.";
+                return null;
             }
-        }
-
-        async function generateReport() {
-            openModal('report-modal');
-            const content = document.getElementById('report-content');
-            content.innerText = "Сканирование архивов...";
-
-            const msgs = Array.from(document.querySelectorAll('.message:not(.system) .msg-text-content'))
-                .slice(-30)
-                .map(el => {
-                    const author = el.closest('.message').querySelector('.msg-author')?.innerText || "Я";
-                    return `${author}: ${el.innerText}`;
-                })
-                .join("\n");
-
-            if (msgs.length < 50) {
-                content.innerText = "Недостаточно данных для анализа.";
-                return;
-            }
-
-            const report = await askMistral(msgs, true);
-            content.innerText = report;
         }
 
         async function tryTriggerAI(message) {
@@ -339,6 +315,8 @@
 
                 const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
                 const reply = await askMistral(prompt);
+
+                if (!reply) return;
 
                 await db.createDocument(DB_ID, MSG_COL, ID.unique(), {
                     messageContent: reply,
