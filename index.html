@@ -299,6 +299,28 @@
                 <textarea id="p-about-edit" class="hidden" rows="4" style="background: transparent; border: none; font-family: 'Courier New'; width: 100%; resize: none;" placeholder="Введите данные..."></textarea>
                 <p id="p-about" style="margin: 5px 0;">-</p>
             </div>
+
+            <!-- TAMAGOTCHI SECTION -->
+            <div id="flower-controls" class="flower-panel hidden">
+                <div class="flower-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">СТАДИЯ</span>
+                        <span id="f-stage" class="stat-val">ЗЕРНО</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">ЭФИР</span>
+                        <span id="f-ether" class="stat-val">0</span>
+                    </div>
+                </div>
+
+                <div class="flower-actions">
+                    <button id="btn-claim" class="btn-small" onclick="claimEther()">СБОР ЭФИРА</button>
+                    <div id="claim-timer" class="hidden" style="font-size:0.8rem; color:#888;">00:00:00</div>
+
+                    <button id="btn-nourish" class="btn-small btn-primary" onclick="nourishFlower()">НАПИТАТЬ (-1)</button>
+                </div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 5px; text-align: center;">*Сброс в 00:00 MSK</div>
+            </div>
             
             <div id="admin-controls" class="hidden" style="margin-top: 20px; border-top: 2px solid #d00; padding-top: 10px;">
                 <select id="p-rank-edit" style="margin-bottom: 10px; background: #fff;">

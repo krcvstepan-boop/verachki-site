@@ -926,6 +926,80 @@
             opacity: 0.8;
         }
 
+        /* Flower / Tamagotchi Panel */
+        .flower-panel {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.4);
+            border: 1px dashed #333;
+            border-radius: 12px;
+        }
+
+        .flower-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .flower-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: transparent;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-small:hover:not(:disabled) {
+            background: #333;
+            color: #fff;
+        }
+
+        .btn-small:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
         /* Lists */
         .users-list {
             max-height: 50vh;

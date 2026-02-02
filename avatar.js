@@ -91,15 +91,29 @@ class SoulAvatarSystem {
         return Math.abs(hash);
     }
 
-    getMesh(username) {
+    getMesh(username, xp = 0) {
+        // Cache key includes XP now to force regeneration on level up
+        // Simplified: We check if cached mesh exists. If so, we assume it's correct unless explicitly updated.
+        // The calling code (script.js) should call updateAvatar(username, newXp) when XP changes.
         if (this.meshes.has(username)) {
             return this.meshes.get(username);
         }
 
         const hash = this.stringToHash(username);
 
-        // Generate Unique Geometry
-        const detail = 1; // 80 faces
+        // Growth Logic
+        // Lvl 1: 0-5 XP -> Detail 0, Minimal Noise
+        // Lvl 2: 6-20 XP -> Detail 1, Low Noise
+        // Lvl 3: 21-50 XP -> Detail 2, Med Noise
+        // Lvl 4: 50+ XP -> Detail 3, High Noise (Spiky)
+
+        let detail = 0;
+        let noiseMagnitude = 0.1;
+
+        if (xp >= 50) { detail = 3; noiseMagnitude = 0.8; }
+        else if (xp >= 21) { detail = 2; noiseMagnitude = 0.5; }
+        else if (xp >= 6) { detail = 1; noiseMagnitude = 0.3; }
+
         const geometry = new THREE.IcosahedronGeometry(1, detail);
         const positionAttribute = geometry.attributes.position;
         const vertex = new THREE.Vector3();
@@ -111,11 +125,10 @@ class SoulAvatarSystem {
             return x - Math.floor(x);
         };
 
-        // Displace vertices to create "Fractal/Spike" look
-        // Done once on CPU (lightweight enough for <100 users)
+        // Displace vertices
         for (let i = 0; i < positionAttribute.count; i++) {
             vertex.fromBufferAttribute(positionAttribute, i);
-            const spikeFactor = 1.0 + (random() * 0.6);
+            const spikeFactor = 1.0 + (random() * noiseMagnitude);
             vertex.multiplyScalar(spikeFactor);
             positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
         }
@@ -124,14 +137,28 @@ class SoulAvatarSystem {
 
         const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
 
+        // Speed slightly increases with level
+        const baseSpeed = 0.005 + (xp * 0.0001);
+
         const data = {
             mesh: mesh,
-            speed: 0.005 + (random() * 0.01),
+            speed: baseSpeed + (random() * 0.01),
             rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
         };
 
         this.meshes.set(username, data);
         return data;
+    }
+
+    updateAvatar(username, xp) {
+        if (this.meshes.has(username)) {
+            const oldData = this.meshes.get(username);
+            // Dispose old geometry
+            if (oldData.mesh.geometry) oldData.mesh.geometry.dispose();
+            this.meshes.delete(username);
+        }
+        // Force regeneration
+        this.getMesh(username, xp);
     }
 
     animate() {
@@ -161,9 +188,10 @@ class SoulAvatarSystem {
 
             const { mesh, speed, rotationAxis } = this.getMesh(username);
 
-            // Animation
-            mesh.rotation.x += speed * rotationAxis.x * 2;
-            mesh.rotation.y += speed * rotationAxis.y * 2;
+            // Animation (Time-based to avoid speedup on multiple instances)
+            const time = performance.now();
+            mesh.rotation.x = time * speed * rotationAxis.x * 0.1;
+            mesh.rotation.y = time * speed * rotationAxis.y * 0.1;
 
             // Render Logic (Single Scene Swap)
             // Add mesh to shared scene -> Render -> Remove
