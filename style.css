@@ -464,16 +464,49 @@
         }
 
         /* Message Styling - Mobile Optimized */
+        #soul-avatars {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            width: 100%;
+            height: 100%;
+        }
+
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .message-row.mine {
+            flex-direction: row-reverse;
+        }
+
+        .message-row.system {
+            justify-content: center;
+        }
+
+        .soul-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            margin: 0 8px;
+            flex-shrink: 0;
+            /* Placeholder background for debugging or fallback */
+            /* background: rgba(0,0,0,0.05); */
+            border-radius: 50%;
+        }
+
         .message {
             padding: 10px 14px;
             border-radius: 18px;
             border-bottom-left-radius: 4px;
-            max-width: 85%;
+            max-width: 75%;
             font-size: clamp(0.9rem, 2.5vw, 0.95rem);
             position: relative;
             background: #fff;
             color: #1a1a1a;
-            align-self: flex-start;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: all 0.3s ease;
@@ -481,8 +514,7 @@
             overflow-wrap: break-word;
         }
 
-        .message.mine {
-            align-self: flex-end;
+        .message-row.mine .message {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             border-radius: 18px;
@@ -492,7 +524,6 @@
         }
 
         .message.system {
-            align-self: center;
             background: #2d3436;
             color: #fff;
             border: 1px solid #000;
@@ -893,6 +924,80 @@
             padding: 3px 8px;
             transform: rotate(-15deg);
             opacity: 0.8;
+        }
+
+        /* Flower / Tamagotchi Panel */
+        .flower-panel {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.4);
+            border: 1px dashed #333;
+            border-radius: 12px;
+        }
+
+        .flower-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .flower-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: transparent;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-small:hover:not(:disabled) {
+            background: #333;
+            color: #fff;
+        }
+
+        .btn-small:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
         }
 
         /* Lists */

@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;800&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Courier+New&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1" defer></script>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
+    <script src="avatar.js" defer></script>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -196,6 +198,7 @@
     <section id="app-interface" class="hidden" style="padding: 0; height: 100dvh; overflow: hidden; position: fixed; inset: 0; z-index: 500;">
         <div class="container" style="height: 100%; max-width: 100%; width: 100%; padding: 0;">
             <div class="chat-wrapper glass-panel">
+                <canvas id="soul-avatars"></canvas>
                 <div class="radio-overlay"></div>
                 
                 <div class="chat-header">
@@ -295,6 +298,28 @@
                 <strong>ДОСЬЕ:</strong>
                 <textarea id="p-about-edit" class="hidden" rows="4" style="background: transparent; border: none; font-family: 'Courier New'; width: 100%; resize: none;" placeholder="Введите данные..."></textarea>
                 <p id="p-about" style="margin: 5px 0;">-</p>
+            </div>
+
+            <!-- TAMAGOTCHI SECTION -->
+            <div id="flower-controls" class="flower-panel hidden">
+                <div class="flower-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">СТАДИЯ</span>
+                        <span id="f-stage" class="stat-val">ЗЕРНО</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">ЭФИР</span>
+                        <span id="f-ether" class="stat-val">0</span>
+                    </div>
+                </div>
+
+                <div class="flower-actions">
+                    <button id="btn-claim" class="btn-small" onclick="claimEther()">СБОР ЭФИРА</button>
+                    <div id="claim-timer" class="hidden" style="font-size:0.8rem; color:#888;">00:00:00</div>
+
+                    <button id="btn-nourish" class="btn-small btn-primary" onclick="nourishFlower()">НАПИТАТЬ (-1)</button>
+                </div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 5px; text-align: center;">*Сброс в 00:00 MSK</div>
             </div>
             
             <div id="admin-controls" class="hidden" style="margin-top: 20px; border-top: 2px solid #d00; padding-top: 10px;">

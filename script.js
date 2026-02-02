@@ -35,10 +35,15 @@
             isUploading: false,
             isRadioMode: false,
             radioNoise: null,
-            aiCooldown: false
+            aiCooldown: false,
+            claimTimer: null
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function getMSKDate() {
+            return new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' });
+        }
 
         // MOBILE OPTIMIZATION: Prevent double-tap zoom
         let lastTouchEnd = 0;
@@ -137,13 +142,29 @@
                     const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.equal('email', state.user.email)]);
                     if(res.documents.length > 0) {
                         state.profile = res.documents[0];
+                        // Init new fields if missing (lazy migration)
+                        if (state.profile.ether === undefined) state.profile.ether = 0;
+                        if (state.profile.flower_xp === undefined) state.profile.flower_xp = 0;
                         state.profileCache.set(state.profile.username, state.profile);
                     }
-                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: state.user.name, email: state.user.email, rank: "Наблюдатель", about: "" });
+                    else state.profile = await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), {
+                        username: state.user.name,
+                        email: state.user.email,
+                        rank: "Наблюдатель",
+                        about: "",
+                        ether: 0,
+                        flower_xp: 0,
+                        last_claim_date: ""
+                    });
                 } catch(e) { console.log("Profile create/fetch error", e); }
 
                 if(state.profile && state.profile.rank === 'Изгнан') { document.getElementById('ban-screen').style.display = 'flex'; return; }
                 updateLandingState(true);
+
+                // Initialize avatar with XP if system exists
+                if(state.profile && typeof AvatarSystem !== 'undefined') {
+                    AvatarSystem.updateAvatar(state.profile.username, state.profile.flower_xp || 0);
+                }
             } catch (e) { updateLandingState(false); }
         }
         checkSession();
@@ -182,6 +203,11 @@
             closeModal('auth-modal');
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
+
+            // Initialize Soul ID System
+            if (typeof AvatarSystem !== 'undefined') {
+                AvatarSystem.init();
+            }
         }
 
         function showLanding() {
@@ -225,7 +251,15 @@
                     const name = document.getElementById('reg-name').value;
                     await account.create(ID.unique(), email, pass, name);
                     await account.createEmailPasswordSession(email, pass);
-                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), { username: name, email: email, rank: "Наблюдатель", about: "" });
+                    await db.createDocument(DB_ID, PROFILES_COL, ID.unique(), {
+                        username: name,
+                        email: email,
+                        rank: "Наблюдатель",
+                        about: "",
+                        ether: 0,
+                        flower_xp: 0,
+                        last_claim_date: ""
+                    });
                     location.reload();
                 }
             } catch(e) { showToast(e.message, 'error'); }
@@ -502,10 +536,24 @@
             const isMine = state.profile && msg.senderId === state.profile.username;
             const isSystem = msg.senderId === "СИСТЕМА";
 
+            // Row Container
+            const row = document.createElement('div');
+            row.className = `message-row ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
+            row.id = msg.$id;
+            if (msg.optimistic) row.dataset.optimistic = "true";
+
+            // Avatar (Soul ID) - Skip for System
+            if (!isSystem) {
+                const avatar = document.createElement('div');
+                avatar.className = 'soul-avatar-placeholder';
+                avatar.dataset.user = msg.senderId;
+                avatar.onclick = () => openProfile(escapeHtml(escapeJs(msg.senderId)));
+                row.appendChild(avatar);
+            }
+
+            // Message Bubble
             const div = document.createElement('div');
             div.className = `message ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
-            div.id = msg.$id;
-            if (msg.optimistic) div.dataset.optimistic = "true";
 
             let controls = '';
             if (!msg.optimistic && !isSystem && isMine) {
@@ -529,12 +577,18 @@
                 if (msg.messageContent) contentHtml += `<div style="margin-top:8px;"><span class="msg-text-content">${escapeHtml(msg.messageContent)}</span></div>`;
             }
 
+            // Removed inline author name since we have avatar, or keep it?
+            // User requested "Instead of user images...", we are adding avatars.
+            // Let's keep the name for clarity but maybe smaller?
+            // The original code had name inside the bubble for others.
             const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${escapeHtml(escapeJs(msg.senderId))}')">${escapeHtml(msg.senderId)}</span>`;
             const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
             const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
             div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div><div class="msg-time">${time}</div>`;
-            return div;
+
+            row.appendChild(div);
+            return row;
         }
 
         async function loadMessages() {
@@ -757,6 +811,153 @@
             }
         }
 
+        function updateFlowerUI(p) {
+            const ether = p.ether || 0;
+            const xp = p.flower_xp || 0;
+
+            document.getElementById('f-ether').innerText = ether;
+
+            let stage = "ЗЕРНО (I)";
+            if (xp >= 50) stage = "ВОЗНЕСЕНИЕ (IV)";
+            else if (xp >= 21) stage = "ЦВЕТЕНИЕ (III)";
+            else if (xp >= 6) stage = "РОСТОК (II)";
+            document.getElementById('f-stage').innerText = `${stage} [${xp} XP]`;
+
+            // Check claim status
+            const today = getMSKDate();
+            const btnClaim = document.getElementById('btn-claim');
+            const timerDiv = document.getElementById('claim-timer');
+
+            if (p.last_claim_date === today) {
+                btnClaim.disabled = true;
+                btnClaim.innerText = "СОБРАНО";
+                timerDiv.classList.remove('hidden');
+                startClaimTimer();
+            } else {
+                btnClaim.disabled = false;
+                btnClaim.innerText = "СБОР ЭФИРА";
+                timerDiv.classList.add('hidden');
+            }
+
+            // Nourish button
+            const btnNourish = document.getElementById('btn-nourish');
+            if (ether > 0) {
+                btnNourish.disabled = false;
+                btnNourish.innerText = "НАПИТАТЬ (-1)";
+            } else {
+                btnNourish.disabled = true;
+                btnNourish.innerText = "НЕТ ЭФИРА";
+            }
+        }
+
+        function startClaimTimer() {
+            if (state.claimTimer) clearInterval(state.claimTimer);
+
+            const timerDiv = document.getElementById('claim-timer');
+            const update = () => {
+                const now = new Date();
+                // Target: Next 00:00 MSK.
+                // Currently simplified: Just countdown to next midnight local?
+                // No, prompt requires MSK.
+                // 00:00 MSK is 21:00 UTC previous day? No, UTC+3.
+
+                // Hacky MSK calculation:
+                // Get current UTC time
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                // Get MSK time
+                const mskTime = new Date(utc + (3600000 * 3));
+
+                // Target is tomorrow 00:00 MSK
+                const target = new Date(mskTime);
+                target.setHours(24, 0, 0, 0);
+
+                const diff = target - mskTime;
+                if (diff < 0) {
+                     timerDiv.innerText = "ГОТОВО";
+                     return;
+                }
+
+                const h = Math.floor(diff / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                timerDiv.innerText = `До сброса: ${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            };
+
+            state.claimTimer = setInterval(update, 1000);
+            update();
+        }
+
+        async function claimEther() {
+            if (!state.profile) return;
+            const today = getMSKDate();
+
+            if (state.profile.last_claim_date === today) {
+                showToast("Уже собрано сегодня", "error");
+                return;
+            }
+
+            try {
+                const newEther = (state.profile.ether || 0) + 1;
+                await db.updateDocument(DB_ID, PROFILES_COL, state.profile.$id, {
+                    ether: newEther,
+                    last_claim_date: today
+                });
+
+                state.profile.ether = newEther;
+                state.profile.last_claim_date = today;
+                state.profileCache.set(state.profile.username, state.profile);
+
+                updateFlowerUI(state.profile);
+                showToast("+1 Эфир получен");
+                playNotification(); // Reuse sound
+            } catch(e) {
+                showToast("Ошибка сбора", "error");
+            }
+        }
+
+        async function nourishFlower() {
+            if (!state.profile || (state.profile.ether || 0) <= 0) return;
+
+            try {
+                const newEther = state.profile.ether - 1;
+                const newXp = (state.profile.flower_xp || 0) + 1;
+
+                await db.updateDocument(DB_ID, PROFILES_COL, state.profile.$id, {
+                    ether: newEther,
+                    flower_xp: newXp
+                });
+
+                state.profile.ether = newEther;
+                state.profile.flower_xp = newXp;
+                state.profileCache.set(state.profile.username, state.profile);
+
+                updateFlowerUI(state.profile);
+
+                // Trigger 3D Update
+                if (typeof AvatarSystem !== 'undefined') {
+                    AvatarSystem.updateAvatar(state.profile.username, newXp);
+                }
+
+                // FX
+                showToast("Цветок напитан (+1 XP)");
+                playNotification();
+
+                // Particle FX (Simulated via simple DOM overlay)
+                const particles = document.createElement('div');
+                particles.style.position = 'fixed';
+                particles.style.inset = '0';
+                particles.style.zIndex = '9999';
+                particles.style.pointerEvents = 'none';
+                particles.innerHTML = '<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:5rem; opacity:0; animation: fadeUp 1s;">💧</div>';
+                document.body.appendChild(particles);
+                setTimeout(() => particles.remove(), 1000);
+
+            } catch(e) {
+                showToast("Ошибка", "error");
+            }
+        }
+
         async function openProfile(username) {
             openModal('profile-modal');
             document.getElementById('p-name').innerText = username;
@@ -765,6 +966,7 @@
             document.getElementById('p-save-self').classList.add('hidden');
             document.getElementById('p-about-edit').classList.add('hidden');
             document.getElementById('p-about').classList.remove('hidden');
+            document.getElementById('flower-controls').classList.add('hidden'); // Default hide
 
             try {
                 let p;
@@ -788,6 +990,10 @@
                         document.getElementById('p-about-edit').classList.remove('hidden');
                         document.getElementById('p-about-edit').value = p.about || "";
                         document.getElementById('p-save-self').classList.remove('hidden');
+
+                        // Show Flower Controls ONLY for self
+                        document.getElementById('flower-controls').classList.remove('hidden');
+                        updateFlowerUI(p);
                     }
                     if (state.user && state.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                         document.getElementById('admin-controls').classList.remove('hidden');
