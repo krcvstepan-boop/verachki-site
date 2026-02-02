@@ -727,56 +727,6 @@
             background: var(--primary);
         }
 
-        /* Geiger Widget - Mobile Responsive */
-        #geiger-wrapper {
-            position: absolute;
-            bottom: clamp(75px, 20vw, 85px);
-            right: clamp(15px, 5vw, 25px);
-            width: clamp(70px, 20vw, 90px);
-            height: clamp(50px, 15vw, 60px);
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 50;
-        }
-
-        #geiger-screen {
-            width: 80%;
-            height: 50%;
-            background: rgba(0,0,0,0.05);
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        #geiger-needle {
-            width: 2px;
-            height: 85%;
-            background: var(--danger);
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            border-radius: 2px;
-            transform-origin: bottom center;
-            transform: rotate(-45deg);
-            transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
-        }
-
-        .geiger-label {
-            font-size: clamp(6px, 2vw, 8px);
-            color: var(--primary);
-            margin-top: 3px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
         /* Radio Mode */
         .radio-overlay {
             pointer-events: none;
@@ -1113,26 +1063,6 @@
         #report-content::-webkit-scrollbar-thumb {
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
-        }
-
-        /* Enigma Encryption Styles */
-        .decipher-icon {
-            cursor: pointer;
-            margin-left: 8px;
-            font-size: 0.8rem;
-            color: var(--primary);
-            transition: transform 0.2s;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .decipher-icon:hover {
-            transform: scale(1.2);
-            color: var(--accent);
-        }
-        .encrypted {
-            font-family: 'Courier New', monospace;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
         }
 
         /* Countdown Timer */

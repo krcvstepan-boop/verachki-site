@@ -65,7 +65,7 @@
                         Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.
                     </p>
                     <div class="btn-group">
-                        <button class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
+                        <button id="hero-main-btn" class="btn" onclick="openModal('auth-modal')">Принять Присягу</button>
                         <button class="btn btn-outline" onclick="document.getElementById('history').scrollIntoView()">Изучить Архивы</button>
                     </div>
                 </div>
@@ -197,16 +197,11 @@
             <div class="chat-wrapper glass-panel">
                 <div class="radio-overlay"></div>
                 
-                <div id="geiger-wrapper">
-                    <div id="geiger-screen"><div id="geiger-needle"></div></div>
-                    <div class="geiger-label">RAD LEVEL</div>
-                </div>
-
                 <div class="chat-header">
                     <div class="chat-header-left">
                         <div class="back-btn" onclick="showLanding()">
                             <span>❮</span>
-                            <span>В МИР</span>
+                            <span>НА ГЛАВНУЮ</span>
                         </div>
                     </div>
                     <div class="chat-header-center">
