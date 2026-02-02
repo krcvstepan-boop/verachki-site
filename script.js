@@ -182,6 +182,11 @@
             closeModal('auth-modal');
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
+
+            // Initialize Soul ID System
+            if (typeof AvatarSystem !== 'undefined') {
+                AvatarSystem.init();
+            }
         }
 
         function showLanding() {
@@ -502,10 +507,24 @@
             const isMine = state.profile && msg.senderId === state.profile.username;
             const isSystem = msg.senderId === "СИСТЕМА";
 
+            // Row Container
+            const row = document.createElement('div');
+            row.className = `message-row ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
+            row.id = msg.$id;
+            if (msg.optimistic) row.dataset.optimistic = "true";
+
+            // Avatar (Soul ID) - Skip for System
+            if (!isSystem) {
+                const avatar = document.createElement('div');
+                avatar.className = 'soul-avatar-placeholder';
+                avatar.dataset.user = msg.senderId;
+                avatar.onclick = () => openProfile(escapeHtml(escapeJs(msg.senderId)));
+                row.appendChild(avatar);
+            }
+
+            // Message Bubble
             const div = document.createElement('div');
             div.className = `message ${isMine ? 'mine' : ''} ${isSystem ? 'system' : ''}`;
-            div.id = msg.$id;
-            if (msg.optimistic) div.dataset.optimistic = "true";
 
             let controls = '';
             if (!msg.optimistic && !isSystem && isMine) {
@@ -529,12 +548,18 @@
                 if (msg.messageContent) contentHtml += `<div style="margin-top:8px;"><span class="msg-text-content">${escapeHtml(msg.messageContent)}</span></div>`;
             }
 
+            // Removed inline author name since we have avatar, or keep it?
+            // User requested "Instead of user images...", we are adding avatars.
+            // Let's keep the name for clarity but maybe smaller?
+            // The original code had name inside the bubble for others.
             const author = (isMine || isSystem) ? '' : `<span class="msg-author" onclick="openProfile('${escapeHtml(escapeJs(msg.senderId))}')">${escapeHtml(msg.senderId)}</span>`;
             const edited = msg.isEdited ? " <span style='opacity:0.5; font-size:0.6rem;'>(ред.)</span>" : "";
             const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
             div.innerHTML = `${controls}${author}<div class="msg-text">${contentHtml}${edited}</div><div class="msg-time">${time}</div>`;
-            return div;
+
+            row.appendChild(div);
+            return row;
         }
 
         async function loadMessages() {
