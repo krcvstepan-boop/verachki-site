@@ -249,48 +249,6 @@
             letter-spacing: 0.05em;
         }
 
-        /* Defcon Widget */
-        .defcon-widget {
-            display: flex;
-            gap: 6px;
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            margin-right: 10px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-
-        .defcon-lvl {
-            width: clamp(20px, 6vw, 24px);
-            height: clamp(20px, 6vw, 24px);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(8px, 2.5vw, 10px);
-            font-weight: bold;
-            color: rgba(0,0,0,0.5);
-            transition: 0.3s;
-            border: 2px solid transparent;
-            opacity: 0.5;
-        }
-
-        .defcon-lvl:active {
-            transform: scale(1.1);
-            opacity: 0.8;
-        }
-
-        .defcon-lvl.active {
-            box-shadow: 0 0 15px currentColor;
-            color: #fff;
-            transform: scale(1.2);
-            opacity: 1;
-            border-color: rgba(255,255,255,0.8);
-        }
-
         /* Hero Section - Mobile First */
         .hero-grid {
             display: grid;
@@ -824,16 +782,6 @@
             50% { transform: translate(-0.5px, -0.5px); }
             75% { transform: translate(-0.5px, 0.5px); }
             100% { transform: translate(0.5px, -0.5px); }
-        }
-
-        /* Defcon 1 */
-        body.defcon-1 { animation: alarmPulse 2s infinite; }
-        body.defcon-1 .aurora-bg { background: #200; }
-        body.defcon-1 .blob-1, body.defcon-1 .blob-2, body.defcon-1 .blob-3 { background: #f00; opacity: 0.3; }
-        @keyframes alarmPulse {
-            0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); }
-            50% { box-shadow: inset 0 0 50px 20px rgba(255,0,0,0.3); }
-            100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0); }
         }
 
         /* Night Vision */
