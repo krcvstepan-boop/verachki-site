@@ -264,7 +264,7 @@
                     });
                     location.reload();
                 }
-            } catch(e) { showToast(e.message, 'error'); }
+            } catch(e) { console.error(e); }
         }
 
         async function logout() {
@@ -910,11 +910,9 @@
                         playNotification();
                      } catch (createErr) {
                          console.error(createErr);
-                         showToast("Ошибка создания профиля", "error");
                      }
                 } else {
                     console.error(e);
-                    showToast("Ошибка сбора", "error");
                 }
             }
         }
@@ -957,7 +955,7 @@
                 setTimeout(() => particles.remove(), 1000);
 
             } catch(e) {
-                showToast("Ошибка", "error");
+                console.error(e);
             }
         }
 
