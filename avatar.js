@@ -62,16 +62,25 @@ class SoulAvatarSystem {
         pointLight2.position.set(-5, -5, 2);
         this.scene.add(pointLight2);
 
-        // Shared Material (Phong is faster and handles simple lights better for "fake glass")
-        this.sharedMaterial = new THREE.MeshPhongMaterial({
+        // Additional Color Lights for Glass Effect
+        const cyanLight = new THREE.PointLight(0x00ffff, 1, 10);
+        cyanLight.position.set(2, 2, 2);
+        this.scene.add(cyanLight);
+
+        const magentaLight = new THREE.PointLight(0xff00ff, 1, 10);
+        magentaLight.position.set(-2, -2, 2);
+        this.scene.add(magentaLight);
+
+        // Shared Material (Physical Glass / Crystal)
+        this.sharedMaterial = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
-            emissive: 0x111111,
-            specular: 0xffffff,
-            shininess: 100,
+            transmission: 1.0,
+            roughness: 0.05,
+            thickness: 1.5,
+            ior: 1.5,
             transparent: true,
-            opacity: 0.7,
             side: THREE.FrontSide,
-            flatShading: true // Enhances the "fractal/crystal" look
+            flatShading: false
         });
 
         // Start animation loop
@@ -104,14 +113,8 @@ class SoulAvatarSystem {
     createGeometryData(username, xp) {
         const hash = this.stringToHash(username);
 
-        let detail = 0;
-        let noiseMagnitude = 0.1;
-
-        if (xp >= 50) { detail = 3; noiseMagnitude = 0.8; }
-        else if (xp >= 21) { detail = 2; noiseMagnitude = 0.5; }
-        else if (xp >= 6) { detail = 1; noiseMagnitude = 0.3; }
-
-        const geometry = new THREE.IcosahedronGeometry(1, detail);
+        // High-segment sphere for organic glass look
+        const geometry = new THREE.SphereGeometry(1, 64, 64);
         const positionAttribute = geometry.attributes.position;
         const vertex = new THREE.Vector3();
 
@@ -121,10 +124,23 @@ class SoulAvatarSystem {
             return x - Math.floor(x);
         };
 
+        // Petal Algorithm
+        const petals = 5 + Math.floor(random() * 2); // 5 or 6 petals
+        const amplitude = 0.1 + (Math.min(xp, 100) * 0.002); // Grows slightly with XP
+
         for (let i = 0; i < positionAttribute.count; i++) {
             vertex.fromBufferAttribute(positionAttribute, i);
-            const spikeFactor = 1.0 + (random() * noiseMagnitude);
-            vertex.multiplyScalar(spikeFactor);
+
+            // Calculate spherical coordinates approximation
+            const angle = Math.atan2(vertex.z, vertex.x);
+            const elevation = vertex.y;
+
+            // Soft overlapping curves displacement
+            const displacement = 1.0 + amplitude *
+                                       Math.sin(petals * angle + seed) *
+                                       Math.cos(3 * elevation);
+
+            vertex.multiplyScalar(displacement);
             positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
         }
 

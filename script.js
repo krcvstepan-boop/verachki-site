@@ -327,17 +327,6 @@
             }
         }
 
-        function setDefcon(level) {
-            document.body.classList.remove('defcon-1');
-            document.querySelectorAll('.defcon-lvl').forEach(el => el.classList.remove('active'));
-            const activeBtn = document.getElementById(`def-${level}`);
-            if(activeBtn) activeBtn.classList.add('active');
-
-            if (level === 1) {
-                document.body.classList.add('defcon-1');
-            }
-        }
-
         function toggleNVG() {
             document.body.classList.toggle('nvg-mode');
         }
