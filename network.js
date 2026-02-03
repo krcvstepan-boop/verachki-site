@@ -33,7 +33,7 @@ function generatePhantoms() {
     for (let i = 0; i < PHANTOM_COUNT; i++) {
         phantoms.push({
             id: `phantom-${i}`,
-            name: Math.random() > 0.5 ? "Signal Encrypted" : "Id: Unknown",
+            name: Math.random() > 0.5 ? "Сигнал Зашифрован" : "ID: Неизвестен",
             group: 'phantom',
             val: 3 // Size
         });
@@ -93,7 +93,7 @@ async function initGraph() {
         .showNavInfo(false)
         .nodeLabel(node => {
             const color = node.group === 'user' ? '#00ffff' : '#888';
-            const label = node.group === 'user' ? 'CITIZEN' : 'UNKNOWN';
+            const label = node.group === 'user' ? 'ГРАЖДАНИН' : 'НЕИЗВЕСТНО';
             return `<div style="text-align:center; color:${color}; font-weight:bold; font-family:'Courier New'; font-size:1.2em;">${node.name}</div><div style="font-size:0.8em; color:#ccc;">${label}</div>`;
         })
         .nodeThreeObject(node => {

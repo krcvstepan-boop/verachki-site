@@ -1,3 +1,61 @@
+const vertexShader = `
+precision mediump float;
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vViewPosition;
+uniform float uTime;
+
+void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
+
+    // Breathing: sine wave displacement along normal
+    vec3 newPos = position + normal * sin(uTime * 2.0) * 0.05;
+
+    vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    gl_Position = projectionMatrix * mvPosition;
+}
+`;
+
+const fragmentShader = `
+precision mediump float;
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vViewPosition;
+uniform float uTime;
+uniform vec3 uColor;
+
+void main() {
+    vec3 normal = normalize(vNormal);
+    vec3 viewDir = normalize(vViewPosition);
+
+    // Fresnel
+    float fresnel = pow(1.0 - abs(dot(viewDir, normal)), 3.0);
+
+    // Dynamic Pastel Gradient
+    vec3 pink = vec3(1.0, 0.82, 0.86);
+    vec3 cyan = vec3(0.68, 0.85, 0.9);
+    float t = uTime * 0.5;
+    float mixVal = sin(vUv.y * 3.0 + t) * 0.5 + 0.5;
+    vec3 gradient = mix(pink, cyan, mixVal);
+
+    // Fake Chromatic Dispersion (prism)
+    vec3 disp = vec3(0.0);
+    disp.r = sin(dot(viewDir, normal) * 10.0 + t) * 0.5 + 0.5;
+    disp.g = sin(dot(viewDir, normal) * 10.0 + t + 2.0) * 0.5 + 0.5;
+    disp.b = sin(dot(viewDir, normal) * 10.0 + t + 4.0) * 0.5 + 0.5;
+
+    vec3 finalColor = mix(gradient, uColor, 0.3);
+    finalColor += disp * 0.2 * fresnel;
+    finalColor += fresnel * 0.8; // Edge glow
+
+    float alpha = 0.5 + fresnel * 0.5;
+
+    gl_FragColor = vec4(finalColor, alpha);
+}
+`;
+
 
 class SoulAvatarSystem {
     constructor() {
@@ -138,13 +196,14 @@ class SoulAvatarSystem {
             geometry.computeVertexNormals();
 
             // Unique Material per Petal
-            const color = colors[Math.floor(random() * colors.length)];
-            const material = new THREE.MeshPhysicalMaterial({
-                color: color,
-                transmission: 0.9,
-                roughness: 0.1,
-                thickness: 1.5,
-                ior: 1.5,
+            const colorHex = colors[Math.floor(random() * colors.length)];
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0.0 },
+                    uColor: { value: new THREE.Color(colorHex) }
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
                 transparent: true,
                 side: THREE.FrontSide
             });
@@ -296,9 +355,12 @@ class SoulAvatarSystem {
              this.profileGroup.rotation.x = time * speed * rotationAxis.x * 0.1;
              this.profileGroup.rotation.y = time * speed * rotationAxis.y * 0.1;
 
-             // Breathing Animation (Life)
-             const scale = 1 + Math.sin(time * 0.0015) * 0.03;
-             this.profileGroup.scale.set(scale, scale, scale);
+             // Breathing Animation (GPU)
+             this.profileGroup.traverse((child) => {
+                 if (child.isMesh && child.material.uniforms) {
+                     child.material.uniforms.uTime.value = time * 0.001;
+                 }
+             });
 
              this.profileRenderer.render(this.profileScene, this.profileCamera);
         };
@@ -318,7 +380,7 @@ class SoulAvatarSystem {
 
         const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
-        const breathingScale = 1 + Math.sin(time * 0.0015) * 0.03;
+        const timeSeconds = time * 0.001;
 
         for (let i = 0; i < placeholders.length; i++) {
             const el = placeholders[i];
@@ -335,8 +397,12 @@ class SoulAvatarSystem {
             group.rotation.x = time * speed * rotationAxis.x * 0.1;
             group.rotation.y = time * speed * rotationAxis.y * 0.1;
 
-            // Breathing
-            group.scale.set(breathingScale, breathingScale, breathingScale);
+            // Breathing (GPU)
+            group.traverse((child) => {
+                 if (child.isMesh && child.material.uniforms) {
+                     child.material.uniforms.uTime.value = timeSeconds;
+                 }
+            });
 
             this.scene.add(group);
 
