@@ -201,6 +201,8 @@
             document.querySelector('nav').style.display = 'none';
             document.getElementById('app-interface').classList.remove('hidden');
 
+            stopCountdownTimer();
+
             closeModal('auth-modal');
             loadMessages();
             client.subscribe(`databases.${DB_ID}.collections.${MSG_COL}.documents`, handleRealtime);
@@ -212,6 +214,8 @@
         }
 
         function showLanding() {
+            startCountdownTimer();
+
             // MOBILE OPTIMIZATION: Cleanup on exit
             if (state.audioPlayer) {
                 state.audioPlayer.pause();
@@ -1092,7 +1096,15 @@
         }
 
         // COUNTDOWN SYSTEM
-        function startCountdown() {
+        let countdownInterval = null;
+        let countdownAnimFrame = null;
+
+        function startCountdownTimer() {
+            const timer = document.getElementById('countdown-timer');
+            if (timer) timer.style.display = 'flex';
+
+            if (countdownInterval) return; // Already running
+
             const targetDate = new Date('2026-06-01T00:00:00').getTime();
             const elYears = document.getElementById('cd-years');
             const elDays = document.getElementById('cd-days');
@@ -1100,7 +1112,6 @@
             const elMinutes = document.getElementById('cd-minutes');
             const elSeconds = document.getElementById('cd-seconds');
             const elMs = document.getElementById('cd-ms');
-            const timer = document.getElementById('countdown-timer');
 
             function updateTime() {
                 const now = new Date();
@@ -1108,6 +1119,7 @@
 
                 if (diff <= 0) {
                     if (timer) timer.style.display = 'none';
+                    stopCountdownTimer();
                     return;
                 }
 
@@ -1141,12 +1153,26 @@
                 if (diff <= 0) return;
                 const ms = Math.floor(diff % 1000);
                 if(elMs) elMs.innerText = ms.toString().padStart(3, '0');
-                requestAnimationFrame(updateMs);
+                countdownAnimFrame = requestAnimationFrame(updateMs);
             }
 
-            setInterval(updateTime, 1000);
             updateTime();
-            requestAnimationFrame(updateMs);
+            countdownInterval = setInterval(updateTime, 1000);
+            updateMs();
         }
 
-        startCountdown();
+        function stopCountdownTimer() {
+            const timer = document.getElementById('countdown-timer');
+            if (timer) timer.style.display = 'none';
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (countdownAnimFrame) {
+                cancelAnimationFrame(countdownAnimFrame);
+                countdownAnimFrame = null;
+            }
+        }
+
+        startCountdownTimer();
