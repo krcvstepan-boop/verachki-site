@@ -7,13 +7,12 @@ class SoulAvatarSystem {
         this.isRunning = false;
 
         // Caches
-        this.meshes = new Map(); // username -> { mesh, speed }
+        this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
-        // Single Shared Resources (Memory Optimization)
+        // Single Shared Resources
         this.scene = null;
         this.camera = null;
-        this.sharedMaterial = null;
-        this.baseGeometry = null;
+        // Shared material removed as per new multi-color requirement
 
         // Configuration
         this.baseColor = 0x6a4df4;
@@ -23,7 +22,7 @@ class SoulAvatarSystem {
         this.profileRenderer = null;
         this.profileScene = null;
         this.profileCamera = null;
-        this.profileMesh = null;
+        this.profileGroup = null;
         this.profileCanvas = null;
         this.profileRequestId = null;
     }
@@ -35,12 +34,12 @@ class SoulAvatarSystem {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             alpha: true,
-            antialias: true, // MSAA might be heavy, but needed for wireframes/thin lines.
+            antialias: true,
             powerPreference: "high-performance",
-            precision: "mediump" // optimization for mobile
+            precision: "mediump"
         });
 
-        this.renderer.setClearColor(0xffffff, 0); // Force transparency
+        this.renderer.setClearColor(0xffffff, 0);
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -50,7 +49,7 @@ class SoulAvatarSystem {
         this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
         this.camera.position.z = 3.5;
 
-        // Shared Lighting (Static)
+        // Shared Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(ambientLight);
 
@@ -71,22 +70,10 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
-        // Shared Material (Physical Glass / Crystal)
-        this.sharedMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
-            transmission: 1.0,
-            roughness: 0.05,
-            thickness: 1.5,
-            ior: 1.5,
-            transparent: true,
-            side: THREE.FrontSide,
-            flatShading: false
-        });
-
         // Start animation loop
         this.isRunning = true;
         this.animate();
-        console.log("Soul ID System Initialized (Optimized Mode)");
+        console.log("Soul ID System Initialized (Living Flower Mode)");
     }
 
     resize() {
@@ -95,7 +82,6 @@ class SoulAvatarSystem {
         const height = this.canvas.clientHeight;
         if (this.canvas.width !== width || this.canvas.height !== height) {
             this.renderer.setSize(width, height, false);
-            // Limit pixel ratio to 2 to prevent overheat on Retina screens
             this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         }
     }
@@ -110,13 +96,9 @@ class SoulAvatarSystem {
         return Math.abs(hash);
     }
 
-    createGeometryData(username, xp) {
+    createAvatarGroup(username, xp) {
         const hash = this.stringToHash(username);
-
-        // High-segment sphere for organic glass look
-        const geometry = new THREE.SphereGeometry(1, 64, 64);
-        const positionAttribute = geometry.attributes.position;
-        const vertex = new THREE.Vector3();
+        const group = new THREE.Group();
 
         let seed = hash;
         const random = () => {
@@ -124,32 +106,89 @@ class SoulAvatarSystem {
             return x - Math.floor(x);
         };
 
-        // Petal Algorithm
-        const petals = 5 + Math.floor(random() * 2); // 5 or 6 petals
-        const amplitude = 0.1 + (Math.min(xp, 100) * 0.002); // Grows slightly with XP
+        // Pastel Colors: Rose, Blue, Green, Lavender, Peach
+        const colors = [0xffd1dc, 0xadd8e6, 0x98fb98, 0xe6e6fa, 0xffdab9];
 
-        for (let i = 0; i < positionAttribute.count; i++) {
-            vertex.fromBufferAttribute(positionAttribute, i);
+        // 1. Generate Petals
+        const petalCount = 5 + Math.floor(random() * 2); // 5-7 petals
+        const amplitude = 0.1 + (Math.min(xp, 100) * 0.002);
 
-            // Calculate spherical coordinates approximation
-            const angle = Math.atan2(vertex.z, vertex.x);
-            const elevation = vertex.y;
+        for (let k = 0; k < petalCount; k++) {
+            const geometry = new THREE.SphereGeometry(1, 64, 64);
+            const positionAttribute = geometry.attributes.position;
+            const vertex = new THREE.Vector3();
 
-            // Soft overlapping curves displacement
-            const displacement = 1.0 + amplitude *
-                                       Math.sin(petals * angle + seed) *
+            // Unique seed offset per petal
+            let petalSeed = seed + k * 100;
+
+            for (let i = 0; i < positionAttribute.count; i++) {
+                vertex.fromBufferAttribute(positionAttribute, i);
+                const angle = Math.atan2(vertex.z, vertex.x);
+                const elevation = vertex.y;
+
+                // Soft overlapping curves displacement
+                const displacement = 1.0 + amplitude *
+                                       Math.sin(5 * angle + petalSeed) *
                                        Math.cos(3 * elevation);
 
-            vertex.multiplyScalar(displacement);
-            positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                vertex.multiplyScalar(displacement);
+                positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+            }
+
+            geometry.computeVertexNormals();
+
+            // Unique Material per Petal
+            const color = colors[Math.floor(random() * colors.length)];
+            const material = new THREE.MeshPhysicalMaterial({
+                color: color,
+                transmission: 0.9,
+                roughness: 0.1,
+                thickness: 1.5,
+                ior: 1.5,
+                transparent: true,
+                side: THREE.FrontSide
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Random slight rotation to layer them
+            mesh.rotation.set(random() * Math.PI, random() * Math.PI, random() * Math.PI);
+            mesh.scale.setScalar(0.95 + random() * 0.1);
+
+            group.add(mesh);
         }
 
-        geometry.computeVertexNormals();
+        // 2. Add Particles (Magic Atmosphere)
+        const particleCount = 60;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+
+        for(let i=0; i<particleCount; i++) {
+            const r = 1.2 + random() * 1.5; // Orbit radius
+            const theta = random() * Math.PI * 2;
+            const phi = Math.acos(2 * random() - 1);
+
+            positions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+            positions[i*3+2] = r * Math.cos(phi);
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const particleMat = new THREE.PointsMaterial({
+            color: 0x00ffff,
+            size: 0.03,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(particleGeo, particleMat);
+        group.add(particles);
 
         const baseSpeed = 0.005 + (xp * 0.0001);
 
         return {
-            geometry: geometry,
+            group: group,
             speed: baseSpeed + (random() * 0.01),
             rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
         };
@@ -160,15 +199,7 @@ class SoulAvatarSystem {
             return this.meshes.get(username);
         }
 
-        const { geometry, speed, rotationAxis } = this.createGeometryData(username, xp);
-        const mesh = new THREE.Mesh(geometry, this.sharedMaterial);
-
-        const data = {
-            mesh: mesh,
-            speed: speed,
-            rotationAxis: rotationAxis
-        };
-
+        const data = this.createAvatarGroup(username, xp);
         this.meshes.set(username, data);
         return data;
     }
@@ -176,8 +207,14 @@ class SoulAvatarSystem {
     updateAvatar(username, xp) {
         if (this.meshes.has(username)) {
             const oldData = this.meshes.get(username);
-            // Dispose old geometry
-            if (oldData.mesh.geometry) oldData.mesh.geometry.dispose();
+            // Dispose old resources
+            oldData.group.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material.dispose();
+                }
+            });
             this.meshes.delete(username);
         }
         // Force regeneration
@@ -187,17 +224,14 @@ class SoulAvatarSystem {
     renderProfileAvatar(canvas, username, xp) {
         if (!window.THREE) return;
 
-        // Cancel old loop
         if (this.profileRequestId) {
             cancelAnimationFrame(this.profileRequestId);
             this.profileRequestId = null;
         }
 
-        // Initialize Profile Renderer if needed
         if (!this.profileRenderer || this.profileCanvas !== canvas) {
-            if (this.profileRenderer) {
-                this.profileRenderer.dispose();
-            }
+            if (this.profileRenderer) this.profileRenderer.dispose();
+
             this.profileCanvas = canvas;
             this.profileRenderer = new THREE.WebGLRenderer({
                 canvas: canvas,
@@ -212,7 +246,6 @@ class SoulAvatarSystem {
             this.profileCamera = new THREE.PerspectiveCamera(50, canvas.width / canvas.height, 0.1, 100);
             this.profileCamera.position.z = 3.5;
 
-            // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             this.profileScene.add(ambientLight);
             const pointLight = new THREE.PointLight(0xffffff, 1);
@@ -223,7 +256,6 @@ class SoulAvatarSystem {
             this.profileScene.add(pointLight2);
         }
 
-        // Handle Resize based on CSS size
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
         if (canvas.width !== width || canvas.height !== height) {
@@ -232,18 +264,24 @@ class SoulAvatarSystem {
              this.profileCamera.updateProjectionMatrix();
         }
 
-        // Create/Update Mesh
-        if (this.profileMesh) {
-            this.profileScene.remove(this.profileMesh);
-            if(this.profileMesh.geometry) this.profileMesh.geometry.dispose();
-            this.profileMesh = null;
+        // Cleanup old profile mesh
+        if (this.profileGroup) {
+            this.profileScene.remove(this.profileGroup);
+            this.profileGroup.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                    else child.material.dispose();
+                }
+            });
+            this.profileGroup = null;
         }
 
-        const { geometry, speed, rotationAxis } = this.createGeometryData(username, xp);
-        this.profileMesh = new THREE.Mesh(geometry, this.sharedMaterial);
-        this.profileScene.add(this.profileMesh);
+        // Create new dedicated instance for profile
+        const { group, speed, rotationAxis } = this.createAvatarGroup(username, xp);
+        this.profileGroup = group;
+        this.profileScene.add(this.profileGroup);
 
-        // Animation Loop
         const animate = () => {
              if (canvas.offsetParent === null) {
                  this.profileRequestId = requestAnimationFrame(animate);
@@ -253,8 +291,14 @@ class SoulAvatarSystem {
              this.profileRequestId = requestAnimationFrame(animate);
 
              const time = performance.now();
-             this.profileMesh.rotation.x = time * speed * rotationAxis.x * 0.1;
-             this.profileMesh.rotation.y = time * speed * rotationAxis.y * 0.1;
+
+             // Rotation
+             this.profileGroup.rotation.x = time * speed * rotationAxis.x * 0.1;
+             this.profileGroup.rotation.y = time * speed * rotationAxis.y * 0.1;
+
+             // Breathing Animation (Life)
+             const scale = 1 + Math.sin(time * 0.0015) * 0.03;
+             this.profileGroup.scale.set(scale, scale, scale);
 
              this.profileRenderer.render(this.profileScene, this.profileCamera);
         };
@@ -268,46 +312,45 @@ class SoulAvatarSystem {
         if (!this.renderer || !this.container) return;
         if (document.hidden) return;
 
-        // 1. Clear Screen
         this.renderer.setScissorTest(false);
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
         const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        const time = performance.now();
+        const breathingScale = 1 + Math.sin(time * 0.0015) * 0.03;
 
-        // Optimization: Iterate placeholders
         for (let i = 0; i < placeholders.length; i++) {
             const el = placeholders[i];
             const elRect = el.getBoundingClientRect();
 
-            // Frustum Culling
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
 
             const username = el.dataset.user;
             if (!username) continue;
 
-            const { mesh, speed, rotationAxis } = this.getMesh(username);
+            const { group, speed, rotationAxis } = this.getMesh(username);
 
-            // Animation (Time-based to avoid speedup on multiple instances)
-            const time = performance.now();
-            mesh.rotation.x = time * speed * rotationAxis.x * 0.1;
-            mesh.rotation.y = time * speed * rotationAxis.y * 0.1;
+            // Animation
+            group.rotation.x = time * speed * rotationAxis.x * 0.1;
+            group.rotation.y = time * speed * rotationAxis.y * 0.1;
 
-            // Render Logic (Single Scene Swap)
-            // Add mesh to shared scene -> Render -> Remove
-            this.scene.add(mesh);
+            // Breathing
+            group.scale.set(breathingScale, breathingScale, breathingScale);
+
+            this.scene.add(group);
 
             const width = elRect.width;
             const height = elRect.height;
             const left = elRect.left;
-            const bottom = window.innerHeight - elRect.bottom; // WebGL uses bottom-left origin
+            const bottom = window.innerHeight - elRect.bottom;
 
             this.renderer.setViewport(left, bottom, width, height);
             this.renderer.setScissor(left, bottom, width, height);
 
             this.renderer.render(this.scene, this.camera);
 
-            this.scene.remove(mesh);
+            this.scene.remove(group);
         }
 
         this.renderer.setScissorTest(false);
@@ -315,4 +358,4 @@ class SoulAvatarSystem {
 }
 
 // Global instance
-const AvatarSystem = new SoulAvatarSystem();
+window.AvatarSystem = new SoulAvatarSystem();
