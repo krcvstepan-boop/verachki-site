@@ -8,9 +8,18 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
+        // SECURITY: API Key removed. Uses Bring Your Own Key (BYOK) model.
+        function getHFToken() {
+            return localStorage.getItem('HF_TOKEN');
+        }
+
+        window.setAIToken = function(token) {
+            if(!token) token = prompt("Enter Hugging Face Token (hf_...):");
+            if(token) {
+                localStorage.setItem('HF_TOKEN', token);
+                alert("Token saved. AI features enabled.");
+            }
+        };
 
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -278,6 +287,12 @@
 
         async function askMistral(prompt) {
             try {
+                const token = getHFToken();
+                if (!token) {
+                    console.warn("AI Token missing. Use window.setAIToken() to configure.");
+                    return null;
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
@@ -286,7 +301,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
