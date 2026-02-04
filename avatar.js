@@ -66,6 +66,7 @@ class SoulAvatarSystem {
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
+        this.placeholdersCache = null; // Optimization: Live DOM collection
 
         // Single Shared Resources
         this.scene = null;
@@ -101,6 +102,15 @@ class SoulAvatarSystem {
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
+
+        // Optimization: Cache live collection to avoid querySelectorAll every frame
+        const msgContainer = document.getElementById('messages-container');
+        if (msgContainer) {
+            this.placeholdersCache = msgContainer.getElementsByClassName('soul-avatar-placeholder');
+        } else {
+             // Fallback to global query if container not found (unlikely)
+             this.placeholdersCache = document.getElementsByClassName('soul-avatar-placeholder');
+        }
 
         // Setup Shared Scene
         this.scene = new THREE.Scene();
@@ -378,7 +388,8 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Optimization: Use cached live collection
+        const placeholders = this.placeholdersCache || document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
