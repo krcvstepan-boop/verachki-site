@@ -64,6 +64,8 @@ class SoulAvatarSystem {
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
 
+        this.placeholders = null;
+
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
@@ -98,6 +100,8 @@ class SoulAvatarSystem {
         });
 
         this.renderer.setClearColor(0xffffff, 0);
+
+        this.placeholders = document.getElementsByClassName('soul-avatar-placeholder');
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -378,7 +382,7 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        const placeholders = this.placeholders || document.getElementsByClassName('soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
