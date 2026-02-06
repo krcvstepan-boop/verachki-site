@@ -88,6 +88,9 @@ class SoulAvatarSystem {
     init() {
         if (!this.canvas || !window.THREE) return;
 
+        // Cache live collection for performance
+        this.placeholders = document.getElementsByClassName('soul-avatar-placeholder');
+
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
@@ -378,7 +381,8 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Use cached live collection instead of querySelectorAll
+        const placeholders = this.placeholders;
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
