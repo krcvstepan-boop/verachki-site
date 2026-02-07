@@ -66,6 +66,8 @@ class SoulAvatarSystem {
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
+        this.placeholders = null; // Live HTMLCollection cache
+        this.boundAnimate = this.animate.bind(this); // Bind once
 
         // Single Shared Resources
         this.scene = null;
@@ -87,6 +89,12 @@ class SoulAvatarSystem {
 
     init() {
         if (!this.canvas || !window.THREE) return;
+
+        // Ensure container reference and cache live collection
+        if (!this.container) this.container = document.getElementById('messages-container');
+        if (this.container) {
+            this.placeholders = this.container.getElementsByClassName('soul-avatar-placeholder');
+        }
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -369,7 +377,7 @@ class SoulAvatarSystem {
 
     animate() {
         if (!this.isRunning) return;
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.boundAnimate);
 
         if (!this.renderer || !this.container) return;
         if (document.hidden) return;
@@ -378,7 +386,10 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Optimization: Use cached live collection instead of querySelectorAll
+        const placeholders = this.placeholders;
+        if (!placeholders) return;
+
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
