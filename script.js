@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -37,6 +33,20 @@
             radioNoise: null,
             aiCooldown: false,
             claimTimer: null
+        };
+
+        // SECURITY: API Token Management
+        function getHFToken() {
+            return localStorage.getItem('HF_TOKEN');
+        }
+
+        window.setAIToken = function(token) {
+            if (!token) {
+                console.error("Token cannot be empty");
+                return;
+            }
+            localStorage.setItem('HF_TOKEN', token);
+            console.log("AI Token saved securely to localStorage");
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -278,6 +288,12 @@
 
         async function askMistral(prompt) {
             try {
+                const token = getHFToken();
+                if (!token) {
+                    console.warn("No AI Token set. Use window.setAIToken('YOUR_TOKEN') to enable AI features.");
+                    return null;
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
@@ -286,7 +302,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
