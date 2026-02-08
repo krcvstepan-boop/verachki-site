@@ -83,10 +83,19 @@ class SoulAvatarSystem {
         this.profileGroup = null;
         this.profileCanvas = null;
         this.profileRequestId = null;
+
+        this.placeholders = null;
+        this.boundAnimate = this.animate.bind(this);
     }
 
     init() {
         if (!this.canvas || !window.THREE) return;
+
+        // Cache live collection
+        if (!this.container) this.container = document.getElementById('messages-container');
+        if (this.container) {
+            this.placeholders = this.container.getElementsByClassName('soul-avatar-placeholder');
+        }
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -369,21 +378,28 @@ class SoulAvatarSystem {
 
     animate() {
         if (!this.isRunning) return;
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.boundAnimate);
 
-        if (!this.renderer || !this.container) return;
+        if (!this.container) {
+            this.container = document.getElementById('messages-container');
+        }
+        if (this.container && !this.placeholders) {
+            this.placeholders = this.container.getElementsByClassName('soul-avatar-placeholder');
+        }
+
+        if (!this.renderer || !this.container || !this.placeholders) return;
         if (document.hidden) return;
 
         this.renderer.setScissorTest(false);
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
+        const len = this.placeholders.length;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        for (let i = 0; i < len; i++) {
+            const el = this.placeholders[i];
             const elRect = el.getBoundingClientRect();
 
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
