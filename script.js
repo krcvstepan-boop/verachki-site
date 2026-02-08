@@ -8,9 +8,15 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
+        function getHFToken() {
+            return localStorage.getItem('HF_TOKEN');
+        }
+
+        window.setAIToken = (token) => {
+            if(!token) return;
+            localStorage.setItem('HF_TOKEN', token);
+            showToast("AI Ключ сохранен");
+        };
 
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -277,6 +283,12 @@
         }
 
         async function askMistral(prompt) {
+            const token = getHFToken();
+            if (!token) {
+                console.warn("AI Token not set. Use window.setAIToken('YOUR_KEY') to enable.");
+                return null;
+            }
+
             try {
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
@@ -286,7 +298,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -314,6 +326,12 @@
             const isRandomTrigger = Math.random() < 0.05;
 
             if (isDirectCall || isRandomTrigger) {
+                const token = getHFToken();
+                if (!token) {
+                    if (isDirectCall) showToast("AI Token не задан", "error");
+                    return;
+                }
+
                 state.aiCooldown = true;
                 setTimeout(() => state.aiCooldown = false, 10000);
 
