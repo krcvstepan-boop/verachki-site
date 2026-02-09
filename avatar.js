@@ -76,6 +76,10 @@ class SoulAvatarSystem {
         this.baseColor = 0x6a4df4;
         this.secondaryColor = 0x74b9ff;
 
+        // VISIBILITY OPTIMIZATION
+        this.visibleAvatars = new Set();
+        this.boundAnimate = this.animate.bind(this);
+
         // Profile Renderer State
         this.profileRenderer = null;
         this.profileScene = null;
@@ -128,10 +132,59 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Init Observers
+        this.initObservers();
+
         // Start animation loop
         this.isRunning = true;
-        this.animate();
+        this.boundAnimate();
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    initObservers() {
+        if (!this.container) return;
+
+        // Intersection Observer for viewport culling
+        this.io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            root: this.container,
+            threshold: 0.1
+        });
+
+        // Mutation Observer for dynamic messages
+        this.mo = new MutationObserver((mutations) => {
+            mutations.forEach(m => {
+                m.addedNodes.forEach(n => {
+                    if (n.nodeType === 1 && n.classList.contains('message-row')) {
+                        const p = n.querySelector('.soul-avatar-placeholder');
+                        if (p) this.io.observe(p);
+                    }
+                });
+                m.removedNodes.forEach(n => {
+                    if (n.nodeType === 1 && n.classList.contains('message-row')) {
+                        const p = n.querySelector('.soul-avatar-placeholder');
+                        if (p) {
+                            this.io.unobserve(p);
+                            this.visibleAvatars.delete(p);
+                        }
+                    }
+                });
+            });
+        });
+
+        this.mo.observe(this.container, { childList: true });
+
+        // Initial scan
+        this.container.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+            this.io.observe(el);
+        });
     }
 
     resize() {
@@ -369,7 +422,7 @@ class SoulAvatarSystem {
 
     animate() {
         if (!this.isRunning) return;
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.boundAnimate);
 
         if (!this.renderer || !this.container) return;
         if (document.hidden) return;
@@ -378,15 +431,13 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        for (const el of this.visibleAvatars) {
             const elRect = el.getBoundingClientRect();
-
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            // Visibility is managed by IntersectionObserver, so we skip the explicit bounds check here
+            // This reduces layout thrashing and loop overhead significantly
 
             const username = el.dataset.user;
             if (!username) continue;
