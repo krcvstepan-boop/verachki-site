@@ -8,9 +8,13 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
+        function getAIToken() {
+            return localStorage.getItem('VERACHKI_HF_TOKEN');
+        }
+
+        function setAIToken(token) {
+            if(token) localStorage.setItem('VERACHKI_HF_TOKEN', token);
+        }
 
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -276,8 +280,20 @@
             location.reload();
         }
 
-        async function askMistral(prompt) {
+        async function askMistral(prompt, isInteractive = false) {
             try {
+                let token = getAIToken();
+                if (!token) {
+                    if (isInteractive) {
+                        token = window.prompt("Введите Hugging Face Token (Read Only) для доступа к ИИ:\n(Он будет сохранен локально)");
+                        if (token) setAIToken(token);
+                        else return null;
+                    } else {
+                        console.warn("AI System: Token missing. Skipping background request.");
+                        return null;
+                    }
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
@@ -286,7 +302,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -318,7 +334,7 @@
                 setTimeout(() => state.aiCooldown = false, 10000);
 
                 const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
-                const reply = await askMistral(prompt);
+                const reply = await askMistral(prompt, isDirectCall);
 
                 if (!reply) return;
 
