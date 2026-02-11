@@ -42,7 +42,12 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function getMSKDate() {
-            return new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' });
+            const now = new Date();
+            const mskDate = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
+            const dd = String(mskDate.getDate()).padStart(2, '0');
+            const mm = String(mskDate.getMonth() + 1).padStart(2, '0');
+            const yyyy = mskDate.getFullYear();
+            return `${dd}.${mm}.${yyyy}`;
         }
 
         // MOBILE OPTIMIZATION: Prevent double-tap zoom
@@ -141,6 +146,16 @@
                 try {
                     const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.equal('email', state.user.email)]);
                     if(res.documents.length > 0) {
+                        // Handle potential duplicates: pick the one with highest XP or most recent update
+                        if (res.documents.length > 1) {
+                            console.warn("Found multiple profiles for user", state.user.email);
+                            res.documents.sort((a, b) => {
+                                const xpA = a.flower_xp || 0;
+                                const xpB = b.flower_xp || 0;
+                                if (xpB !== xpA) return xpB - xpA;
+                                return new Date(b.$updatedAt) - new Date(a.$updatedAt);
+                            });
+                        }
                         state.profile = res.documents[0];
                         // Init new fields if missing (lazy migration)
                         if (state.profile.ether === undefined) state.profile.ether = 0;
@@ -863,18 +878,25 @@
 
         async function claimEther() {
             if (!state.user) return; // Must be logged in
+
+            // Ensure profile is loaded
+            if (!state.profile) await checkSession();
+            if (!state.profile) {
+                showToast("Ошибка профиля", "error");
+                return;
+            }
+
             const today = getMSKDate();
 
             // Optimistic check if profile exists locally
-            if (state.profile && state.profile.last_claim_date === today) {
+            if (state.profile.last_claim_date === today) {
                 showToast("Уже собрано сегодня", "error");
                 return;
             }
 
             try {
-                // Determine ID: Profile ID if exists, otherwise User ID
-                const docId = state.profile ? state.profile.$id : state.user.$id;
-                const currentEther = state.profile ? (state.profile.ether || 0) : 0;
+                const docId = state.profile.$id;
+                const currentEther = state.profile.ether || 0;
                 const newEther = currentEther + 1;
 
                 await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, docId, {
@@ -882,42 +904,18 @@
                     last_claim_date: today
                 });
 
-                // Update local state if successful
-                if (state.profile) {
-                    state.profile.ether = newEther;
-                    state.profile.last_claim_date = today;
-                    state.profileCache.set(state.profile.username, state.profile);
-                    updateFlowerUI(state.profile);
-                }
+                // Update local state
+                state.profile.ether = newEther;
+                state.profile.last_claim_date = today;
+                state.profileCache.set(state.profile.username, state.profile);
+                updateFlowerUI(state.profile);
 
                 showToast("+1 Эфир получен");
                 playNotification();
 
             } catch(e) {
-                // FIX: Auto-Create Logic
-                if (e.code === 404) {
-                     try {
-                        const newProfile = await db.createDocument(DB_ID, PROFILES_COLLECTION_ID, state.user.$id, {
-                            username: state.user.name,
-                            email: state.user.email,
-                            rank: "Наблюдатель",
-                            about: "",
-                            ether: 1,
-                            flower_xp: 0,
-                            last_claim_date: today
-                        });
-
-                        state.profile = newProfile;
-                        state.profileCache.set(state.profile.username, state.profile);
-                        updateFlowerUI(state.profile);
-                        showToast("+1 Эфир получен (Профиль создан)");
-                        playNotification();
-                     } catch (createErr) {
-                         console.error(createErr);
-                     }
-                } else {
-                    console.error(e);
-                }
+                console.error(e);
+                showToast("Ошибка сбора эфира", "error");
             }
         }
 
