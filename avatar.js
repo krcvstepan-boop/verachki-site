@@ -86,7 +86,10 @@ class SoulAvatarSystem {
     }
 
     init() {
+        if (this.initialized) return;
         if (!this.canvas || !window.THREE) return;
+
+        this.initialized = true;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -127,6 +130,54 @@ class SoulAvatarSystem {
         const magentaLight = new THREE.PointLight(0xff00ff, 1, 10);
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
+
+        // Optimization: Intersection Observer
+        this.visibleAvatars = new Set();
+
+        this.io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) this.visibleAvatars.add(entry.target);
+                else this.visibleAvatars.delete(entry.target);
+            });
+        }, { root: null, rootMargin: '200px', threshold: 0 });
+
+        // Optimization: Mutation Observer
+        if (!this.container) this.container = document.getElementById('messages-container');
+
+        if (this.container) {
+            this.mo = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === 1) {
+                                if (node.classList.contains('soul-avatar-placeholder')) {
+                                    this.io.observe(node);
+                                } else {
+                                    node.querySelectorAll('.soul-avatar-placeholder').forEach(el => this.io.observe(el));
+                                }
+                            }
+                        });
+                        mutation.removedNodes.forEach(node => {
+                            if (node.nodeType === 1) {
+                                if (node.classList.contains('soul-avatar-placeholder')) {
+                                    this.io.unobserve(node);
+                                    this.visibleAvatars.delete(node);
+                                } else {
+                                    node.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+                                        this.io.unobserve(el);
+                                        this.visibleAvatars.delete(el);
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            this.mo.observe(this.container, { childList: true, subtree: true });
+
+            // Initial Scan
+            this.container.querySelectorAll('.soul-avatar-placeholder').forEach(el => this.io.observe(el));
+        }
 
         // Start animation loop
         this.isRunning = true;
@@ -378,45 +429,45 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
-            const elRect = el.getBoundingClientRect();
+        if (this.visibleAvatars) {
+            this.visibleAvatars.forEach(el => {
+                const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+                if (elRect.bottom < 0 || elRect.top > window.innerHeight) return;
 
-            const username = el.dataset.user;
-            if (!username) continue;
+                const username = el.dataset.user;
+                if (!username) return;
 
-            const { group, speed, rotationAxis } = this.getMesh(username);
+                const { group, speed, rotationAxis } = this.getMesh(username);
 
-            // Animation
-            group.rotation.x = time * speed * rotationAxis.x * 0.1;
-            group.rotation.y = time * speed * rotationAxis.y * 0.1;
+                // Animation
+                group.rotation.x = time * speed * rotationAxis.x * 0.1;
+                group.rotation.y = time * speed * rotationAxis.y * 0.1;
 
-            // Breathing (GPU)
-            group.traverse((child) => {
-                 if (child.isMesh && child.material.uniforms) {
-                     child.material.uniforms.uTime.value = timeSeconds;
-                 }
+                // Breathing (GPU)
+                group.traverse((child) => {
+                     if (child.isMesh && child.material.uniforms) {
+                         child.material.uniforms.uTime.value = timeSeconds;
+                     }
+                });
+
+                this.scene.add(group);
+
+                const width = elRect.width;
+                const height = elRect.height;
+                const left = elRect.left;
+                const bottom = window.innerHeight - elRect.bottom;
+
+                this.renderer.setViewport(left, bottom, width, height);
+                this.renderer.setScissor(left, bottom, width, height);
+
+                this.renderer.render(this.scene, this.camera);
+
+                this.scene.remove(group);
             });
-
-            this.scene.add(group);
-
-            const width = elRect.width;
-            const height = elRect.height;
-            const left = elRect.left;
-            const bottom = window.innerHeight - elRect.bottom;
-
-            this.renderer.setViewport(left, bottom, width, height);
-            this.renderer.setScissor(left, bottom, width, height);
-
-            this.renderer.render(this.scene, this.camera);
-
-            this.scene.remove(group);
         }
 
         this.renderer.setScissorTest(false);
