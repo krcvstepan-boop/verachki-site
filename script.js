@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -276,17 +272,34 @@
             location.reload();
         }
 
-        async function askMistral(prompt) {
+        async function askMistral(promptText, isInteractive) {
             try {
+                let token = localStorage.getItem('HF_TOKEN');
+
+                if (!token) {
+                    if (isInteractive) {
+                        const userToken = window.prompt("SECURITY: Введите API токен Hugging Face (Read) для доступа к ИИ:");
+                        if (userToken && userToken.trim().length > 0) {
+                            token = userToken.trim();
+                            localStorage.setItem('HF_TOKEN', token);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        console.warn("AI trigger skipped: No HF_TOKEN set.");
+                        return null;
+                    }
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
-                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
+                const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${promptText} [/INST]`;
 
                 const response = await fetch(
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -297,7 +310,13 @@
                     }
                 );
 
-                if (!response.ok) throw new Error("AI Error");
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('HF_TOKEN');
+                        console.warn("Invalid HF_TOKEN. Cleared from storage.");
+                    }
+                    throw new Error("AI Error: " + response.status);
+                }
                 const result = await response.json();
                 return result[0].generated_text.trim();
             } catch (error) {
@@ -318,7 +337,7 @@
                 setTimeout(() => state.aiCooldown = false, 10000);
 
                 const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
-                const reply = await askMistral(prompt);
+                const reply = await askMistral(prompt, isDirectCall);
 
                 if (!reply) return;
 
