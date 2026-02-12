@@ -66,6 +66,7 @@ class SoulAvatarSystem {
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
+        this.visibleAvatars = new Set(); // Set of currently visible placeholders
 
         // Single Shared Resources
         this.scene = null;
@@ -83,10 +84,21 @@ class SoulAvatarSystem {
         this.profileGroup = null;
         this.profileCanvas = null;
         this.profileRequestId = null;
+        this.initialized = false;
     }
 
     init() {
+        if (this.initialized) return;
         if (!this.canvas || !window.THREE) return;
+
+        // Ensure container is available
+        this.container = document.getElementById('messages-container');
+        if (!this.container) {
+             console.error("AvatarSystem: messages-container not found.");
+             return;
+        }
+
+        this.initialized = true;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -127,6 +139,57 @@ class SoulAvatarSystem {
         const magentaLight = new THREE.PointLight(0xff00ff, 1, 10);
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
+
+        // Optimization: Intersection Observer
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '200px' // Preload slightly before visible
+        });
+
+        // Optimization: Mutation Observer to track new messages
+        if (this.container) {
+            this.mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element
+                            if (node.classList.contains('soul-avatar-placeholder')) {
+                                this.observer.observe(node);
+                            } else {
+                                const placeholders = node.querySelectorAll('.soul-avatar-placeholder');
+                                placeholders.forEach(p => this.observer.observe(p));
+                            }
+                        }
+                    });
+                    mutation.removedNodes.forEach((node) => {
+                         if (node.nodeType === 1) {
+                             if (node.classList.contains('soul-avatar-placeholder')) {
+                                 this.observer.unobserve(node);
+                                 this.visibleAvatars.delete(node);
+                             } else {
+                                 const placeholders = node.querySelectorAll('.soul-avatar-placeholder');
+                                 placeholders.forEach(p => {
+                                     this.observer.unobserve(p);
+                                     this.visibleAvatars.delete(p);
+                                 });
+                             }
+                         }
+                    });
+                });
+            });
+
+            this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+
+            // Initial Scan
+            const initial = this.container.querySelectorAll('.soul-avatar-placeholder');
+            initial.forEach(p => this.observer.observe(p));
+        }
 
         // Start animation loop
         this.isRunning = true;
@@ -378,18 +441,24 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Performance Optimization: Iterate only over visible set
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        this.visibleAvatars.forEach(el => {
+            // Safety check if element is still in DOM (MutationObserver handles most, but safe guard)
+            if (!el.isConnected) {
+                this.visibleAvatars.delete(el);
+                return;
+            }
+
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            // Double check visibility (IntersectionObserver has margin)
+            if (elRect.bottom < 0 || elRect.top > window.innerHeight) return;
 
             const username = el.dataset.user;
-            if (!username) continue;
+            if (!username) return;
 
             const { group, speed, rotationAxis } = this.getMesh(username);
 
@@ -417,7 +486,7 @@ class SoulAvatarSystem {
             this.renderer.render(this.scene, this.camera);
 
             this.scene.remove(group);
-        }
+        });
 
         this.renderer.setScissorTest(false);
     }
