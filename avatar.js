@@ -63,6 +63,7 @@ class SoulAvatarSystem {
         this.renderer = null;
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
+        this.initialized = false;
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
@@ -83,10 +84,19 @@ class SoulAvatarSystem {
         this.profileGroup = null;
         this.profileCanvas = null;
         this.profileRequestId = null;
+
+        // Optimization: Observer State
+        this.visibleAvatars = new Set();
+        this.observer = null;
+        this.mutationObserver = null;
+        // Bind animate once to avoid creating closures every frame
+        this.boundAnimate = this.animate.bind(this);
     }
 
     init() {
+        if (this.initialized) return;
         if (!this.canvas || !window.THREE) return;
+        this.initialized = true;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -128,10 +138,66 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        this.initObservers();
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    initObservers() {
+        // 1. Intersection Observer for Visibility
+        // Use rootMargin to start rendering slightly before they enter viewport
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            root: null, // viewport
+            rootMargin: '200px',
+            threshold: 0
+        });
+
+        // 2. Initial Scan
+        const initialAvatars = document.querySelectorAll('.soul-avatar-placeholder');
+        initialAvatars.forEach(el => this.observer.observe(el));
+
+        // 3. Mutation Observer for New Messages
+        if (this.container) {
+            this.mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element
+                            if (node.classList.contains('soul-avatar-placeholder')) {
+                                this.observer.observe(node);
+                            } else if (node.querySelectorAll) {
+                                node.querySelectorAll('.soul-avatar-placeholder').forEach(el => this.observer.observe(el));
+                            }
+                        }
+                    });
+                    mutation.removedNodes.forEach((node) => {
+                        if (node.nodeType === 1) {
+                             if (node.classList.contains('soul-avatar-placeholder')) {
+                                this.observer.unobserve(node);
+                                this.visibleAvatars.delete(node);
+                             } else if (node.querySelectorAll) {
+                                node.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+                                    this.observer.unobserve(el);
+                                    this.visibleAvatars.delete(el);
+                                });
+                             }
+                        }
+                    });
+                });
+            });
+
+            this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+        }
     }
 
     resize() {
@@ -369,7 +435,7 @@ class SoulAvatarSystem {
 
     animate() {
         if (!this.isRunning) return;
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.boundAnimate);
 
         if (!this.renderer || !this.container) return;
         if (document.hidden) return;
@@ -378,15 +444,21 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Optimization: Only iterate visible avatars (managed by IntersectionObserver)
+        for (const el of this.visibleAvatars) {
+            // Safety check: remove if no longer in DOM (though MutationObserver should handle it)
+            if (!el.isConnected) {
+                this.visibleAvatars.delete(el);
+                continue;
+            }
+
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            // Note: We skip the viewport check here because IntersectionObserver handles it.
+            // However, we still need coords for rendering.
 
             const username = el.dataset.user;
             if (!username) continue;
