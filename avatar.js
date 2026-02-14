@@ -63,6 +63,9 @@ class SoulAvatarSystem {
         this.renderer = null;
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
+        this.initialized = false;
+        this.visibleAvatars = new Set();
+        this.observer = null;
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
@@ -86,7 +89,10 @@ class SoulAvatarSystem {
     }
 
     init() {
+        if (this.initialized) return;
         if (!this.canvas || !window.THREE) return;
+
+        this.initialized = true;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -128,10 +134,53 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Optimization: IntersectionObserver to track visible avatars
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            root: this.container, // #messages-container
+            rootMargin: '200px', // Pre-load slightly before visible
+            threshold: 0
+        });
+
+        // Optimization: MutationObserver to attach IO to new messages automatically
+        const mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element
+                        const avatar = node.querySelector('.soul-avatar-placeholder');
+                        if (avatar) this.observer.observe(avatar);
+                    }
+                });
+                mutation.removedNodes.forEach(node => {
+                     if (node.nodeType === 1) {
+                        const avatar = node.querySelector ? node.querySelector('.soul-avatar-placeholder') : null;
+                        if (avatar) {
+                            this.observer.unobserve(avatar);
+                            this.visibleAvatars.delete(avatar);
+                        }
+                     }
+                });
+            });
+        });
+
+        if (this.container) {
+            mutationObserver.observe(this.container, { childList: true, subtree: true });
+        }
+
+        // Initial scan
+        document.querySelectorAll('.soul-avatar-placeholder').forEach(el => this.observer.observe(el));
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
-        console.log("Soul ID System Initialized (Living Flower Mode)");
+        console.log("Soul ID System Initialized (Living Flower Mode) - Optimized");
     }
 
     resize() {
@@ -378,18 +427,18 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Optimization: Loop only over visible avatars
+        this.visibleAvatars.forEach(el => {
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            // Double check visibility in viewport (IO tracks container intersection)
+            if (elRect.bottom < 0 || elRect.top > window.innerHeight || elRect.width === 0) return;
 
             const username = el.dataset.user;
-            if (!username) continue;
+            if (!username) return;
 
             const { group, speed, rotationAxis } = this.getMesh(username);
 
@@ -417,7 +466,7 @@ class SoulAvatarSystem {
             this.renderer.render(this.scene, this.camera);
 
             this.scene.remove(group);
-        }
+        });
 
         this.renderer.setScissorTest(false);
     }
