@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -276,7 +272,27 @@
             location.reload();
         }
 
+        function getAIToken() {
+            return localStorage.getItem('HF_TOKEN');
+        }
+
+        window.setAIToken = function(token) {
+            if(!token) {
+                 localStorage.removeItem('HF_TOKEN');
+                 console.log("AI Token removed.");
+                 return;
+            }
+            localStorage.setItem('HF_TOKEN', token);
+            console.log("AI Token saved securely.");
+        };
+
         async function askMistral(prompt) {
+            const token = getAIToken();
+            if (!token) {
+                console.warn("AI Token missing. Use window.setAIToken('your_token') to enable AI features.");
+                return null;
+            }
+
             try {
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
@@ -286,7 +302,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -297,7 +313,13 @@
                     }
                 );
 
-                if (!response.ok) throw new Error("AI Error");
+                if (!response.ok) {
+                    if (response.status === 401) {
+                         localStorage.removeItem('HF_TOKEN');
+                         console.error("Invalid AI Token. Removed.");
+                    }
+                    throw new Error("AI Error: " + response.statusText);
+                }
                 const result = await response.json();
                 return result[0].generated_text.trim();
             } catch (error) {
