@@ -63,14 +63,19 @@ class SoulAvatarSystem {
         this.renderer = null;
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
+        this.initialized = false;
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
+        // Optimization: Track visible avatars
+        this.visibleAvatars = new Set();
+        this.intersectionObserver = null;
+        this.mutationObserver = null;
+
         // Single Shared Resources
         this.scene = null;
         this.camera = null;
-        // Shared material removed as per new multi-color requirement
 
         // Configuration
         this.baseColor = 0x6a4df4;
@@ -87,6 +92,8 @@ class SoulAvatarSystem {
 
     init() {
         if (!this.canvas || !window.THREE) return;
+        if (this.initialized) return;
+        this.initialized = true;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -128,10 +135,65 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Optimization: Intersection Observer for visibility culling
+        const observerOptions = {
+            root: null,
+            rootMargin: '200px',
+            threshold: 0
+        };
+
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Optimization: Mutation Observer to track new avatars
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                        if (node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.observe(node);
+                        } else {
+                            const avatars = node.querySelectorAll('.soul-avatar-placeholder');
+                            avatars.forEach(a => this.intersectionObserver.observe(a));
+                        }
+                    }
+                });
+                mutation.removedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                         if (node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.unobserve(node);
+                            this.visibleAvatars.delete(node);
+                        } else {
+                            const avatars = node.querySelectorAll('.soul-avatar-placeholder');
+                            avatars.forEach(a => {
+                                this.intersectionObserver.unobserve(a);
+                                this.visibleAvatars.delete(a);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        if (this.container) {
+            this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+
+            // Initial scan
+            const existing = this.container.querySelectorAll('.soul-avatar-placeholder');
+            existing.forEach(el => this.intersectionObserver.observe(el));
+        }
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
-        console.log("Soul ID System Initialized (Living Flower Mode)");
+        console.log("Soul ID System Initialized (Living Flower Mode) with Optimization");
     }
 
     resize() {
@@ -378,18 +440,19 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Optimization: Use cached visible set instead of DOM query
+        // const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        this.visibleAvatars.forEach(el => {
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            if (elRect.bottom < 0 || elRect.top > window.innerHeight) return;
 
             const username = el.dataset.user;
-            if (!username) continue;
+            if (!username) return;
 
             const { group, speed, rotationAxis } = this.getMesh(username);
 
@@ -417,7 +480,7 @@ class SoulAvatarSystem {
             this.renderer.render(this.scene, this.camera);
 
             this.scene.remove(group);
-        }
+        });
 
         this.renderer.setScissorTest(false);
     }
