@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -276,8 +272,35 @@
             location.reload();
         }
 
-        async function askMistral(prompt) {
+        // AI TOKEN MANAGEMENT
+        window.setAIToken = function(token) {
+            if (token) {
+                localStorage.setItem('HF_TOKEN', token);
+                console.log("AI Token updated.");
+            } else {
+                localStorage.removeItem('HF_TOKEN');
+                console.log("AI Token cleared.");
+            }
+        };
+
+        async function askMistral(prompt, isInteractive = false) {
             try {
+                let token = localStorage.getItem('HF_TOKEN');
+
+                if (!token) {
+                    if (isInteractive) {
+                        token = window.prompt("Введите Hugging Face Token (Read Access) для активации ИИ:");
+                        if (token) {
+                            window.setAIToken(token);
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        console.warn("AI Token missing for background trigger.");
+                        return null;
+                    }
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
@@ -286,7 +309,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -296,6 +319,13 @@
                         }),
                     }
                 );
+
+                if (response.status === 401) {
+                    console.error("AI Token Invalid. Clearing.");
+                    window.setAIToken(null);
+                    if (isInteractive) return askMistral(prompt, true); // Retry once
+                    return null;
+                }
 
                 if (!response.ok) throw new Error("AI Error");
                 const result = await response.json();
@@ -318,7 +348,7 @@
                 setTimeout(() => state.aiCooldown = false, 10000);
 
                 const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
-                const reply = await askMistral(prompt);
+                const reply = await askMistral(prompt, isDirectCall);
 
                 if (!reply) return;
 
