@@ -83,10 +83,60 @@ class SoulAvatarSystem {
         this.profileGroup = null;
         this.profileCanvas = null;
         this.profileRequestId = null;
+
+        // Optimization: Track visible avatars to avoid querySelectorAll every frame
+        this.visibleAvatars = new Set();
+        this.boundAnimate = this.animate.bind(this);
     }
 
     init() {
         if (!this.canvas || !window.THREE) return;
+
+        // Performance Optimization: IntersectionObserver to track visibility
+        const observerOptions = {
+            root: null, // viewport
+            rootMargin: '200px', // preload before entering viewport
+            threshold: 0
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Track new messages/avatars added to the DOM
+        if (this.container) {
+            this.mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) { // Element
+                             const avatar = node.classList.contains('soul-avatar-placeholder') ? node : node.querySelector('.soul-avatar-placeholder');
+                             if (avatar) this.observer.observe(avatar);
+                        }
+                    });
+                    mutation.removedNodes.forEach((node) => {
+                        if (node.nodeType === 1) {
+                             const avatar = node.classList.contains('soul-avatar-placeholder') ? node : node.querySelector('.soul-avatar-placeholder');
+                             if (avatar) {
+                                 this.observer.unobserve(avatar);
+                                 this.visibleAvatars.delete(avatar);
+                             }
+                        }
+                    });
+                });
+            });
+            this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+        }
+
+        // Initial scan
+        document.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+            this.observer.observe(el);
+        });
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -369,7 +419,7 @@ class SoulAvatarSystem {
 
     animate() {
         if (!this.isRunning) return;
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame(this.boundAnimate);
 
         if (!this.renderer || !this.container) return;
         if (document.hidden) return;
@@ -378,12 +428,16 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Optimization: Iterate only over visible set instead of DOM query
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        for (const el of this.visibleAvatars) {
+            if (!el.isConnected) {
+                this.visibleAvatars.delete(el);
+                continue;
+            }
+
             const elRect = el.getBoundingClientRect();
 
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
