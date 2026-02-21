@@ -8,9 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
 
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
@@ -276,7 +273,23 @@
             location.reload();
         }
 
-        async function askMistral(prompt) {
+        async function askMistral(prompt, isInteractive = false) {
+            let token = localStorage.getItem('HF_TOKEN');
+
+            if (!token) {
+                if (isInteractive) {
+                    token = window.prompt("Введите Hugging Face Token (Read):");
+                    if (token) {
+                        localStorage.setItem('HF_TOKEN', token);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    console.warn("HF_TOKEN missing for background trigger");
+                    return null;
+                }
+            }
+
             try {
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
@@ -286,7 +299,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
@@ -296,6 +309,13 @@
                         }),
                     }
                 );
+
+                if (response.status === 401) {
+                    localStorage.removeItem('HF_TOKEN');
+                    if (isInteractive) {
+                        return askMistral(prompt, true);
+                    }
+                }
 
                 if (!response.ok) throw new Error("AI Error");
                 const result = await response.json();
@@ -318,7 +338,7 @@
                 setTimeout(() => state.aiCooldown = false, 10000);
 
                 const prompt = isDirectCall ? message.replace(/^(ии|бот|система),/i, '').trim() : `Прокомментируй это сообщение: "${message}"`;
-                const reply = await askMistral(prompt);
+                const reply = await askMistral(prompt, isDirectCall);
 
                 if (!reply) return;
 
