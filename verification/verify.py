@@ -6,7 +6,8 @@ def verify_changes():
         page = browser.new_page()
 
         # Navigate to the page
-        page.goto("http://localhost:8080/index.html")
+        import os
+        page.goto(f"file://{os.path.abspath('index.html')}")
 
         # 1. Check if Defcon widget is gone
         defcon = page.query_selector(".defcon-widget")
@@ -27,6 +28,13 @@ def verify_changes():
 
         # Wait a bit for JS to run
         page.wait_for_timeout(2000)
+
+        # Check if AvatarSystem is initialized
+        is_initialized = page.evaluate("() => !!window.AvatarSystem && !!window.AvatarSystem.visibleAvatars")
+        if is_initialized:
+             print("SUCCESS: AvatarSystem initialized properly.")
+        else:
+             print("FAILURE: AvatarSystem NOT initialized.")
 
         # Screenshot
         page.screenshot(path="verification/verification.png")
