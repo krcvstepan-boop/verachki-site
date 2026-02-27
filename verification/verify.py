@@ -1,12 +1,13 @@
 from playwright.sync_api import sync_playwright
+import os
 
 def verify_changes():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        # Navigate to the page
-        page.goto("http://localhost:8080/index.html")
+        # Navigate to the page using file protocol
+        page.goto(f"file://{os.getcwd()}/index.html")
 
         # 1. Check if Defcon widget is gone
         defcon = page.query_selector(".defcon-widget")
