@@ -64,6 +64,11 @@ class SoulAvatarSystem {
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
 
+        // Visibility Optimization
+        this.visibleAvatars = new Set();
+        this.intersectionObserver = null;
+        this.mutationObserver = null;
+
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
@@ -128,10 +133,66 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Make sure container is correctly loaded
+        this.container = document.getElementById('messages-container');
+
+        // Setup DOM Observers
+        this.setupObservers();
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    setupObservers() {
+        if (!window.IntersectionObserver || !window.MutationObserver || !this.container) return;
+
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '200px'
+        });
+
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // ELEMENT_NODE
+                        const placeholders = node.querySelectorAll('.soul-avatar-placeholder');
+                        placeholders.forEach(el => this.intersectionObserver.observe(el));
+                        if (node.classList && node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.observe(node);
+                        }
+                    }
+                });
+
+                mutation.removedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                        const placeholders = node.querySelectorAll('.soul-avatar-placeholder');
+                        placeholders.forEach(el => {
+                            this.intersectionObserver.unobserve(el);
+                            this.visibleAvatars.delete(el);
+                        });
+                        if (node.classList && node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.unobserve(node);
+                            this.visibleAvatars.delete(node);
+                        }
+                    }
+                });
+            });
+        });
+
+        this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+
+        // Observe initial placeholders
+        const initialPlaceholders = this.container.querySelectorAll('.soul-avatar-placeholder');
+        initialPlaceholders.forEach(el => this.intersectionObserver.observe(el));
     }
 
     resize() {
@@ -378,18 +439,18 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Optimized: Iterate only over visible avatars from IntersectionObserver
+        this.visibleAvatars.forEach(el => {
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            // Double check bounds to be safe during fast scrolling
+            if (elRect.bottom < 0 || elRect.top > window.innerHeight) return;
 
             const username = el.dataset.user;
-            if (!username) continue;
+            if (!username) return;
 
             const { group, speed, rotationAxis } = this.getMesh(username);
 
@@ -417,7 +478,7 @@ class SoulAvatarSystem {
             this.renderer.render(this.scene, this.camera);
 
             this.scene.remove(group);
-        }
+        });
 
         this.renderer.setScissorTest(false);
     }
