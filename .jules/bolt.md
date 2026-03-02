@@ -1,0 +1,3 @@
+## 2024-05-24 - [Avoid querySelectorAll in requestAnimationFrame]
+**Learning:** Using `document.querySelectorAll` inside a `requestAnimationFrame` loop creates a significant performance bottleneck (O(N) operation per frame). In a high-frequency animation loop, this can cause jank and frame drops.
+**Action:** Combining `MutationObserver` (to track added/removed elements) with `IntersectionObserver` (to track viewport visibility) allows maintaining a `Set` of visible elements. Iterating over this pre-calculated `Set` instead of querying the DOM directly reduces the operation to O(M) per frame, effectively mitigating the bottleneck in vanilla JavaScript without heavy frameworks.
