@@ -67,6 +67,11 @@ class SoulAvatarSystem {
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
+        // Visibility Tracking
+        this.visibleAvatars = new Set();
+        this.intersectionObserver = null;
+        this.mutationObserver = null;
+
         // Single Shared Resources
         this.scene = null;
         this.camera = null;
@@ -128,10 +133,58 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Setup observers for performance
+        this.setupObservers();
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    setupObservers() {
+        // Track visibility of avatars to avoid querying DOM every frame
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            root: this.container,
+            rootMargin: '200px' // Pre-load slightly outside viewport
+        });
+
+        // Track new avatars added to the chat
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        const avatars = node.classList && node.classList.contains('soul-avatar-placeholder') ? [node] : node.querySelectorAll('.soul-avatar-placeholder');
+                        avatars.forEach(avatar => this.intersectionObserver.observe(avatar));
+                    }
+                });
+                mutation.removedNodes.forEach(node => {
+                     if (node.nodeType === 1) {
+                         const avatars = node.classList && node.classList.contains('soul-avatar-placeholder') ? [node] : node.querySelectorAll('.soul-avatar-placeholder');
+                         avatars.forEach(avatar => {
+                             this.intersectionObserver.unobserve(avatar);
+                             this.visibleAvatars.delete(avatar);
+                         });
+                     }
+                });
+            });
+        });
+
+        if (this.container) {
+            this.mutationObserver.observe(this.container, { childList: true, subtree: true });
+            // Initial pass
+            this.container.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+                this.intersectionObserver.observe(el);
+            });
+        }
     }
 
     resize() {
@@ -378,12 +431,11 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Iterate only over avatars currently visible in the viewport (O(M) instead of O(N) DOM query)
+        for (const el of this.visibleAvatars) {
             const elRect = el.getBoundingClientRect();
 
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;

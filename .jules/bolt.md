@@ -1,0 +1,3 @@
+## 2026-03-03 - Optimize DOM Querying in Animation Loop
+**Learning:** Querying the DOM synchronously within an animation loop (`document.querySelectorAll`) is a major performance bottleneck, resulting in an O(N) operation per frame. For long chat logs or numerous elements, this can severely impact UI rendering latency and framerates.
+**Action:** Replace direct per-frame DOM querying with an event-driven `IntersectionObserver` paired with a `MutationObserver`. Maintain a dynamic `Set` of visible elements that updates efficiently when the DOM changes or an element enters/leaves the viewport, reducing the operation to O(M) where M is only the visible items.
