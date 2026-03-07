@@ -1,0 +1,3 @@
+## 2024-05-24 - Hoisting High-Frequency Object Instantiations
+**Learning:** High-frequency UI update loops (like countdown timers running every second via `setInterval` or `requestAnimationFrame`) degrade performance when they instantiate complex objects like `Intl.DateTimeFormat` or multiple `Date` objects on every tick. This causes unnecessary memory allocation and frequent garbage collection pauses, leading to layout thrashing or stuttering.
+**Action:** Always hoist configuration and heavy object initializations (e.g., `Intl.DateTimeFormat`) outside of high-frequency loops, utilizing closures to access them inside the update function.

@@ -827,34 +827,53 @@
             if (state.claimTimer) clearInterval(state.claimTimer);
 
             const timerDiv = document.getElementById('claim-timer');
+
+            // ⚡ Bolt Optimization: Hoist Intl.DateTimeFormat outside the high-frequency setInterval loop
+            // to prevent unnecessary object instantiation and garbage collection pauses.
+            const mskFormatter = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/Moscow',
+                hourCycle: 'h23',
+                hour12: false,
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+            });
+
             const update = () => {
                 const now = new Date();
-                // Target: Next 00:00 MSK.
-                // Currently simplified: Just countdown to next midnight local?
-                // No, prompt requires MSK.
-                // 00:00 MSK is 21:00 UTC previous day? No, UTC+3.
+                const parts = mskFormatter.formatToParts(now);
 
-                // Hacky MSK calculation:
-                // Get current UTC time
-                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                // Get MSK time
-                const mskTime = new Date(utc + (3600000 * 3));
+                let hStr = "0", mStr = "0", sStr = "0";
+                for (const part of parts) {
+                    if (part.type === 'hour') hStr = part.value;
+                    if (part.type === 'minute') mStr = part.value;
+                    if (part.type === 'second') sStr = part.value;
+                }
 
-                // Target is tomorrow 00:00 MSK
-                const target = new Date(mskTime);
-                target.setHours(24, 0, 0, 0);
+                const currentH = parseInt(hStr, 10);
+                const currentM = parseInt(mStr, 10);
+                const currentS = parseInt(sStr, 10);
 
-                const diff = target - mskTime;
-                if (diff < 0) {
+                // Calculate time remaining until 24:00:00 (which is next midnight)
+                let remH = 23 - currentH;
+                let remM = 59 - currentM;
+                let remS = 60 - currentS;
+
+                if (remS === 60) {
+                    remS = 0;
+                    remM += 1;
+                }
+                if (remM === 60) {
+                    remM = 0;
+                    remH += 1;
+                }
+
+                if (remH < 0) {
                      timerDiv.innerText = "ГОТОВО";
                      return;
                 }
 
-                const h = Math.floor(diff / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-                timerDiv.innerText = `До сброса: ${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                timerDiv.innerText = `До сброса: ${remH}:${remM.toString().padStart(2,'0')}:${remS.toString().padStart(2,'0')}`;
             };
 
             state.claimTimer = setInterval(update, 1000);
