@@ -61,11 +61,12 @@ class SoulAvatarSystem {
     constructor() {
         this.canvas = document.getElementById('soul-avatars');
         this.renderer = null;
-        this.container = document.getElementById('messages-container');
+        this.container = null;
         this.isRunning = false;
 
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
+        this.visibleAvatars = new Set(); // DOM elements currently visible
 
         // Single Shared Resources
         this.scene = null;
@@ -86,7 +87,10 @@ class SoulAvatarSystem {
     }
 
     init() {
-        if (!this.canvas || !window.THREE) return;
+        if (!this.canvas || !window.THREE || this.initialized) return;
+        this.initialized = true;
+
+        this.container = document.getElementById('messages-container');
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -130,8 +134,64 @@ class SoulAvatarSystem {
 
         // Start animation loop
         this.isRunning = true;
+        this.setupObservers();
         this.animate();
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    setupObservers() {
+        if (!this.container) return;
+
+        // 1. Intersection Observer for Visibility
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, { rootMargin: '200px' });
+
+        // Observe initial placeholders
+        document.querySelectorAll('.soul-avatar-placeholder').forEach(el => {
+            this.intersectionObserver.observe(el);
+        });
+
+        // 2. Mutation Observer for DOM changes (new/deleted messages)
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                // Handle added nodes
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        // If the node itself is a placeholder
+                        if (node.classList && node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.observe(node);
+                        }
+                        // Or if it contains placeholders
+                        const newPlaceholders = node.querySelectorAll('.soul-avatar-placeholder');
+                        newPlaceholders.forEach(el => this.intersectionObserver.observe(el));
+                    }
+                });
+
+                // Handle removed nodes
+                mutation.removedNodes.forEach(node => {
+                    if (node.nodeType === 1) {
+                        if (node.classList && node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.unobserve(node);
+                            this.visibleAvatars.delete(node);
+                        }
+                        const removedPlaceholders = node.querySelectorAll('.soul-avatar-placeholder');
+                        removedPlaceholders.forEach(el => {
+                            this.intersectionObserver.unobserve(el);
+                            this.visibleAvatars.delete(el);
+                        });
+                    }
+                });
+            });
+        });
+
+        this.mutationObserver.observe(this.container, { childList: true, subtree: true });
     }
 
     resize() {
@@ -378,14 +438,14 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Iterate only over visible avatars determined by IntersectionObserver
+        for (const el of this.visibleAvatars) {
             const elRect = el.getBoundingClientRect();
 
+            // Additional precise clipping guard for smooth scrolling edges
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
 
             const username = el.dataset.user;

@@ -1,0 +1,3 @@
+## 2024-05-24 - IntersectionObserver WebGL Render Loop Anti-pattern Fix
+**Learning:** Performing DOM queries (`querySelectorAll`) and iterating over potentially thousands of elements (`getBoundingClientRect()`) inside `requestAnimationFrame` for a chat UI severely bottlenecks the main thread and impacts WebGL rendering frame rates. Specifically, `avatar.js` was rendering elements offscreen.
+**Action:** Replaced O(N) DOM querying per frame with an O(M) Set iteration (`this.visibleAvatars`), maintained by an `IntersectionObserver` to track viewport entry/exit, combined with a `MutationObserver` on the chat container to handle dynamic message additions and deletions to prevent memory leaks and redundant computations.
