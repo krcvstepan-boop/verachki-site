@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimize graph initialization in `network.js`]
+**Learning:** Initializing the user graph with nested loops $O(N^2)$ and an internal array filter check $O(L)$ resulted in $O(N^3)$ complexity, which caused major initial lag as the node count increased.
+**Action:** Replace `links.filter` inside loops with a continuously maintained `Set` for connected users to perform the connectivity check in $O(1)$ time, thereby returning the initialization to $O(N^2)$ and dramatically speeding up graph loading for large datasets.
