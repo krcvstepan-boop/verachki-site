@@ -1,0 +1,17 @@
+127.0.0.1 - - [11/Mar/2026 19:21:58] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:21:58] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:21:58] "GET /cover.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:21:58] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:21:58] "GET /avatar.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:15] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:15] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:15] "GET /avatar.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:15] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:15] "GET /cover.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:17] "GET /network.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:22:17] "GET /network.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:23:21] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:23:21] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:23:21] "GET /cover.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:23:21] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 19:23:21] "GET /avatar.js HTTP/1.1" 200 -
