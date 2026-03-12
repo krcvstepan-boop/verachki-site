@@ -1,0 +1,3 @@
+## 2024-05-24 - Network graph generation complexity
+**Learning:** O(N^3) time complexity can easily sneak into initialization loops when calculating edge connections, specifically when doing an O(L) array filter inside an O(N^2) nested loop (where L can grow to N^2).
+**Action:** Use an O(1) Set to track node connections instead of iterating over the growing edges array, which reduces the complexity to O(N^2).
