@@ -48,17 +48,24 @@ async function initGraph() {
     const links = [];
 
     // Connect users to form a core web
+    const connectedUsers = new Set();
     for (let i = 0; i < users.length; i++) {
         for (let j = i + 1; j < users.length; j++) {
             // 30% chance to connect any two users
             if (Math.random() < 0.3) {
                 links.push({ source: users[i].id, target: users[j].id });
+                connectedUsers.add(users[i].id);
+                connectedUsers.add(users[j].id);
             }
         }
         // Ensure at least one connection for each user if users exist
-        if (users.length > 1 && links.filter(l => l.source === users[i].id || l.target === users[i].id).length === 0) {
+        // ⚡ Bolt: Replaced O(N) array filter with O(1) Set lookup
+        // Reduces complexity from O(N^3) to O(N^2)
+        if (users.length > 1 && !connectedUsers.has(users[i].id)) {
             const target = users[(i + 1) % users.length];
             links.push({ source: users[i].id, target: target.id });
+            connectedUsers.add(users[i].id);
+            connectedUsers.add(target.id);
         }
     }
 
