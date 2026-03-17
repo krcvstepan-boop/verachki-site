@@ -1,0 +1,3 @@
+## 2024-05-15 - Optimize Avatar Rendering Loop
+**Learning:** Re-querying the DOM using `document.querySelectorAll('.soul-avatar-placeholder')` within the `requestAnimationFrame` loop caused an O(N) performance bottleneck and layout thrashing as the number of messages increased.
+**Action:** Replace per-frame DOM queries with reactive Set iteration by using `IntersectionObserver` to track element visibility and `MutationObserver` to automatically observe newly added or removed DOM elements, ensuring the animation loop only processes currently visible avatars.
