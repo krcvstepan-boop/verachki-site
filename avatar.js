@@ -64,6 +64,12 @@ class SoulAvatarSystem {
         this.container = document.getElementById('messages-container');
         this.isRunning = false;
 
+        // Performance optimizations
+        this.initialized = false;
+        this.visibleAvatars = new Set();
+        this.intersectionObserver = null;
+        this.mutationObserver = null;
+
         // Caches
         this.meshes = new Map(); // username -> { group, speed, rotationAxis }
 
@@ -87,6 +93,7 @@ class SoulAvatarSystem {
 
     init() {
         if (!this.canvas || !window.THREE) return;
+        if (this.initialized) return;
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -128,10 +135,74 @@ class SoulAvatarSystem {
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
 
+        // Setup observers for optimized render loop
+        this.setupObservers();
+
         // Start animation loop
         this.isRunning = true;
         this.animate();
+        this.initialized = true;
         console.log("Soul ID System Initialized (Living Flower Mode)");
+    }
+
+    setupObservers() {
+        this.container = document.getElementById('messages-container');
+        if (!this.container) return;
+
+        // 1. Intersection Observer to track visibility
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleAvatars.add(entry.target);
+                } else {
+                    this.visibleAvatars.delete(entry.target);
+                }
+            });
+        }, {
+            root: null, // viewport
+            rootMargin: '200px 0px', // preload avatars just outside viewport
+            threshold: 0
+        });
+
+        // 2. Mutation Observer to track added/removed elements
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.observe(node);
+                        }
+                        // Check children if a row was added
+                        const avatars = node.querySelectorAll?.('.soul-avatar-placeholder');
+                        if (avatars) avatars.forEach(a => this.intersectionObserver.observe(a));
+                    }
+                });
+
+                mutation.removedNodes.forEach(node => {
+                    if (node.nodeType === 1) {
+                        if (node.classList.contains('soul-avatar-placeholder')) {
+                            this.intersectionObserver.unobserve(node);
+                            this.visibleAvatars.delete(node);
+                        }
+                        const avatars = node.querySelectorAll?.('.soul-avatar-placeholder');
+                        if (avatars) avatars.forEach(a => {
+                            this.intersectionObserver.unobserve(a);
+                            this.visibleAvatars.delete(a);
+                        });
+                    }
+                });
+            });
+        });
+
+        // Start observing mutations on the container
+        this.mutationObserver.observe(this.container, {
+            childList: true,
+            subtree: true
+        });
+
+        // Initial scan for existing placeholders
+        const existing = document.querySelectorAll('.soul-avatar-placeholder');
+        existing.forEach(el => this.intersectionObserver.observe(el));
     }
 
     resize() {
@@ -378,12 +449,11 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
-            const el = placeholders[i];
+        // Iterate over the dynamically maintained Set instead of O(N) DOM query
+        for (const el of this.visibleAvatars) {
             const elRect = el.getBoundingClientRect();
 
             if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;

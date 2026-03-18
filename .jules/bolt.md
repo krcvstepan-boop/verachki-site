@@ -1,0 +1,3 @@
+## 2024-05-24 - DOM query elimination in render loops
+**Learning:** `document.querySelectorAll()` inside a `requestAnimationFrame` loop (like `SoulAvatarSystem.animate` in `avatar.js`) causes significant performance overhead and unnecessary garbage collection.
+**Action:** Use `IntersectionObserver` and `MutationObserver` to maintain a Set of currently visible elements (`visibleAvatars`), and iterate over that Set in the render loop instead of querying the DOM every frame. Ensure proper unobserving to prevent memory leaks when nodes are removed.
