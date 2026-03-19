@@ -1,0 +1,3 @@
+## 2024-05-24 - Network Graph Optimization O(N^3) to O(N^2)
+**Learning:** Checking connectivity with `links.filter` inside nested loops over nodes leads to catastrophic O(N^3) time complexity during graph initialization, causing significant main thread blocking on the frontend.
+**Action:** When connecting nodes, maintain an external O(1) tracking structure (like a `Set`) for relationships rather than repeatedly searching the output array.
