@@ -4,3 +4,8 @@
 **Vulnerability:** User inputs (username, messages) were injected directly into inline event handlers (e.g., `onclick="func('${val}')"`) and template literals. Standard HTML escaping (`&`, `<`, `>`) is insufficient here because browsers decode HTML entities in attributes *before* JS parsing.
 **Learning:** `escapeHtml` protects HTML content, but protecting JS strings inside HTML attributes requires escaping JS syntax characters (`'`, `"`, `` ` ``, `\`, `newline`).
 **Prevention:** Use a dedicated `escapeJs` function for values injected into JS strings within HTML attributes. Better yet, avoid inline event handlers and use `addEventListener` where possible (though inline was kept here for minimal refactoring).
+
+## 2024-05-24 - Hardcoded 3rd-party API credentials
+**Vulnerability:** Hugging Face API tokens were hardcoded globally in `script.js` and split into chunks (`keyP1` + `keyP2`).
+**Learning:** Hardcoding credentials client-side, even obfuscated or chunked, exposes them to anyone viewing the source code.
+**Prevention:** 3rd-party API keys (e.g., HuggingFace tokens) must never be hardcoded or concatenated in client-side JavaScript. Instead, use a Bring Your Own Key (BYOK) model storing tokens in `localStorage`, or proxy requests through a secure backend.
