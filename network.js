@@ -46,6 +46,7 @@ async function initGraph() {
     const phantoms = generatePhantoms();
     const nodes = [...users, ...phantoms];
     const links = [];
+    const connectedUsers = new Set(); // ⚡ Bolt: O(1) connection tracking
 
     // Connect users to form a core web
     for (let i = 0; i < users.length; i++) {
@@ -53,12 +54,17 @@ async function initGraph() {
             // 30% chance to connect any two users
             if (Math.random() < 0.3) {
                 links.push({ source: users[i].id, target: users[j].id });
+                connectedUsers.add(users[i].id);
+                connectedUsers.add(users[j].id);
             }
         }
         // Ensure at least one connection for each user if users exist
-        if (users.length > 1 && links.filter(l => l.source === users[i].id || l.target === users[i].id).length === 0) {
+        // ⚡ Bolt: Replaced O(N) array filter with O(1) Set lookup
+        if (users.length > 1 && !connectedUsers.has(users[i].id)) {
             const target = users[(i + 1) % users.length];
             links.push({ source: users[i].id, target: target.id });
+            connectedUsers.add(users[i].id);
+            connectedUsers.add(target.id);
         }
     }
 
