@@ -1,0 +1,3 @@
+## 2026-03-26 - [Avatar Rendering Optimization]
+**Learning:** In high-frequency rendering loops (e.g. `requestAnimationFrame` in `avatar.js`), using `document.querySelectorAll()` and repeatedly accessing `window.innerHeight` per-element introduce severe layout thrashing and computational overhead, even if elements don't change frequently.
+**Action:** Replace `document.querySelectorAll` with the faster, live `document.getElementsByClassName`, and cache `window.innerHeight` once per frame prior to iterating over elements.
