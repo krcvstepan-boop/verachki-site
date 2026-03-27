@@ -1,0 +1,3 @@
+## 2024-05-24 - Document.querySelectorAll in High-Frequency Animation Loops
+**Learning:** Using `document.querySelectorAll()` inside a `requestAnimationFrame` loop (like `animate()` in `avatar.js`) is an anti-pattern as it creates a new static NodeList object on every frame, incurring a severe performance and garbage collection penalty. Furthermore, repeatedly reading `window.innerHeight` and `.length` properties inside such loops can cause layout thrashing.
+**Action:** Always prefer `document.getElementsByClassName()` or `getElementById()` which return fast live HTMLCollections. Always cache array lengths and layout properties (like `window.innerHeight`) into local variables outside the loop to avoid redundant recalculations.
