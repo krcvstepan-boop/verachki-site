@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing high-frequency DOM queries in animation loop
+**Learning:** Using `document.querySelectorAll` inside a `requestAnimationFrame` loop like the one in `avatar.js` causes significant performance overhead due to the constant creation of static NodeLists. Similarly, repeatedly accessing layout properties like `window.innerHeight` triggers unnecessary layout calculations and thrashing.
+**Action:** Replace `querySelectorAll` with `getElementsByClassName` to utilize a live HTMLCollection which is faster to iterate over. Always cache layout properties like `window.innerHeight` and loop bounds (`length`) outside the high-frequency loop to minimize DOM interactions and prevent layout thrashing.
