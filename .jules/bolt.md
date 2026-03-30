@@ -1,0 +1,3 @@
+## 2024-03-30 - [Performance Optimization in requestAnimationFrame loops]
+**Learning:** In high-frequency rendering paths like `avatar.js`'s `animate()` loop, using static NodeLists (from `document.querySelectorAll`) and redundant layout property reads (like `window.innerHeight`) inside the loop introduces significant performance and garbage collection overheads, exacerbating potential layout thrashing.
+**Action:** Use fast, live HTMLCollections (via `document.getElementsByClassName`) for elements that need periodic querying in a `requestAnimationFrame` loop, and explicitly cache fixed or rarely-changing properties (like loop length and viewport dimensions) outside the loop prior to execution to minimize computation costs per frame.

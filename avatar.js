@@ -378,15 +378,19 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // ⚡ Bolt Optimization: Use fast live HTMLCollection and cache layout properties outside the render loop
+        const placeholders = document.getElementsByClassName('soul-avatar-placeholder');
+        const placeholdersCount = placeholders.length;
+        const winHeight = window.innerHeight;
+
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
+        for (let i = 0; i < placeholdersCount; i++) {
             const el = placeholders[i];
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            if (elRect.bottom < 0 || elRect.top > winHeight) continue;
 
             const username = el.dataset.user;
             if (!username) continue;
