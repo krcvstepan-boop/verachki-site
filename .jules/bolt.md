@@ -1,0 +1,3 @@
+## 2024-03-31 - [High-Frequency Loop Layout Thrashing]
+**Learning:** High-frequency rendering loops (like `animate()` in `avatar.js` using `requestAnimationFrame`) can suffer from severe performance degradation and layout thrashing when combining slow DOM queries (`document.querySelectorAll`) with uncached layout properties (e.g., querying `window.innerHeight` repeatedly within a loop over many elements).
+**Action:** Always prefer `document.getElementsByClassName` for faster, live HTMLCollections instead of static NodeLists, and rigorously cache layout properties (like `window.innerHeight` or array lengths) outside of iterative loops to minimize redundant computation and layout recalculations.
