@@ -1,6 +1,4 @@
-# Sentinel Journal
-
-## 2024-05-22 - XSS in HTML Event Handlers and Templates
-**Vulnerability:** User inputs (username, messages) were injected directly into inline event handlers (e.g., `onclick="func('${val}')"`) and template literals. Standard HTML escaping (`&`, `<`, `>`) is insufficient here because browsers decode HTML entities in attributes *before* JS parsing.
-**Learning:** `escapeHtml` protects HTML content, but protecting JS strings inside HTML attributes requires escaping JS syntax characters (`'`, `"`, `` ` ``, `\`, `newline`).
-**Prevention:** Use a dedicated `escapeJs` function for values injected into JS strings within HTML attributes. Better yet, avoid inline event handlers and use `addEventListener` where possible (though inline was kept here for minimal refactoring).
+## 2026-03-31 - [Hardcoded API Key Parts Pattern]
+**Vulnerability:** A critical API token (Hugging Face `HF_TOKEN`) was hardcoded directly in `script.js` by concatenating string fragments (`keyP1 + keyP2`). This bypassed simple string scanning but exposed the secret token in plain text client-side, making it susceptible to theft.
+**Learning:** Hardcoded credentials on the client-side are insecure, even when split into parts to evade simple static analysis. Any logic running in a public browser environment allows full access to these variables.
+**Prevention:** 3rd-party API keys must never be hardcoded or concatenated in client-side code. Instead, use a Bring Your Own Key (BYOK) model storing tokens securely via `localStorage` on-demand or proxy requests through a secure backend server.
