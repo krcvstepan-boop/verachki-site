@@ -1,0 +1,3 @@
+## 2025-01-20 - Optimize DOM queries and caching in animate loop
+**Learning:** In high-frequency execution paths like the `animate` loop in `avatar.js`, using `document.querySelectorAll` creates unnecessary overhead by returning a static NodeList, and repeated layout queries like `window.innerHeight` cause layout thrashing.
+**Action:** Replace `document.querySelectorAll` with `document.getElementsByClassName` (returning a fast live HTMLCollection), and cache layout properties (`window.innerHeight`) and array lengths outside the loop to prevent layout thrashing and redundant overhead.
