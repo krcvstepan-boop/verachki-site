@@ -378,16 +378,16 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        // ⚡ Bolt: Performance Optimization
-        // Replace querySelectorAll with getElementsByClassName for faster live collection
+        // Optimization: Use getElementsByClassName for faster live HTMLCollection
         const placeholders = document.getElementsByClassName('soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
-        // ⚡ Bolt: Cache array length and window layout properties to prevent layout thrashing and redundant lookups
-        const placeholdersLen = placeholders.length;
-        const winHeight = window.innerHeight;
 
-        for (let i = 0; i < placeholdersLen; i++) {
+        // Optimization: Cache window.innerHeight and length to prevent layout thrashing
+        const winHeight = window.innerHeight;
+        const len = placeholders.length;
+
+        for (let i = 0; i < len; i++) {
             const el = placeholders[i];
             const elRect = el.getBoundingClientRect();
 
