@@ -378,15 +378,22 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        const placeholders = document.querySelectorAll('.soul-avatar-placeholder');
+        // Optimization: Use getElementsByClassName (live HTMLCollection, O(1) update)
+        // instead of querySelectorAll (static NodeList, O(N) traversal) in tight loop.
+        const placeholders = document.getElementsByClassName('soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
 
-        for (let i = 0; i < placeholders.length; i++) {
+        // Optimization: Cache layout properties (innerHeight) and collection length
+        // outside the loop to prevent layout thrashing and redundant property lookups.
+        const winHeight = window.innerHeight;
+        const count = placeholders.length;
+
+        for (let i = 0; i < count; i++) {
             const el = placeholders[i];
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue;
+            if (elRect.bottom < 0 || elRect.top > winHeight) continue;
 
             const username = el.dataset.user;
             if (!username) continue;
@@ -409,7 +416,7 @@ class SoulAvatarSystem {
             const width = elRect.width;
             const height = elRect.height;
             const left = elRect.left;
-            const bottom = window.innerHeight - elRect.bottom;
+            const bottom = winHeight - elRect.bottom;
 
             this.renderer.setViewport(left, bottom, width, height);
             this.renderer.setScissor(left, bottom, width, height);
