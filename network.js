@@ -4,6 +4,16 @@ const ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
 const DB_ID = '6962475a003af27425fb';
 const PROFILES_COL = 'profiles';
 
+function escapeHtml(text) {
+    if (!text) return "";
+    return text.toString()
+               .replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
+}
+
 // APPWRITE SETUP
 const { Client, Databases, Query } = Appwrite;
 const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -94,7 +104,8 @@ async function initGraph() {
         .nodeLabel(node => {
             const color = node.group === 'user' ? '#00ffff' : '#888';
             const label = node.group === 'user' ? 'ГРАЖДАНИН' : 'НЕИЗВЕСТНО';
-            return `<div style="text-align:center; color:${color}; font-weight:bold; font-family:'Courier New'; font-size:1.2em;">${node.name}</div><div style="font-size:0.8em; color:#ccc;">${label}</div>`;
+            const safeName = escapeHtml(node.name);
+            return `<div style="text-align:center; color:${color}; font-weight:bold; font-family:'Courier New'; font-size:1.2em;">${safeName}</div><div style="font-size:0.8em; color:#ccc;">${label}</div>`;
         })
         .nodeThreeObject(node => {
             if (node.group === 'user') {
