@@ -8,10 +8,6 @@
         const ADMIN_EMAIL = "kraacovstepa@gmail.com";
         const SECRET_CODE = "GLEB2023";
 
-        const keyP1 = "hf_UwcAeGYbQKgyWa";
-        const keyP2 = "AlccfNJwQoCAxVzHgSdS";
-        const HF_TOKEN = keyP1 + keyP2;
-
         // APPWRITE SETUP
         const { Client, Account, Databases, Storage, ID, Query } = Appwrite;
         const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
@@ -275,6 +271,13 @@
 
         async function askMistral(prompt) {
             try {
+                let hfToken = localStorage.getItem('hf_token');
+                if (!hfToken) {
+                    hfToken = window.prompt("Для работы ИИ-ассистента введите ваш Hugging Face API Token (hf_...):");
+                    if (!hfToken) return null;
+                    localStorage.setItem('hf_token', hfToken.trim());
+                }
+
                 const systemPrompt = "Ты — СИСТЕМА, искусственный интеллект-наблюдатель чата 'Верачки'. Твой характер: ироничный, загадочный, киберпанковый. Ты не человек. Отвечай кратко (1-2 предложения).";
 
                 const fullPrompt = `<s>[INST] ${systemPrompt} \n\nВходящие данные:\n${prompt} [/INST]`;
@@ -283,7 +286,7 @@
                     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
                     {
                         headers: {
-                            Authorization: `Bearer ${HF_TOKEN}`,
+                            Authorization: `Bearer ${hfToken}`,
                             "Content-Type": "application/json"
                         },
                         method: "POST",
