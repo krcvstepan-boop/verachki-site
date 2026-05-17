@@ -9,6 +9,16 @@ const { Client, Databases, Query } = Appwrite;
 const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
 const db = new Databases(client);
 
+// UTILS
+function escapeHtml(text) {
+    if (!text) return "";
+    return text.replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
+}
+
 // SETTINGS
 const IS_MOBILE = window.innerWidth < 768;
 const PHANTOM_COUNT = IS_MOBILE ? 30 : 60;
@@ -94,7 +104,7 @@ async function initGraph() {
         .nodeLabel(node => {
             const color = node.group === 'user' ? '#00ffff' : '#888';
             const label = node.group === 'user' ? 'ГРАЖДАНИН' : 'НЕИЗВЕСТНО';
-            return `<div style="text-align:center; color:${color}; font-weight:bold; font-family:'Courier New'; font-size:1.2em;">${node.name}</div><div style="font-size:0.8em; color:#ccc;">${label}</div>`;
+            return `<div style="text-align:center; color:${color}; font-weight:bold; font-family:'Courier New'; font-size:1.2em;">${escapeHtml(node.name)}</div><div style="font-size:0.8em; color:#ccc;">${label}</div>`;
         })
         .nodeThreeObject(node => {
             if (node.group === 'user') {
