@@ -56,6 +56,9 @@ async function initGraph() {
     const phantoms = generatePhantoms();
     const nodes = [...users, ...phantoms];
     const links = [];
+    // BOLT OPTIMIZATION: Use a Set to track connections in O(1) instead of O(N) array filter.
+    // This reduces link generation complexity from O(N^3) to O(N^2), critical for large graphs.
+    const hasConnection = new Set();
 
     // Connect users to form a core web
     for (let i = 0; i < users.length; i++) {
@@ -63,12 +66,21 @@ async function initGraph() {
             // 30% chance to connect any two users
             if (Math.random() < 0.3) {
                 links.push({ source: users[i].id, target: users[j].id });
+                hasConnection.add(users[i].id);
+                hasConnection.add(users[j].id);
             }
         }
-        // Ensure at least one connection for each user if users exist
-        if (users.length > 1 && links.filter(l => l.source === users[i].id || l.target === users[i].id).length === 0) {
-            const target = users[(i + 1) % users.length];
-            links.push({ source: users[i].id, target: target.id });
+    }
+
+    // Ensure at least one connection for each user to maintain graph integrity
+    if (users.length > 1) {
+        for (let i = 0; i < users.length; i++) {
+            if (!hasConnection.has(users[i].id)) {
+                const target = users[(i + 1) % users.length];
+                links.push({ source: users[i].id, target: target.id });
+                hasConnection.add(users[i].id);
+                hasConnection.add(target.id);
+            }
         }
     }
 
