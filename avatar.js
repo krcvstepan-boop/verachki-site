@@ -65,7 +65,9 @@ class SoulAvatarSystem {
         this.isRunning = false;
 
         // Caches
-        this.meshes = new Map(); // username -> { group, speed, rotationAxis }
+        this.meshes = new Map(); // username -> { group, speed, rotationAxis, timeUniforms }
+        this.visibleNodes = new Set();
+        this.intersectionObserver = null;
 
         // Single Shared Resources
         this.scene = null;
@@ -87,6 +89,20 @@ class SoulAvatarSystem {
 
     init() {
         if (!this.canvas || !window.THREE) return;
+
+        // Visibility tracking for render loop optimization
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.visibleNodes.add(entry.target);
+                } else {
+                    this.visibleNodes.delete(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '100px 0px', // Pre-load avatars slightly before they enter viewport
+            threshold: 0
+        });
 
         // Optimization: High Performance Mode
         this.renderer = new THREE.WebGLRenderer({
@@ -127,6 +143,32 @@ class SoulAvatarSystem {
         const magentaLight = new THREE.PointLight(0xff00ff, 1, 10);
         magentaLight.position.set(-2, -2, 2);
         this.scene.add(magentaLight);
+
+        // Watch for new messages to observe their avatars
+        if (this.container) {
+            const mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1) {
+                            const placeholders = node.classList.contains('soul-avatar-placeholder')
+                                ? [node]
+                                : node.getElementsByClassName('soul-avatar-placeholder');
+
+                            for (let el of placeholders) {
+                                this.intersectionObserver.observe(el);
+                            }
+                        }
+                    });
+                });
+            });
+            mutationObserver.observe(this.container, { childList: true, subtree: true });
+
+            // Observe existing placeholders
+            const existing = this.container.getElementsByClassName('soul-avatar-placeholder');
+            for (let el of existing) {
+                this.intersectionObserver.observe(el);
+            }
+        }
 
         // Start animation loop
         this.isRunning = true;
@@ -170,9 +212,11 @@ class SoulAvatarSystem {
         // 1. Generate Petals
         const petalCount = 5 + Math.floor(random() * 2); // 5-7 petals
         const amplitude = 0.1 + (Math.min(xp, 100) * 0.002);
+        const timeUniforms = [];
 
         for (let k = 0; k < petalCount; k++) {
-            const geometry = new THREE.SphereGeometry(1, 64, 64);
+            // Optimization: Reduce geometry detail for small avatars
+            const geometry = new THREE.SphereGeometry(1, 32, 32);
             const positionAttribute = geometry.attributes.position;
             const vertex = new THREE.Vector3();
 
@@ -207,6 +251,8 @@ class SoulAvatarSystem {
                 transparent: true,
                 side: THREE.FrontSide
             });
+
+            timeUniforms.push(material.uniforms.uTime);
 
             const mesh = new THREE.Mesh(geometry, material);
 
@@ -249,7 +295,8 @@ class SoulAvatarSystem {
         return {
             group: group,
             speed: baseSpeed + (random() * 0.01),
-            rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize()
+            rotationAxis: new THREE.Vector3(random()-0.5, random()-0.5, random()-0.5).normalize(),
+            timeUniforms: timeUniforms
         };
     }
 
@@ -378,38 +425,33 @@ class SoulAvatarSystem {
         this.renderer.clear();
         this.renderer.setScissorTest(true);
 
-        // Optimization: Use getElementsByClassName (live HTMLCollection, O(1) update)
-        // instead of querySelectorAll (static NodeList, O(N) traversal) in tight loop.
-        const placeholders = document.getElementsByClassName('soul-avatar-placeholder');
         const time = performance.now();
         const timeSeconds = time * 0.001;
-
-        // Optimization: Cache layout properties (innerHeight) and collection length
-        // outside the loop to prevent layout thrashing and redundant property lookups.
         const winHeight = window.innerHeight;
-        const count = placeholders.length;
 
-        for (let i = 0; i < count; i++) {
-            const el = placeholders[i];
+        // Optimization: Iterate only over visible nodes tracked by IntersectionObserver
+        // to eliminate O(N) getBoundingClientRect() calls in the render loop.
+        this.visibleNodes.forEach(el => {
             const elRect = el.getBoundingClientRect();
 
-            if (elRect.bottom < 0 || elRect.top > winHeight) continue;
+            // Double check visibility in case of fast scrolling
+            if (elRect.bottom < 0 || elRect.top > winHeight) return;
 
             const username = el.dataset.user;
-            if (!username) continue;
+            if (!username) return;
 
-            const { group, speed, rotationAxis } = this.getMesh(username);
+            const { group, speed, rotationAxis, timeUniforms } = this.getMesh(username);
 
             // Animation
             group.rotation.x = time * speed * rotationAxis.x * 0.1;
             group.rotation.y = time * speed * rotationAxis.y * 0.1;
 
-            // Breathing (GPU)
-            group.traverse((child) => {
-                 if (child.isMesh && child.material.uniforms) {
-                     child.material.uniforms.uTime.value = timeSeconds;
-                 }
-            });
+            // Breathing (GPU) - Optimized: Avoid traverse() by using cached uniforms
+            if (timeUniforms) {
+                for (let j = 0; j < timeUniforms.length; j++) {
+                    timeUniforms[j].value = timeSeconds;
+                }
+            }
 
             this.scene.add(group);
 
@@ -424,7 +466,7 @@ class SoulAvatarSystem {
             this.renderer.render(this.scene, this.camera);
 
             this.scene.remove(group);
-        }
+        });
 
         this.renderer.setScissorTest(false);
     }
