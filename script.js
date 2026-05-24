@@ -32,7 +32,8 @@
             isRadioMode: false,
             radioNoise: null,
             aiCooldown: false,
-            claimTimer: null
+            claimTimer: null,
+            activeAudioBtn: null
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -214,6 +215,7 @@
                 state.audioPlayer.pause();
                 state.audioPlayer = null;
             }
+            state.activeAudioBtn = null;
             if (state.recorder && state.recorder.state === 'recording') {
                 state.recorder.stop();
                 state.recorder.stream.getTracks().forEach(t => t.stop());
@@ -487,11 +489,13 @@
             } else {
                 if (state.audioPlayer) {
                     state.audioPlayer.pause();
-                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
+                    // Optimization: Use O(1) cached reference instead of O(N) querySelectorAll
+                    if (state.activeAudioBtn) state.activeAudioBtn.innerText = '▶';
                 }
                 state.audioPlayer = new Audio(src);
                 state.audioPlayer.play();
                 btn.innerText = '❚❚';
+                state.activeAudioBtn = btn;
 
                 state.audioPlayer.ontimeupdate = () => {
                     if(state.audioPlayer.duration) {
@@ -502,6 +506,7 @@
                 state.audioPlayer.onended = () => {
                     btn.innerText = '▶';
                     progress.style.width = '0%';
+                    if (state.activeAudioBtn === btn) state.activeAudioBtn = null;
                 };
             }
         }
