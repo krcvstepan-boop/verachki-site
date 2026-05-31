@@ -32,7 +32,8 @@
             isRadioMode: false,
             radioNoise: null,
             aiCooldown: false,
-            claimTimer: null
+            claimTimer: null,
+            activeAudioBtn: null
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -478,8 +479,12 @@
 
             if (state.audioPlayer && state.audioPlayer.src === src) {
                 if (state.audioPlayer.paused) {
+                    if (state.activeAudioBtn && state.activeAudioBtn !== btn) {
+                        state.activeAudioBtn.innerText = '▶';
+                    }
                     state.audioPlayer.play();
                     btn.innerText = '❚❚';
+                    state.activeAudioBtn = btn;
                 } else {
                     state.audioPlayer.pause();
                     btn.innerText = '▶';
@@ -487,11 +492,14 @@
             } else {
                 if (state.audioPlayer) {
                     state.audioPlayer.pause();
-                    document.querySelectorAll('.audio-btn').forEach(b => b.innerText = '▶');
+                    if (state.activeAudioBtn) {
+                        state.activeAudioBtn.innerText = '▶';
+                    }
                 }
                 state.audioPlayer = new Audio(src);
                 state.audioPlayer.play();
                 btn.innerText = '❚❚';
+                state.activeAudioBtn = btn;
 
                 state.audioPlayer.ontimeupdate = () => {
                     if(state.audioPlayer.duration) {
@@ -502,6 +510,7 @@
                 state.audioPlayer.onended = () => {
                     btn.innerText = '▶';
                     progress.style.width = '0%';
+                    state.activeAudioBtn = null;
                 };
             }
         }
