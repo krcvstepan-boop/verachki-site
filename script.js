@@ -521,7 +521,7 @@
                 const avatar = document.createElement('div');
                 avatar.className = 'soul-avatar-placeholder';
                 avatar.dataset.user = msg.senderId;
-                avatar.onclick = () => openProfile(escapeHtml(escapeJs(msg.senderId)));
+                avatar.onclick = () => openProfile(msg.senderId); // Pass raw ID for logic
                 row.appendChild(avatar);
             }
 
@@ -532,8 +532,8 @@
             let controls = '';
             if (!msg.optimistic && !isSystem && isMine) {
                 controls = `<div class="controls">`;
-                if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${msg.$id}', '${escapeHtml(escapeJs(msg.messageContent))}')">✎</span>`;
-                controls += `<span class="control-btn" onclick="deleteMsg('${msg.$id}')" style="color:red">✕</span></div>`;
+                if(!msg.fileId) controls += `<span class="control-btn" onclick="startEdit('${escapeHtml(escapeJs(msg.$id))}', '${escapeHtml(escapeJs(msg.messageContent))}')">✎</span>`;
+                controls += `<span class="control-btn" onclick="deleteMsg('${escapeHtml(escapeJs(msg.$id))}')" style="color:red">✕</span></div>`;
             }
 
             let contentHtml = `<span class="msg-text-content">${escapeHtml(msg.messageContent)}</span>`;
@@ -542,11 +542,11 @@
                 const fileView = msg.fileUrl || storage.getFileView(STORAGE_ID, msg.fileId);
 
                 if (msg.fileType === 'image') {
-                    contentHtml = `<img src="${fileView}" class="msg-media msg-img" onclick="openViewer('${fileView}')" loading="lazy">`;
+                    contentHtml = `<img src="${escapeHtml(fileView)}" class="msg-media msg-img" onclick="openViewer('${escapeHtml(escapeJs(fileView))}')" loading="lazy">`;
                 } else if (msg.fileType === 'video') {
-                    contentHtml = `<video src="${fileView}" controls playsinline class="msg-media msg-video"></video>`;
+                    contentHtml = `<video src="${escapeHtml(fileView)}" controls playsinline class="msg-media msg-video"></video>`;
                 } else if (msg.fileType === 'audio') {
-                    contentHtml = `<div class="custom-audio-player"><div class="audio-btn" onclick="toggleAudio(this, '${fileView}')">▶</div><div class="audio-track"><div class="audio-progress"></div></div></div>`;
+                    contentHtml = `<div class="custom-audio-player"><div class="audio-btn" onclick="toggleAudio(this, '${escapeHtml(escapeJs(fileView))}')">▶</div><div class="audio-track"><div class="audio-progress"></div></div></div>`;
                 }
                 if (msg.messageContent) contentHtml += `<div style="margin-top:8px;"><span class="msg-text-content">${escapeHtml(msg.messageContent)}</span></div>`;
             }
@@ -614,6 +614,12 @@
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
+
+            // Security: Message length validation
+            if (text.length > 1000) {
+                showToast("Сообщение слишком длинное (макс. 1000 симв.)", "error");
+                return;
+            }
 
             if (state.editingId) {
                 try {
@@ -1026,8 +1032,17 @@
         }
 
         async function saveMyProfile() {
+            if (!state.profile) return;
             const newAbout = document.getElementById('p-about-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { about: newAbout });
+
+            // Security: About field length validation
+            if (newAbout.length > 500) {
+                showToast("Описание слишком длинное (макс. 500 симв.)", "error");
+                return;
+            }
+
+            // Security: Use state.profile.$id instead of currentProfileId to prevent IDOR
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.profile.$id, { about: newAbout });
 
             if (state.profile) {
                 state.profile.about = newAbout;
@@ -1039,6 +1054,12 @@
         }
 
         async function saveProfileChanges() {
+            // Security: Client-side authorization check for rank updates
+            if (!state.user || state.user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                showToast("Доступ запрещен", "error");
+                return;
+            }
+
             const newRank = document.getElementById('p-rank-edit').value;
             await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { rank: newRank });
 
