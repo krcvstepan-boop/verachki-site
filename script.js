@@ -615,6 +615,12 @@
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
 
+            // SECURITY: Input validation for message length
+            if (text.length > 1000) {
+                showToast("Сообщение слишком длинное (макс. 1000 симв.)", "error");
+                return;
+            }
+
             if (state.editingId) {
                 try {
                     await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
@@ -767,7 +773,11 @@
             listContainer.innerHTML = '<p>Загрузка архивов...</p>';
 
             try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.limit(100)]);
+                // SECURITY: Use Query.select to avoid leaking sensitive fields like email
+                const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [
+                    Query.limit(100),
+                    Query.select(['username', 'rank', 'about', 'flower_xp', 'ether', '$id'])
+                ]);
                 if (res.documents.length === 0) {
                     listContainer.innerHTML = '<p>Список пуст.</p>';
                     return;
@@ -979,7 +989,11 @@
                 if (state.profileCache.has(username)) {
                     p = state.profileCache.get(username);
                 } else {
-                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.equal('username', username)]);
+                    // SECURITY: Use Query.select to avoid leaking sensitive fields like email
+                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [
+                        Query.equal('username', username),
+                        Query.select(['username', 'rank', 'about', 'flower_xp', 'ether', '$id'])
+                    ]);
                     if(res.documents.length > 0) {
                         p = res.documents[0];
                         state.profileCache.set(username, p);
@@ -1026,19 +1040,31 @@
         }
 
         async function saveMyProfile() {
-            const newAbout = document.getElementById('p-about-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { about: newAbout });
-
-            if (state.profile) {
-                state.profile.about = newAbout;
-                state.profileCache.set(state.profile.username, state.profile);
+            if (!state.profile) {
+                showToast("Профиль не загружен", "error");
+                return;
             }
+            const newAbout = document.getElementById('p-about-edit').value;
+            if (newAbout.length > 500) {
+                showToast("Описание слишком длинное (макс. 500 симв.)", "error");
+                return;
+            }
+            // SECURITY: Use state.profile.$id instead of state.currentProfileId to prevent IDOR
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.profile.$id, { about: newAbout });
+
+            state.profile.about = newAbout;
+            state.profileCache.set(state.profile.username, state.profile);
 
             closeModal('profile-modal');
             showToast("Сохранено");
         }
 
         async function saveProfileChanges() {
+            // SECURITY: Ensure only ADMIN_EMAIL can perform rank updates
+            if (!state.user || state.user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                showToast("Доступ запрещен", "error");
+                return;
+            }
             const newRank = document.getElementById('p-rank-edit').value;
             await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { rank: newRank });
 

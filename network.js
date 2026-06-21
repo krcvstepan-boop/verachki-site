@@ -25,7 +25,11 @@ const PHANTOM_COUNT = IS_MOBILE ? 30 : 60;
 
 async function fetchUsers() {
     try {
-        const res = await db.listDocuments(DB_ID, PROFILES_COL, [Query.limit(100)]);
+        // SECURITY: Use Query.select to minimize data fetched and avoid leaking emails
+        const res = await db.listDocuments(DB_ID, PROFILES_COL, [
+            Query.limit(100),
+            Query.select(['username'])
+        ]);
         return res.documents.map(doc => ({
             id: doc.username,
             name: doc.username,
