@@ -615,6 +615,12 @@
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
 
+            // SECURITY: Enforce message length limit
+            if (text.length > 1000) {
+                showToast("Сообщение слишком длинное (>1000 символов)", "error");
+                return;
+            }
+
             if (state.editingId) {
                 try {
                     await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
@@ -1027,18 +1033,32 @@
 
         async function saveMyProfile() {
             const newAbout = document.getElementById('p-about-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { about: newAbout });
 
-            if (state.profile) {
-                state.profile.about = newAbout;
-                state.profileCache.set(state.profile.username, state.profile);
+            if (!state.profile) return;
+
+            // SECURITY: Enforce length limit
+            if (newAbout.length > 500) {
+                showToast("Досье слишком длинное (>500 символов)", "error");
+                return;
             }
+
+            // SECURITY: Fix IDOR by using own profile ID instead of currentProfileId
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.profile.$id, { about: newAbout });
+
+            state.profile.about = newAbout;
+            state.profileCache.set(state.profile.username, state.profile);
 
             closeModal('profile-modal');
             showToast("Сохранено");
         }
 
         async function saveProfileChanges() {
+            // SECURITY: Explicit authorization check for administrative actions
+            if (!state.user || state.user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                showToast("Доступ запрещен: требуется статус Администратора", "error");
+                return;
+            }
+
             const newRank = document.getElementById('p-rank-edit').value;
             await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { rank: newRank });
 
