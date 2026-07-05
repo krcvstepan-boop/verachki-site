@@ -9,3 +9,8 @@
 **Vulnerability:** A Hugging Face API token was hardcoded in `script.js` (split into two parts to avoid simple grep). This allows anyone with access to the source code to use the developer's quota.
 **Learning:** Obfuscation (splitting strings) is not security. Client-side applications cannot securely store global secrets.
 **Prevention:** Implement "Bring Your Own Key" (BYOK) flows. Store user-provided keys in `localStorage` and prompt for them only during interactive sessions to maintain a smooth background experience.
+
+## 2024-05-25 - IDOR and PII Leakage in Public Queries
+**Vulnerability:** Several endpoints lacked authorization checks and data minimization. Users could update any profile by spoofing an ID (IDOR), and listing users leaked sensitive email addresses because the client-side queries requested all document fields.
+**Learning:** Client-side "security" (like hiding a profile ID in a variable) is easily bypassed. Data minimization via `Query.select` is essential to prevent PII leakage when using generic BaaS (Backend-as-a-Service) list operations.
+**Prevention:** Always use verified session identifiers (e.g., `state.profile.$id`) for database updates. Enforce strict field selection in all public-facing queries to ensure only necessary, non-sensitive data reaches the client.
