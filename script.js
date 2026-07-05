@@ -615,6 +615,11 @@
             const text = input.value.trim();
             if ((!text && !state.attachment) || !state.profile) return;
 
+            if (text.length > 1000) {
+                showToast("Сообщение слишком длинное (>1000 символов)", "error");
+                return;
+            }
+
             if (state.editingId) {
                 try {
                     await db.updateDocument(DB_ID, MSG_COL, state.editingId, { messageContent: text, isEdited: true });
@@ -767,7 +772,10 @@
             listContainer.innerHTML = '<p>Загрузка архивов...</p>';
 
             try {
-                const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.limit(100)]);
+                const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [
+                    Query.limit(100),
+                    Query.select(['username', 'rank'])
+                ]);
                 if (res.documents.length === 0) {
                     listContainer.innerHTML = '<p>Список пуст.</p>';
                     return;
@@ -979,7 +987,10 @@
                 if (state.profileCache.has(username)) {
                     p = state.profileCache.get(username);
                 } else {
-                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [Query.equal('username', username)]);
+                    const res = await db.listDocuments(DB_ID, PROFILES_COLLECTION_ID, [
+                        Query.equal('username', username),
+                        Query.select(['username', 'rank', 'about', 'flower_xp', 'ether', 'last_claim_date'])
+                    ]);
                     if(res.documents.length > 0) {
                         p = res.documents[0];
                         state.profileCache.set(username, p);
@@ -1027,7 +1038,13 @@
 
         async function saveMyProfile() {
             const newAbout = document.getElementById('p-about-edit').value;
-            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { about: newAbout });
+            if (newAbout.length > 500) {
+                showToast("Описание слишком длинное (>500 символов)", "error");
+                return;
+            }
+
+            if (!state.profile) return;
+            await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.profile.$id, { about: newAbout });
 
             if (state.profile) {
                 state.profile.about = newAbout;
@@ -1039,6 +1056,11 @@
         }
 
         async function saveProfileChanges() {
+            if (!state.user || state.user.email !== ADMIN_EMAIL) {
+                showToast("Доступ запрещен", "error");
+                return;
+            }
+
             const newRank = document.getElementById('p-rank-edit').value;
             await db.updateDocument(DB_ID, PROFILES_COLLECTION_ID, state.currentProfileId, { rank: newRank });
 
