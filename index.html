@@ -1,838 +1,1368 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-quiet="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0B0A0C">
-<meta name="description" content="Верачки. Империя Тишины. Закрытый орден.">
-<title>ВЕРАЧКИ — Empire of Silence</title>
+<meta name="theme-color" content="#14140F">
+<meta name="description" content="Верочкина Империя — Императорская канцелярия. Закрытый архив грамот.">
+<title>Верочкина Империя · Императорская канцелярия</title>
+
+<!-- метка наличия JS до применения стилей: без скрипта листы не прячем -->
+<script>document.documentElement.classList.add('js');</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=PT+Mono&display=swap" rel="stylesheet">
 
 <style>
-/* ============================================================
-   ВЕРАЧКИ · EMPIRE OF SILENCE
-   Королевское тайное общество. Dark Academia.
-   Палитра: мрак (графит с уходом в бордо), свернувшаяся
-   кровь (#6B0E23), античный пергамент (#E8DFC8).
-   ============================================================ */
+/* ==================================================================
+   ВЕРОЧКИНА ИМПЕРІЯ · ИМПЕРАТОРСКАЯ КАНЦЕЛЯРИЯ
+   Концепция: ТАЙНАЯ КАНЦЕЛЯРИЯ × ИЛЛЮМИНИРОВАННЫЙ МАНУСКРИПТ.
+   Тихий закрытый архив: пергаментные грамоты на тёмном архивном
+   поле, буквицы сусальным золотом, лазурь, неровные сургучные
+   печати, машинописные штампы, маргиналии на полях.
+   Органики нет. Латыни и блэклеттера нет. Всё рукотворно.
+   ================================================================== */
 
 :root{
-  --ink:        #0B0A0C;
-  --ink-deep:   #070608;
-  --ink-warm:   #120C0F;
-  --blood:      #6B0E23;
-  --blood-lit:  #8E1B34;
-  --parchment:  #E8DFC8;
-  --parchment-60: rgba(232,223,200,.60);
-  --parchment-35: rgba(232,223,200,.35);
-  --parchment-20: rgba(232,223,200,.20);
-  --line:       rgba(232,223,200,.14);
-  --line-blood: rgba(107,14,35,.55);
+  /* — основа — */
+  --archive:     #14140F;   /* тёмное архивное поле (поля, глубина) */
+  --archive-lo:  #0E0E0A;   /* глубже фонды — темнее */
+  --parch:       #E8DFC8;   /* тело грамоты */
+  --parch-edge:  #D4C5A0;   /* тень бумаги / край */
+  --sepia:       #2A241A;   /* основной текст, сепия-чернила */
+  --sepia-soft:  #4A4234;   /* вторичный текст (контраст 7.5:1) */
+  --sepia-faint: rgba(42,36,26,.72); /* мелкая машинопись — держим ≥4.5:1 */
 
-  --serif: "Cormorant", "Times New Roman", serif;
-  --grotesque: "Golos Text", "Helvetica Neue", Arial, sans-serif;
+  /* — имперские и манускриптные акценты — */
+  --bordo:       #6B0E23;   /* заголовки, буквицы, печати */
+  --cinnabar:    #8B0000;   /* рубрикация, инициалы */
+  --azure:       #1F3A6E;   /* лазурь — редко, дорого */
+  --violet:      #5A2E75;   /* имперский пурпур (порфира) — акцент на пергаменте */
+  --violet-lit:  #9A6FC0;   /* пурпурный блик — декор на тёмном поле */
+  --gold:        #9C7A3C;   /* сусальное золото */
+  --gold-lit:    #C8A85A;   /* золотой блик */
+  --gold-deep:   #7A5A24;   /* тень золочения */
+  --gray:        #6E6A5F;   /* серый крупных подзаголовков (только на пергаменте, крупно) */
+  --label-dark:  #ADA48F;   /* мелкие капс-метки на тёмном поле — контраст ≥4.5:1 */
+
+  /* — линии на пергаменте / на тёмном — */
+  --rule-parch:  rgba(42,36,26,.20);
+  --rule-gold:   rgba(156,122,60,.45);
+  --rule-dark:   rgba(232,223,200,.14);
+
+  --serif-head: "Old Standard TT", "Times New Roman", serif;
+  --serif-body: "PT Serif", "Georgia", serif;
+  --mono:       "PT Mono", "Courier Prime", ui-monospace, monospace;
+
+  /* атмосферные сигналы, ведёт JS (наклон / дрейф / скролл) */
+  --px: 0;      /* параллакс X  −1..1 */
+  --py: 0;      /* параллакс Y  −1..1 */
+  --sheen: .5;  /* положение блика по золоту буквиц 0..1 */
+  --shx: 44%;   /* центр блика печатей X */
+  --shy: 32%;   /* центр блика печатей Y */
+  --depth: 0;   /* глубина скролла 0..1 — глубже фонды темнеют */
 
   --ease-noble: cubic-bezier(.22,.61,.36,1);
 }
 
+/* «Успокоить архив»: тумблер выставляет data-quiet="on".
+   При системном reduced-motion тоже считаем архив успокоенным. */
+@media (prefers-reduced-motion: reduce){
+  html[data-quiet="auto"]{ --quiet: 1; }
+}
+html[data-quiet="on"]{ --quiet: 1; }
+
 *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
 
 html{ scroll-behavior:smooth; }
+html[data-quiet="on"]{ scroll-behavior:auto; }
 
 body{
-  background:var(--ink);
-  background-image: radial-gradient(120% 90% at 50% 0%, var(--ink-warm) 0%, var(--ink) 55%, var(--ink-deep) 100%);
-  color:var(--parchment);
-  font-family:var(--grotesque);
+  background:var(--archive);
+  color:var(--parch);
+  font-family:var(--serif-body);
   font-size:16px;
-  line-height:1.75;
+  line-height:1.7;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
   overflow-x:hidden;
   min-height:100svh;
 }
 
-::selection{ background:var(--blood); color:var(--parchment); }
+::selection{ background:var(--bordo); color:var(--parch); }
 
-/* ---------- Фактура: зерно + виньетка ---------- */
+/* тёмное поле углубляется по мере скролла (глубже фонды — темнее) */
 body::before{
   content:"";
   position:fixed; inset:0;
-  z-index:3;
+  z-index:0;
   pointer-events:none;
-  opacity:.045;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:160px 160px;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #1c1b14 0%, var(--archive) 45%, var(--archive-lo) 100%);
 }
+/* затемняющая вуаль, крепнущая с глубиной */
 body::after{
   content:"";
   position:fixed; inset:0;
-  z-index:2;
+  z-index:1;
   pointer-events:none;
-  background:radial-gradient(ellipse 90% 70% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);
+  opacity:calc(var(--depth) * .7);
+  background:radial-gradient(130% 100% at 50% 40%, transparent 40%, rgba(0,0,0,.75) 100%);
+  transition:opacity .4s linear;
 }
 
-/* ---------- Общая верстка ---------- */
-.frame{
+/* тонкое зерно на тёмном поле (векторное, не фильтром картинки) */
+.grain{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+}
+
+/* ------------------------------------------------------------------
+   ГРАМОТА (пергаментный лист на тёмном поле)
+   ------------------------------------------------------------------ */
+main{ position:relative; z-index:2; }
+
+.leaf{
   position:relative;
-  z-index:4;
-  width:min(700px, 100% - 3rem);
-  margin-inline:auto;
+  width:min(680px, 100% - 2rem);
+  margin:clamp(0.75rem,2.6vw,1.4rem) auto;
+  padding:clamp(2rem,7vw,3.4rem) clamp(1.4rem,6vw,3rem);
+  color:var(--sepia);
+  background:var(--parch);
+  background-image:
+    radial-gradient(140% 120% at 12% 0%, rgba(255,252,242,.6) 0%, transparent 45%),
+    radial-gradient(120% 120% at 100% 100%, rgba(140,110,60,.16) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.02' numOctaves='3' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23f)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size:auto, auto, 260px 260px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.25) inset,
+    0 0 0 1px var(--parch-edge) inset,
+    0 18px 46px -20px rgba(0,0,0,.75),
+    0 4px 14px -8px rgba(0,0,0,.6);
+  /* деккельный, чуть неровный край листа */
+  border-radius:3px 5px 4px 6px / 5px 3px 6px 4px;
+}
+/* потемнение по краям листа — как настоящий состаренный пергамент */
+.leaf::before{
+  content:"";
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  border-radius:inherit;
+  background:radial-gradient(100% 100% at 50% 45%, transparent 62%, rgba(120,96,52,.22) 100%);
+  mix-blend-mode:multiply;
+}
+.leaf > *{ position:relative; z-index:1; }
+
+.frame{ max-width:38rem; margin-inline:auto; }
+
+/* тёмная секция-интерлюдия (глубокий фонд): текст светлый */
+.interlude{
+  position:relative; z-index:2;
+  text-align:center;
+  color:var(--parch);
+  padding:clamp(1.3rem,4.5vh,2.3rem) 1.25rem;
 }
 
-section{ padding-block:clamp(4.5rem, 12vh, 8rem); }
-
-.rule{
-  display:flex; align-items:center; gap:1.25rem;
-  width:min(700px, 100% - 3rem);
-  margin-inline:auto;
-}
-.rule::before,.rule::after{
-  content:""; flex:1; height:1px; background:var(--line);
-}
-.rule span{
-  width:7px; height:7px;
-  background:var(--blood);
-  transform:rotate(45deg);
-  flex:none;
-}
-
+/* ------------------------------------------------------------------
+   ТИПОГРАФИКА
+   ------------------------------------------------------------------ */
 .eyebrow{
-  font-family:var(--grotesque);
-  font-size:.6875rem;
-  font-weight:500;
-  letter-spacing:.42em;
+  font-family:var(--mono);
+  font-size:.7rem;
+  letter-spacing:.34em;
   text-transform:uppercase;
-  color:var(--parchment-35);
-  margin-bottom:1.5rem;
+  color:var(--label-dark); /* на тёмном поле; на пергаменте — переопределяем ниже */
 }
+.leaf .eyebrow{ color:var(--sepia-soft); }
 
 h1,h2,h3{
-  font-family:var(--serif);
-  font-weight:500;
-  letter-spacing:.02em;
+  font-family:var(--serif-head);
+  font-weight:700;
+  line-height:1.12;
   text-wrap:balance;
   overflow-wrap:break-word;
 }
 
-/* ---------- Акт I · Герб ---------- */
-.hero{
-  min-height:100svh;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  text-align:center;
-  padding-block:clamp(4rem, 10vh, 6rem);
-}
-
-.hero .cancelaria{
-  font-size:.6875rem;
-  letter-spacing:.42em;
-  text-transform:uppercase;
-  color:var(--parchment-35);
-  margin-bottom:clamp(2rem, 5vh, 3rem);
-}
-
-.seal{
-  width:clamp(170px, 44vw, 230px);
-  height:auto;
-  margin-bottom:clamp(2rem, 5vh, 3rem);
-  display:block;
-}
-.seal .ring-text{ animation:sealTurn 120s linear infinite; transform-origin:50% 50%; }
-@keyframes sealTurn{ to{ transform:rotate(360deg); } }
-
-.hero h1{
-  font-size:clamp(2.3rem, 9vw, 4rem);
-  line-height:1.1;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:var(--parchment);
-}
-.hero .subtitle{
-  margin-top:1.25rem;
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(1.05rem, 3.6vw, 1.35rem);
-  color:var(--blood-lit);
-  letter-spacing:.08em;
-}
-.hero .fond{
-  margin-top:2.5rem;
-  font-size:.6875rem;
-  letter-spacing:.42em;
-  text-transform:uppercase;
-  color:var(--parchment-35);
-}
-
-.scroll-hint{
-  position:absolute;
-  bottom:calc(2rem + env(safe-area-inset-bottom));
-  left:50%; translate:-50% 0;
-  width:1px; height:52px;
-  background:linear-gradient(to bottom, transparent, var(--parchment-35));
-  overflow:hidden;
-}
-.scroll-hint::after{
-  content:"";
-  position:absolute; inset:0;
-  background:var(--parchment);
-  transform:translateY(-100%);
-  animation:descend 3.2s var(--ease-noble) infinite;
-}
-@keyframes descend{
-  0%{ transform:translateY(-100%); }
-  60%,100%{ transform:translateY(100%); }
-}
-
-/* ---------- Акт II · Манифест ---------- */
-.manifest h2{
-  font-size:clamp(1.9rem, 6vw, 2.7rem);
-  line-height:1.15;
-  margin-bottom:.5rem;
-}
-.manifest .sub{
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(1.05rem, 3.5vw, 1.25rem);
-  color:var(--blood-lit);
-  margin-bottom:2.25rem;
-}
-.manifest p{
-  font-family:var(--serif);
-  font-size:clamp(1.1rem, 3.8vw, 1.3rem);
-  line-height:1.85;
-  color:var(--parchment-60);
-  max-width:60ch;
-}
-.manifest p + p{ margin-top:1.5rem; }
-.manifest .lead::first-letter{
-  font-size:3.4em;
-  float:left;
-  line-height:.82;
-  padding:.05em .12em 0 0;
-  color:var(--parchment);
-  font-weight:500;
-}
-
-/* ---------- Главы (архивные дела) ---------- */
-.chapter .head{
-  display:flex;
-  align-items:baseline;
-  gap:1rem;
-  margin-bottom:.4rem;
-}
-.chapter .leaf{
-  font-family:var(--serif);
-  font-size:1rem;
-  color:var(--parchment-35);
-  letter-spacing:.08em;
-  flex:none;
-}
-.chapter h2{
-  font-size:clamp(1.6rem, 5.4vw, 2.3rem);
-  line-height:1.15;
-}
-.chapter .head-sub{
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(1rem, 3.4vw, 1.2rem);
-  color:var(--blood-lit);
-  margin-bottom:2rem;
-}
-.chapter p{
-  font-family:var(--serif);
-  font-size:clamp(1.08rem, 3.6vw, 1.25rem);
-  line-height:1.85;
-  color:var(--parchment-60);
-  max-width:60ch;
-}
-.chapter p + p{ margin-top:1.4rem; }
-.chapter p .lead-in{ color:var(--parchment); }
-
-/* Записи (места, регалии, типы) */
-.entries{
-  list-style:none;
-  margin-top:2.75rem;
-  border-top:1px solid var(--line);
-}
-.entries li{
-  padding-block:1.6rem;
-  border-bottom:1px solid var(--line);
-  transition:border-color .8s var(--ease-noble);
-}
-.entries li:hover{ border-bottom-color:var(--line-blood); }
-.entries .name{
-  display:block;
-  font-family:var(--serif);
-  font-size:clamp(1.2rem, 4vw, 1.45rem);
-  color:var(--parchment);
-  letter-spacing:.03em;
-  margin-bottom:.45rem;
-}
-.entries .name .tag{
-  font-family:var(--grotesque);
-  font-size:.62rem;
+.article-no{
+  font-family:var(--mono);
+  font-size:.72rem;
   letter-spacing:.28em;
   text-transform:uppercase;
-  color:var(--blood-lit);
-  vertical-align:middle;
-  margin-left:.6rem;
-}
-.entries .gloss{
-  font-size:.95rem;
-  line-height:1.75;
-  color:var(--parchment-60);
+  color:var(--cinnabar);
 }
 
-/* Кодекс (Уложение) — таблица догм */
-.codex{
-  list-style:none;
-  margin-top:2.5rem;
-  counter-reset:art;
+.leaf h2{
+  font-size:clamp(1.55rem,6vw,2.3rem);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--bordo);
+  margin:.5rem 0 .2rem;
 }
+.head-sub{
+  font-family:var(--serif-body);
+  font-style:italic;
+  font-size:clamp(1.02rem,3.6vw,1.2rem);
+  color:var(--cinnabar);
+  margin-bottom:1.9rem;
+}
+
+.prose p{
+  font-family:var(--serif-body);
+  font-size:clamp(1.02rem,3.4vw,1.12rem);
+  line-height:1.8;
+  color:var(--sepia);
+  max-width:36em;
+}
+.prose p + p{ margin-top:1.15rem; }
+.prose .lead-in{ font-weight:700; color:var(--bordo); }
+
+/* Буквица-инициал: крупный засечный глиф бордо с золотым контуром
+   и растительным завитком. Золото ловит блик (см. .gilt-text). */
+.initial{
+  float:left;
+  font-family:var(--serif-head);
+  font-weight:700;
+  font-size:4.4em;
+  line-height:.74;
+  padding:.06em .16em 0 0;
+  position:relative;
+  color:var(--gold);                     /* фолбэк, если clip не поддержан */
+  -webkit-text-stroke:1.5px var(--bordo);/* бордовый контур буквицы */
+  paint-order:stroke fill;
+}
+/* сусальное золото буквицы ловит свет: блик ездит по глифу (гл. фишка §6.1) */
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  html.js .initial{
+    background:linear-gradient(100deg,
+      var(--gold-deep) 0%, var(--gold) 26%, var(--gold-lit) 50%,
+      var(--gold) 74%, var(--gold-deep) 100%);
+    background-size:240% 100%;
+    background-position:calc(var(--sheen) * 100%) 0;
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+}
+.initial::after{ /* завиток на полях буквицы */
+  content:"";
+  position:absolute; left:-.12em; top:-.16em; right:.02em; bottom:-.06em;
+  z-index:-1;
+  background:
+    radial-gradient(60% 60% at 22% 20%, rgba(90,46,117,.18), transparent 62%),
+    radial-gradient(50% 50% at 90% 85%, rgba(31,58,110,.10), transparent 60%);
+  border-left:2px solid var(--gold);
+  border-top:2px solid var(--gold);
+  border-radius:40% 8% 30% 6%;
+  opacity:.7;
+}
+
+/* золочёный текст, по которому ездит блик */
+.gilt-text{
+  font-family:var(--serif-head);
+  font-weight:700;
+  color:var(--gold);            /* фолбэк, если clip не поддержан */
+}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .gilt-text{
+    background:linear-gradient(100deg,
+      var(--gold-deep) 0%, var(--gold) 26%, var(--gold-lit) 50%,
+      var(--gold) 74%, var(--gold-deep) 100%);
+    background-size:240% 100%;
+    background-position:calc(var(--sheen) * 100%) 0;
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+  }
+}
+
+/* горизонтальная разделительная линеечка (рубрика) */
+.rule{
+  display:flex; align-items:center; gap:1rem;
+  margin:1.8rem 0;
+  color:var(--rule-gold);
+}
+.rule::before,.rule::after{ content:""; flex:1; height:1px; background:var(--rule-parch); }
+.rule i{ width:7px; height:7px; background:var(--bordo); transform:rotate(45deg); flex:none; }
+.interlude .rule::before,.interlude .rule::after{ background:var(--rule-dark); }
+.interlude .rule i{ background:var(--violet-lit); }
+
+/* ------------------------------------------------------------------
+   ПЕЧАТИ, ШТАМПЫ, МАРГИНАЛИИ, СЛЕДЫ ВРЕМЕНИ
+   ------------------------------------------------------------------ */
+
+/* .gilt — золочёная поверхность, ловящая свет (печати, рамки) */
+.gilt{ position:relative; }
+.gilt::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  border-radius:inherit;
+  background:radial-gradient(60% 55% at var(--shx) var(--shy),
+             rgba(255,244,214,.9), rgba(255,244,214,0) 60%);
+  mix-blend-mode:soft-light;
+}
+
+/* машинописный штамп (под лёгким углом, недопропечатан) */
+.stamp{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:.62rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--cinnabar);
+  padding:.4em .7em;
+  border:1.5px solid var(--cinnabar);
+  box-shadow:0 0 0 1px var(--cinnabar) inset;
+  border-radius:2px;
+  mix-blend-mode:multiply;
+  opacity:.82;
+  /* «недопропечатка» — рваная маска чернил */
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='40'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.4 1.25'/%3E%3C/filter%3E%3Crect width='90' height='40' filter='url(%23m)'/%3E%3C/svg%3E");
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='40'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.4 1.25'/%3E%3C/filter%3E%3Crect width='90' height='40' filter='url(%23m)'/%3E%3C/svg%3E");
+  -webkit-mask-size:cover; mask-size:cover;
+}
+.stamp.secret{ color:var(--bordo); border-color:var(--bordo); box-shadow:0 0 0 1px var(--bordo) inset; transform:rotate(-3.5deg); }
+.stamp.dsp{ transform:rotate(2deg); }
+
+.stamp-row{ display:flex; flex-wrap:wrap; gap:.7rem; align-items:center; margin-top:1.6rem; }
+
+/* сургучная печать (круглая, неровная, под углом) */
+.wax{ display:block; }
+.wax .flame{ transform-origin:50% 50%; }
+
+/* маргиналия на полях листа — проявляется по тапу */
+.marginalia{
+  position:absolute;
+  width:clamp(48px,13vw,72px);
+  color:var(--sepia-soft);
+  opacity:0;
+  transform:translateY(4px) scale(.96);
+  pointer-events:none;
+  filter:saturate(.9);
+}
+.marginalia.show{
+  opacity:.9;
+  transform:none;
+  transition:opacity .22s var(--ease-noble), transform .22s var(--ease-noble);
+}
+.marginalia.hide{
+  opacity:0;
+  transition:opacity .6s var(--ease-noble);
+}
+.marginalia.m-tl{ left:-6px;  top:14%; }
+.marginalia.m-tr{ right:-8px; top:26%; text-align:right; }
+.marginalia.m-bl{ left:-4px;  bottom:16%; }
+.marginalia.m-br{ right:-6px; bottom:12%; }
+.marginalia .note{
+  display:block; font-family:var(--serif-body); font-style:italic;
+  font-size:.6rem; line-height:1.2; margin-top:.25rem;
+}
+
+/* следы времени */
+.mark-time{ position:absolute; pointer-events:none; z-index:1; }
+.coffee{ width:88px; height:88px; opacity:.5; mix-blend-mode:multiply; }
+.blot{ width:46px; height:46px; opacity:.72; mix-blend-mode:multiply; }
+.pin{ width:14px; height:14px; }
+/* загнутый уголок листа */
+.dogear{
+  position:absolute; right:-1px; bottom:-1px; width:34px; height:34px; z-index:2;
+  background:linear-gradient(135deg, transparent 50%, var(--parch-edge) 50%, #cbb98f 78%, #b9a578 100%);
+  box-shadow:-2px -2px 5px -2px rgba(0,0,0,.35);
+  border-bottom-right-radius:5px;
+}
+
+/* ------------------------------------------------------------------
+   ВНЕШНИЕ СНОШЕНИЯ (тонкая строка каналов у самого верха)
+   ------------------------------------------------------------------ */
+.ties{
+  position:relative; z-index:2;
+  text-align:center;
+  padding:calc(.9rem + env(safe-area-inset-top)) 1rem .7rem;
+}
+.ties-list{
+  list-style:none; display:flex; flex-wrap:wrap; justify-content:center;
+  gap:.5rem 1.4rem; margin:0;
+}
+.ties .tie{
+  font-family:var(--mono);
+  font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--label-dark);
+  padding-bottom:2px;
+  border-bottom:1px dotted var(--violet-lit);
+}
+.ties-note{
+  margin-top:.55rem;
+  font-family:var(--serif-body); font-style:italic;
+  font-size:.66rem; letter-spacing:.04em;
+  color:var(--violet-lit);
+}
+
+/* ------------------------------------------------------------------
+   АКТ I · ПРИЁМНАЯ КАНЦЕЛЯРИИ (герб + монограмма)
+   ------------------------------------------------------------------ */
+.reception{
+  min-height:84svh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:0;
+  padding:calc(1.6rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
+}
+.reception .cancelaria{ margin-bottom:clamp(1rem,3.2vh,1.7rem); }
+
+.crest{ width:clamp(180px,48vw,236px); height:auto; display:block; margin-bottom:clamp(1rem,3vh,1.6rem); }
+
+.reception h1{
+  font-size:clamp(2rem,8.5vw,3.4rem);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--parch);
+  margin-top:.4rem;
+}
+.reception .tagline{
+  margin-top:1rem;
+  font-family:var(--serif-body); font-style:italic;
+  font-size:clamp(1.02rem,3.6vw,1.3rem);
+  color:var(--gold-lit); letter-spacing:.06em;
+}
+.reception .fond{
+  margin-top:1.35rem;
+  font-family:var(--mono);
+  font-size:.68rem; letter-spacing:.3em; text-transform:uppercase;
+  color:rgba(232,223,200,.72);
+}
+
+/* прокрутка-подсказка: золочёный ромб мягко нисходит по волосяной линии */
+.scroll-hint{
+  margin-top:clamp(1.1rem,3.2vh,1.7rem);
+  width:16px; height:46px;
+  position:relative;
+}
+.scroll-hint::before{
+  content:""; position:absolute; left:50%; top:0; width:1px; height:100%;
+  transform:translateX(-.5px);
+  background:linear-gradient(to bottom, transparent, rgba(200,168,90,.55) 40%, rgba(154,111,192,.4) 75%, transparent);
+}
+.scroll-hint::after{
+  content:""; position:absolute; left:50%; top:14px;
+  width:7px; height:7px; margin-left:-3.5px;
+  background:var(--gold-lit);
+  box-shadow:0 0 5px rgba(200,168,90,.6);
+  transform:rotate(45deg);
+  opacity:.75;
+  animation:drift 2.9s var(--ease-noble) infinite;
+}
+@keyframes drift{
+  0%   { top:2px;  opacity:0; }
+  22%  { opacity:1; }
+  70%  { top:33px; opacity:1; }
+  100% { top:40px; opacity:0; }
+}
+
+/* кнопка-грамота (сургучная) — разрешение на наклон + др. */
+.seal-btn{
+  display:inline-flex; align-items:center; gap:.6rem;
+  min-height:44px;
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--parch);
+  background:linear-gradient(180deg, #7a1128, var(--bordo));
+  border:1px solid rgba(200,168,90,.5);
+  padding:.7rem 1.2rem;
+  border-radius:4px 6px 5px 7px/6px 5px 7px 4px;
+  cursor:pointer;
+  box-shadow:0 6px 18px -8px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.25) inset;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:filter .2s var(--ease-noble), box-shadow .2s var(--ease-noble);
+}
+.seal-btn:hover{ filter:brightness(1.08); }
+.seal-btn:active{ box-shadow:0 3px 10px -6px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.35) inset; filter:brightness(.96); }
+.seal-btn .dot{ width:8px; height:8px; background:var(--gold-lit); border-radius:50%; flex:none; }
+.tilt-permit{ margin-top:1.8rem; }
+
+/* ------------------------------------------------------------------
+   ОПИСЬ ДЕЛ — записи, кодекс, лестница
+   ------------------------------------------------------------------ */
+.entries{ list-style:none; margin-top:1.9rem; border-top:1px solid var(--rule-parch); }
+.entries li{ padding:1.3rem 0; border-bottom:1px solid var(--rule-parch); }
+.entries .name{
+  display:block; font-family:var(--serif-head); font-weight:700;
+  font-size:clamp(1.14rem,4vw,1.34rem); color:var(--bordo);
+  letter-spacing:.02em; margin-bottom:.4rem;
+}
+.entries .name .tag{
+  font-family:var(--mono); font-size:.56rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--cinnabar); vertical-align:middle; margin-left:.5rem;
+  border:1px solid var(--cinnabar); padding:.15em .45em; border-radius:2px;
+}
+.entries .gloss{ font-size:.98rem; line-height:1.7; color:var(--sepia-soft); }
+
+/* Кодекс (Уложение) — статьи римскими */
+.codex{ list-style:none; margin-top:1.8rem; counter-reset:art; }
 .codex li{
-  display:grid;
-  grid-template-columns:3rem 1fr;
-  gap:1.25rem;
-  align-items:baseline;
-  padding-block:1.5rem;
-  border-top:1px solid var(--line);
+  display:grid; grid-template-columns:2.6rem 1fr; gap:1rem; align-items:baseline;
+  padding:1.2rem 0; border-top:1px solid var(--rule-parch);
 }
-.codex li:last-child{ border-bottom:1px solid var(--line); }
+.codex li:last-child{ border-bottom:1px solid var(--rule-parch); }
 .codex .num{
-  counter-increment:art;
-  font-family:var(--serif);
-  font-size:1.15rem;
-  color:var(--blood-lit);
+  counter-increment:art; font-family:var(--serif-head); font-weight:700;
+  font-size:1.2rem; color:var(--violet);
 }
 .codex .num::before{ content:counter(art, upper-roman) "."; }
 .codex .dogma{
-  display:block;
-  font-family:var(--serif);
-  font-size:clamp(1.15rem, 3.8vw, 1.35rem);
-  color:var(--parchment);
-  margin-bottom:.35rem;
+  display:block; font-family:var(--serif-head); font-weight:700;
+  font-size:clamp(1.1rem,3.7vw,1.28rem); color:var(--bordo); margin-bottom:.3rem;
 }
-.codex .interp{
-  font-size:.92rem;
-  line-height:1.7;
-  color:var(--parchment-60);
-}
+.codex .interp{ font-size:.94rem; line-height:1.65; color:var(--sepia-soft); }
 
 /* Иерархия — лестница */
-.ladder{
-  list-style:none;
-  margin-top:2.5rem;
-  display:flex;
-  flex-direction:column;
-  gap:0;
-}
+.ladder{ list-style:none; margin-top:1.8rem; }
 .ladder li{
-  padding:1.8rem 0 1.8rem 1.75rem;
-  border-left:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  padding:1.4rem 0 1.4rem 1.5rem;
+  border-left:1px solid var(--rule-parch);
+  border-bottom:1px solid var(--rule-parch);
   position:relative;
-  transition:border-color .8s var(--ease-noble);
 }
-.ladder li:first-child{ border-top:1px solid var(--line); }
+.ladder li:first-child{ border-top:1px solid var(--rule-parch); }
 .ladder li::before{
-  content:"";
-  position:absolute;
-  left:-4px; top:2rem;
-  width:7px; height:7px;
-  background:var(--blood);
-  transform:rotate(45deg);
+  content:""; position:absolute; left:-4px; top:1.7rem;
+  width:7px; height:7px; background:var(--bordo); transform:rotate(45deg);
 }
-.ladder li:hover{ border-left-color:var(--line-blood); }
 .ladder .rank{
-  display:block;
-  font-family:var(--serif);
-  font-size:clamp(1.25rem, 4.2vw, 1.5rem);
-  color:var(--parchment);
-  letter-spacing:.03em;
-  margin-bottom:.5rem;
+  display:block; font-family:var(--serif-head); font-weight:700;
+  font-size:clamp(1.16rem,4vw,1.4rem); color:var(--bordo); margin-bottom:.4rem;
 }
-.ladder .rank .en{
-  font-style:italic;
-  color:var(--parchment-35);
-  font-size:.78em;
-  margin-left:.5rem;
-}
-.ladder .desc{
-  font-size:.95rem;
-  line-height:1.75;
-  color:var(--parchment-60);
-  max-width:52ch;
-}
+.ladder .rank .en{ font-family:var(--serif-body); font-style:italic; font-weight:400; color:var(--sepia-soft); font-size:.74em; margin-left:.4rem; }
+.ladder .desc{ font-size:.96rem; line-height:1.7; color:var(--sepia-soft); max-width:44em; }
 
-/* ---------- Врата ---------- */
+/* ------------------------------------------------------------------
+   КОЛОФОН · ВРАТА (мандат — long-press печати)
+   ------------------------------------------------------------------ */
+.colophon{ padding-bottom:calc(3rem + env(safe-area-inset-bottom)); }
 .gate{ text-align:center; }
-.gate h2{
-  font-size:clamp(1.5rem, 5.2vw, 2.1rem);
-  margin-bottom:1rem;
-}
 .gate .creed{
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(1.15rem, 4vw, 1.4rem);
-  color:var(--parchment);
-  max-width:40ch;
-  margin-inline:auto;
-  line-height:1.6;
+  font-family:var(--serif-body); font-style:italic;
+  font-size:clamp(1.1rem,4vw,1.34rem); color:var(--sepia);
+  max-width:26em; margin:0 auto 2.2rem; line-height:1.55;
 }
-.gate-form{
-  margin-top:3rem;
-  display:flex; flex-direction:column;
-  align-items:center; gap:2rem;
-}
-.pass-field{
-  width:min(340px, 100%);
+
+.mandate{
   position:relative;
-}
-.pass-field input{
-  width:100%;
-  background:transparent;
-  border:none;
-  border-bottom:1px solid var(--line);
-  padding:.75rem .25rem;
-  font-family:var(--serif);
-  font-size:1.25rem;
-  letter-spacing:.3em;
-  text-align:center;
-  color:var(--parchment);
-  caret-color:var(--blood-lit);
-  transition:border-color .6s var(--ease-noble);
-  border-radius:0;
-  appearance:none;
-}
-.pass-field input:focus{
-  outline:none;
-  border-bottom-color:var(--parchment-60);
-}
-.pass-field input::placeholder{
-  color:var(--parchment-35);
-  letter-spacing:.42em;
-  font-size:.8rem;
-  font-family:var(--grotesque);
-  text-transform:uppercase;
-}
-.gate-form button{
-  background:transparent;
-  border:1px solid var(--line-blood);
-  color:var(--parchment);
-  font-family:var(--grotesque);
-  font-size:.72rem;
-  font-weight:500;
-  letter-spacing:.42em;
-  text-transform:uppercase;
-  padding:1rem 2.6rem 1rem 3rem;
+  width:150px; height:150px;
+  margin:0 auto;
+  padding:0; border:0; background:transparent;
   cursor:pointer;
-  transition:background-color .8s var(--ease-noble), border-color .8s var(--ease-noble);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:none; user-select:none; -webkit-user-select:none;
+  display:grid; place-items:center;
 }
-.gate-form button:hover{
-  background:var(--blood);
-  border-color:var(--blood);
+.mandate:focus-visible{ outline:2px solid var(--azure); outline-offset:6px; border-radius:50%; }
+.mandate .wax-vi{ width:118px; height:118px; transition:transform .3s var(--ease-noble), filter .3s var(--ease-noble); }
+.mandate.pressing .wax-vi{ transform:scale(.965) rotate(-1.2deg); filter:brightness(.9) saturate(1.15); }
+.mandate.broken .wax-vi{ transform:rotate(1.5deg); filter:brightness(.82); }
+
+.mandate-ring{ position:absolute; inset:0; width:150px; height:150px; transform:rotate(-90deg); pointer-events:none; }
+.mandate-ring .track{ fill:none; stroke:rgba(42,36,26,.18); stroke-width:3; }
+.mandate-ring .prog{
+  fill:none; stroke:var(--gold); stroke-width:3; stroke-linecap:round;
+  stroke-dasharray:452; stroke-dashoffset:452;
 }
-.gate-form button:focus-visible{
-  outline:1px solid var(--parchment-60);
-  outline-offset:4px;
+.mandate.pressing .prog{ stroke-dashoffset:0; transition:stroke-dashoffset 1.2s linear; }
+.mandate.resetting .prog{ stroke-dashoffset:452; transition:stroke-dashoffset .28s var(--ease-noble); }
+.mandate.broken .prog{ stroke:var(--gold-lit); stroke-dashoffset:0; }
+
+.mandate-label{
+  display:block; margin-top:1.2rem;
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--sepia-soft);
+  min-height:1.1rem;
 }
-.gate-verdict{
-  min-height:1.5rem;
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:1rem;
-  color:var(--parchment-35);
-  transition:color .6s var(--ease-noble);
-}
-.gate-verdict.denied{ color:var(--blood-lit); }
-.gate-verdict.granted{ color:var(--parchment); }
-.pass-field.denied input{ border-bottom-color:var(--blood); }
-.pass-field.denied{ animation:refuse .5s var(--ease-noble) 1; }
-@keyframes refuse{
-  0%,100%{ transform:translateX(0); }
-  30%{ transform:translateX(-5px); }
-  60%{ transform:translateX(4px); }
+.mandate-hint{
+  font-family:var(--serif-body); font-style:italic; font-size:.86rem; color:var(--sepia-faint);
+  margin-top:.5rem;
 }
 
-/* ---------- Подвал (Колофон) ---------- */
-footer{
-  padding-block:3.5rem calc(3.5rem + env(safe-area-inset-bottom));
-  text-align:center;
+.mandate-reveal{
+  max-height:0; overflow:hidden; opacity:0;
+  transition:max-height .7s var(--ease-noble), opacity .5s var(--ease-noble), margin .5s var(--ease-noble);
+  margin-top:0;
 }
-footer .mark{
-  font-family:var(--serif);
-  font-size:1.3rem;
-  letter-spacing:.3em;
-  color:var(--blood-lit);
-  margin-bottom:1.5rem;
+.mandate-reveal.open{ max-height:340px; opacity:1; margin-top:2rem; }
+.mandate-reveal .granted{
+  font-family:var(--serif-head); font-weight:700; color:var(--azure);
+  font-size:1.1rem; letter-spacing:.04em; margin-bottom:1.2rem;
 }
-footer .links{
-  display:flex;
-  justify-content:center;
-  gap:2rem;
-  flex-wrap:wrap;
-  margin-bottom:1.75rem;
+.gate-links{ display:flex; flex-direction:column; gap:.9rem; align-items:center; }
+.gate-links a{
+  display:inline-flex; align-items:center; justify-content:center; gap:.6rem;
+  min-height:48px; min-width:min(280px,84vw);
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--parch); text-decoration:none;
+  background:linear-gradient(180deg, #7a1128, var(--bordo));
+  border:1px solid rgba(200,168,90,.5);
+  border-radius:4px 6px 5px 7px/6px 5px 7px 4px;
+  box-shadow:0 6px 16px -8px rgba(0,0,0,.5);
+  touch-action:manipulation;
+  transition:filter .2s var(--ease-noble);
 }
-footer .links a{
-  color:var(--parchment-60);
-  text-decoration:none;
-  font-size:.72rem;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  border-bottom:1px solid transparent;
-  padding-bottom:2px;
-  transition:color .6s var(--ease-noble), border-color .6s var(--ease-noble);
-}
-footer .links a:hover{
-  color:var(--parchment);
-  border-bottom-color:var(--line-blood);
-}
-footer .fond-line{
-  font-size:.6875rem;
-  letter-spacing:.36em;
-  text-transform:uppercase;
-  color:var(--parchment-35);
-  margin-bottom:.75rem;
-}
-footer .copy{
-  font-size:.6875rem;
-  letter-spacing:.2em;
-  color:var(--parchment-20);
-  line-height:2;
-}
+.gate-links a:hover{ filter:brightness(1.1); }
+.gate-links a:focus-visible{ outline:2px solid var(--azure); outline-offset:4px; }
 
-/* ---------- Появление ---------- */
-.reveal{
-  opacity:0;
-  transform:translateY(18px);
-  transition:opacity 1.6s var(--ease-noble), transform 1.6s var(--ease-noble);
+/* нижняя строка колофона */
+.colophon-foot{ text-align:center; margin-top:2.6rem; }
+.colophon-foot .fond-line{
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--sepia-soft); margin-bottom:.7rem;
 }
-.reveal.is-visible{ opacity:1; transform:none; }
+.colophon-foot .copy{ font-family:var(--mono); font-size:.62rem; letter-spacing:.12em; color:var(--sepia-faint); line-height:1.9; }
 
-.hero .reveal:nth-child(1){ transition-delay:.1s; }
-.hero .reveal:nth-child(2){ transition-delay:.4s; }
-.hero .reveal:nth-child(3){ transition-delay:.7s; }
-.hero .reveal:nth-child(4){ transition-delay:1s; }
-.hero .reveal:nth-child(5){ transition-delay:1.25s; }
+/* ------------------------------------------------------------------
+   ОПИСЬ (навигация-реестр) — выдвижная грамота
+   ------------------------------------------------------------------ */
+.opis-toggle{
+  position:fixed; z-index:40;
+  right:calc(.9rem + env(safe-area-inset-right));
+  bottom:calc(.9rem + env(safe-area-inset-bottom));
+  width:56px; height:56px; border:0; padding:0; cursor:pointer;
+  background:transparent;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.opis-toggle:focus-visible{ outline:2px solid var(--gold-lit); outline-offset:3px; border-radius:50%; }
+.opis-toggle .wax-mini{ width:56px; height:56px; filter:drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
 
-/* ---------- Доступность / десктоп ---------- */
+.opis{
+  position:fixed; inset:0; z-index:41;
+  display:grid; place-items:center;
+  padding:1.25rem;
+  background:rgba(10,10,7,.55);
+  opacity:0; visibility:hidden;
+  transition:opacity .3s var(--ease-noble), visibility .3s;
+}
+.opis.open{ opacity:1; visibility:visible; }
+.opis-sheet{
+  width:min(420px,100%);
+  background:var(--parch);
+  color:var(--sepia);
+  border-radius:4px 6px 5px 7px/6px 5px 7px 4px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.8), 0 0 0 1px var(--parch-edge) inset;
+  padding:1.8rem 1.6rem calc(1.8rem + env(safe-area-inset-bottom));
+  transform:translateY(14px) scale(.98);
+  transition:transform .3s var(--ease-noble);
+  max-height:88svh; overflow:auto;
+}
+.opis.open .opis-sheet{ transform:none; }
+.opis-sheet .opis-h{
+  font-family:var(--serif-head); font-weight:700;
+  font-size:1.2rem; letter-spacing:.14em; text-transform:uppercase; color:var(--bordo);
+  text-align:center; margin-bottom:.2rem;
+}
+.opis-sheet .sub{ font-family:var(--mono); font-size:.6rem; letter-spacing:.24em; text-transform:uppercase; color:var(--sepia-soft); text-align:center; margin-bottom:1.4rem; }
+.opis-list{ list-style:none; }
+.opis-list li{ border-top:1px solid var(--rule-parch); }
+.opis-list li:last-child{ border-bottom:1px solid var(--rule-parch); }
+.opis-list a{
+  display:flex; align-items:baseline; gap:.9rem;
+  padding:.85rem .2rem; min-height:44px;
+  text-decoration:none; color:var(--sepia);
+  font-family:var(--serif-head); font-size:1.04rem;
+}
+.opis-list a:hover,.opis-list a:focus-visible{ color:var(--bordo); outline:none; }
+.opis-list a:focus-visible{ background:rgba(107,14,35,.06); }
+.opis-list .n{ font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; color:var(--cinnabar); flex:none; width:2.4rem; }
+.opis-quiet{
+  display:flex; align-items:center; justify-content:center; gap:.6rem;
+  width:100%; margin-top:1.5rem; min-height:44px;
+  font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--sepia); background:transparent;
+  border:1px solid var(--rule-gold); border-radius:3px; cursor:pointer;
+  touch-action:manipulation;
+}
+.opis-quiet:focus-visible{ outline:2px solid var(--azure); outline-offset:2px; }
+.opis-quiet .state{ color:var(--cinnabar); }
+
+/* ------------------------------------------------------------------
+   ПОЯВЛЕНИЕ ЛИСТОВ (перелистывание фолианта — ambient, медленно)
+   ------------------------------------------------------------------ */
+/* прячем листы только когда есть JS (иначе без скрипта — пустая страница) */
+html.js .turn{ opacity:0; transform:translateY(26px); }
+html.js:not([data-quiet="on"]) .turn{
+  transition:opacity .75s var(--ease-noble), transform .75s var(--ease-noble);
+}
+/* правило проявления должно быть в том же контексте html.js, иначе оно
+   проигрывает по специфичности и лист остаётся невидимым */
+html.js .turn.turned{ opacity:1; transform:none; }
+
+/* параллакс глубины — амплитуда по слоям (только когда не «успокоено») */
+html:not([data-quiet="on"]) .par-near{ transform:translate3d(calc(var(--px)*6px), calc(var(--py)*5px),0); }
+html:not([data-quiet="on"]) .par-mid { transform:translate3d(calc(var(--px)*3px), calc(var(--py)*2.5px),0); }
+html:not([data-quiet="on"]) .par-far { transform:translate3d(calc(var(--px)*-3px), calc(var(--py)*-2px),0); }
+
+/* «успокоенный архив»: гасим блик, параллакс, перелистывание */
+html[data-quiet="on"] .gilt-text,
+html[data-quiet="on"] .initial{ background-position:44% 0; }
+html[data-quiet="on"] .gilt::after{ opacity:.4; }
+html[data-quiet="on"] .scroll-hint::after,
+html[data-quiet="on"] .ring-turn{ animation:none !important; }
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{
-    animation:none !important;
-    transition:opacity .3s ease !important;
-    transform:none !important;
-  }
-  .reveal{ opacity:0; }
-  .reveal.is-visible{ opacity:1; }
-  html{ scroll-behavior:auto; }
+  html[data-quiet="auto"] .turn{ transition:opacity .3s ease; transform:none; }
+  html[data-quiet="auto"] .scroll-hint::after,
+  html[data-quiet="auto"] .ring-turn{ animation:none !important; }
+  html[data-quiet="auto"] .par-near,
+  html[data-quiet="auto"] .par-mid,
+  html[data-quiet="auto"] .par-far{ transform:none !important; }
 }
-@media (min-width: 760px){
+
+/* ------------------------------------------------------------------
+   Десктоп / крупные экраны: две колонки там, где длинно
+   ------------------------------------------------------------------ */
+@media (min-width:760px){
   body{ font-size:17px; }
+  .prose.two p:not(.lead){ /* оставляем ведущий абзац во всю ширину */ }
 }
+
+/* мерцающий ободок монограммы (медленный ambient) */
+.ring-turn{ transform-origin:50% 50%; animation:ringTurn 140s linear infinite; }
+@keyframes ringTurn{ to{ transform:rotate(360deg); } }
 </style>
 </head>
 <body>
+<div class="grain" aria-hidden="true"></div>
 
-<!-- ================= АКТ I · ГЕРБ ================= -->
-<header class="hero">
-  <p class="cancelaria reveal">Императорская канцелярия · Приёмная</p>
+<!-- ===== ОПИСЬ (реестр-навигация) ===== -->
+<button class="opis-toggle" id="opisToggle" aria-label="Открыть опись документов" aria-haspopup="dialog" aria-expanded="false">
+  <svg class="wax-mini gilt" viewBox="0 0 56 56" aria-hidden="true">
+    <circle cx="28" cy="28" r="25" fill="#6B0E23"/>
+    <path d="M28 4 a24 24 0 0 1 24 25 a24 24 0 0 1 -25 23 a24 24 0 0 1 -23 -25 a24 24 0 0 1 24 -23 z" fill="none" stroke="#C8A85A" stroke-width="1.4" opacity=".8"/>
+    <text x="28" y="34" text-anchor="middle" font-family="Old Standard TT, serif" font-weight="700" font-size="15" letter-spacing="1" fill="#E8DFC8">ОП</text>
+  </svg>
+</button>
 
-  <svg class="seal reveal" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Печать ВИ — Верачки, Империя Тишины">
+<div class="opis" id="opis" role="dialog" aria-modal="true" aria-labelledby="opisTitle" aria-hidden="true">
+  <div class="opis-sheet">
+    <p class="opis-h" id="opisTitle">Опись документов</p>
+    <p class="sub">Фондъ № I · хранить вѣчно</p>
+    <ul class="opis-list">
+      <li><a href="#priyomnaya"><span class="n">—</span>Приёмная канцелярии</a></li>
+      <li><a href="#st-1"><span class="n">Ст. I</span>Хроники разлома</a></li>
+      <li><a href="#st-2"><span class="n">Ст. II</span>Сакральная география</a></li>
+      <li><a href="#st-3"><span class="n">Ст. III</span>Энтропия</a></li>
+      <li><a href="#st-4"><span class="n">Ст. IV</span>Уложение о наказаниях</a></li>
+      <li><a href="#st-5"><span class="n">Ст. V</span>Иерархия</a></li>
+      <li><a href="#colophon"><span class="n">М.П.</span>Колофон · мандат</a></li>
+    </ul>
+    <button class="opis-quiet" id="quietToggle" aria-pressed="false">
+      Успокоить архив · <span class="state" id="quietState">движение живо</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== Внешние сношения канцелярии (в разработке) ===== -->
+<nav class="ties" aria-label="Внешние каналы канцелярии">
+  <ul class="ties-list">
+    <li><span class="tie">VerachkiNews</span></li>
+    <li><span class="tie">VeHistory</span></li>
+    <li><span class="tie">InstaVER</span></li>
+    <li><span class="tie">V&nbsp;massage</span></li>
+  </ul>
+  <p class="ties-note">каналы в разработке</p>
+</nav>
+
+<!-- ================= АКТ I · ПРИЁМНАЯ ================= -->
+<header class="reception" id="priyomnaya">
+  <p class="eyebrow cancelaria turn">Императорская канцелярия · Приёмная</p>
+
+  <!-- ГЕРБ + МОНОГРАММА-ПЕЧАТЬ ВИ (авторский SVG) -->
+  <svg class="crest par-near" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Гербовая печать Верочкиной Империи: монограмма ВИ">
     <defs>
-      <path id="ringPath" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/>
+      <path id="ring" d="M120,120 m-92,0 a92,92 0 1,1 184,0 a92,92 0 1,1 -184,0"/>
+      <radialGradient id="waxg" cx="42%" cy="36%" r="72%">
+        <stop offset="0%" stop-color="#8f1631"/>
+        <stop offset="60%" stop-color="#6B0E23"/>
+        <stop offset="100%" stop-color="#4c0817"/>
+      </radialGradient>
     </defs>
-    <circle cx="100" cy="100" r="97"  fill="none" stroke="rgba(232,223,200,.22)" stroke-width="1"/>
-    <circle cx="100" cy="100" r="88"  fill="none" stroke="rgba(232,223,200,.14)" stroke-width="1"/>
-    <circle cx="100" cy="100" r="58"  fill="none" stroke="rgba(107,14,35,.85)"  stroke-width="1.5"/>
-    <circle cx="100" cy="100" r="54"  fill="none" stroke="rgba(232,223,200,.14)" stroke-width="1"/>
-    <g class="ring-text">
-      <text font-family="Golos Text, Arial, sans-serif" font-size="9" letter-spacing="2.6" fill="rgba(232,223,200,.55)">
-        <textPath href="#ringPath" startOffset="0">ВЕРАЧКИ · EMPIRE OF SILENCE · ФОНД № I · ХРАНИТЬ ВЕЧНО ·</textPath>
+
+    <!-- растительные завитки-держатели (маргиналия герба) -->
+    <path d="M40 150 q-18 -20 -8 -44 q-14 16 -2 40 q-14 -6 -8 -22" fill="none" stroke="#9C7A3C" stroke-width="1.4" opacity=".55"/>
+    <path d="M200 150 q18 -20 8 -44 q14 16 2 40 q14 -6 8 -22" fill="none" stroke="#9C7A3C" stroke-width="1.4" opacity=".55"/>
+
+    <!-- внешние обручи -->
+    <circle cx="120" cy="120" r="112" fill="none" stroke="rgba(200,168,90,.32)" stroke-width="1"/>
+    <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(200,168,90,.18)" stroke-width="1"/>
+
+    <!-- бегущая по кругу гербовая надпись -->
+    <g class="ring-turn">
+      <text font-family="PT Mono, monospace" font-size="8" letter-spacing="3.2" fill="rgba(200,168,90,.72)">
+        <textPath href="#ring" startOffset="0">ВЕРОЧКИНА ИМПЕРІЯ · ИМПЕРАТОРСКАЯ КАНЦЕЛЯРІЯ · ХРАНИТЬ ВѢЧНО · </textPath>
       </text>
     </g>
-    <text x="100" y="100" text-anchor="middle" dominant-baseline="central"
-          font-family="Cormorant, Times New Roman, serif" font-weight="500"
-          font-size="52" letter-spacing="4" fill="#E8DFC8">ВИ</text>
-    <rect x="97" y="9"   width="6" height="6" fill="#6B0E23" transform="rotate(45 100 12)"/>
-    <rect x="97" y="185" width="6" height="6" fill="#6B0E23" transform="rotate(45 100 188)"/>
+
+    <!-- сургучный диск (неровный край) с золочёным блеском -->
+    <path d="M120 34
+             a86 86 0 0 1 84 90
+             a86 86 0 0 1 -92 82
+             a86 86 0 0 1 -78 -94
+             a86 86 0 0 1 86 -78 z"
+          fill="url(#waxg)" stroke="#3c0611" stroke-width="1.2"/>
+    <!-- лёгкий смаз-недопечать с одного края -->
+    <path d="M120 34 a86 86 0 0 1 60 22" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="120" cy="120" r="70" fill="none" stroke="rgba(200,168,90,.6)" stroke-width="1.5"/>
+
+    <!-- монограмма ВИ (сусальное золото — ловит блик через .gilt-text-глиф ниже перекрыт SVG,
+         поэтому золото рисуем градиентом внутри SVG) -->
+    <text x="120" y="122" text-anchor="middle" dominant-baseline="middle"
+          font-family="Old Standard TT, serif" font-weight="700"
+          font-size="86" letter-spacing="2" fill="#C8A85A" stroke="#6B0E23" stroke-width="1">ВИ</text>
+
+    <!-- имперские шипы -->
+    <rect x="116.5" y="12" width="7" height="7" fill="#6B0E23" transform="rotate(45 120 15.5)"/>
+    <rect x="116.5" y="221" width="7" height="7" fill="#6B0E23" transform="rotate(45 120 224.5)"/>
   </svg>
 
-  <h1 class="reveal">Верачки</h1>
-  <p class="subtitle reveal">Империя Тишины // Est. 2023</p>
-  <p class="fond reveal">Фонд № I · Хранить вечно</p>
+  <h1 class="turn">Верочкина<br>Империя</h1>
+  <p class="tagline turn">Империя Тишины</p>
+  <p class="fond turn">Канцелярия отворяется лишь тому, кто держит печать</p>
 
-  <div class="scroll-hint" aria-hidden="true"></div>
+  <div class="scroll-hint turn" aria-hidden="true"></div>
+
+  <div class="tilt-permit turn" id="tiltPermit" hidden>
+    <button class="seal-btn" id="tiltBtn" type="button">
+      <span class="dot" aria-hidden="true"></span>Дозволить рукописи чувствовать наклон
+    </button>
+  </div>
 </header>
 
-<div class="rule" aria-hidden="true"><span></span></div>
+<!-- ================= ТИТУЛЬНАЯ ГРАМОТА (манифест) ================= -->
+<section class="leaf turn" aria-labelledby="manifest-h">
+  <span class="mark-time coffee" style="top:-14px; right:34px;" aria-hidden="true">
+    <svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="38" fill="none" stroke="#7a5a2e" stroke-width="4"/><circle cx="44" cy="44" r="38" fill="none" stroke="#5c4320" stroke-width="1.5" opacity=".5"/></svg>
+  </span>
 
-<!-- ================= АКТ II · МАНИФЕСТ (ТИТУЛЬНАЯ ГРАМОТА) ================= -->
-<section class="manifest">
-  <div class="frame">
-    <p class="eyebrow reveal">Титульная грамота</p>
-    <h2 class="reveal">Мы строим Храм</h2>
-    <p class="sub reveal">Посреди цифрового шума.</p>
+  <p class="eyebrow turn">Титульная грамота</p>
+  <h2 id="manifest-h" class="turn">Мы строимъ Храмъ</h2>
+  <p class="head-sub turn">посреди цифрового шума</p>
 
-    <div class="reveal">
-      <p class="lead">Добро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, VERACHKI остаются островом аналоговой честности. Мы — не просто чат. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.</p>
-      <p>Здесь нет алгоритмов. Нет лайков. Только чистый сигнал. Присоединяйся к Легиону Тишины или оставайся в шуме навсегда.</p>
-    </div>
+  <div class="prose two turn">
+    <p class="lead"><span class="initial">Д</span>обро пожаловать в последнее убежище искренности. В мире, где каждое слово записывается, а каждое чувство монетизируется, мы остаёмся островом аналоговой честности. Мы — не чат и не лента. Мы — закрытый орден тех, кто помнит, как звучит настоящий смех.</p>
+    <p>Здесь нет алгоритмов. Нет лайков. Нет счётчиков. Только чистый сигнал и запертая дверь. Присоединяйся к Легиону Тишины — или оставайся в шуме навсегда.</p>
   </div>
+
+  <div class="stamp-row turn" aria-hidden="true">
+    <span class="stamp secret">Совершенно секретно</span>
+    <span class="stamp dsp">ДСП</span>
+    <span class="stamp">В дѣло № I</span>
+  </div>
+
+  <!-- маргиналия: манускульная указующая рука -->
+  <span class="marginalia m-tr" data-margin aria-hidden="true">
+    <svg viewBox="0 0 60 40"><path d="M6 22 h20 l-6 -6 m6 6 l-6 6 M30 14 c6 -4 12 -2 16 4 c3 4 8 4 10 2 c-2 6 -10 8 -16 4 c-4 -2 -8 -1 -10 2 z" fill="none" stroke="#4A4234" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="note">nota bene</span>
+  </span>
+  <span class="dogear" aria-hidden="true"></span>
 </section>
 
-<div class="rule" aria-hidden="true"><span></span></div>
+<!-- ================= СТАТЬЯ I · ХРОНИКИ РАЗЛОМА ================= -->
+<section class="leaf turn" id="st-1" aria-labelledby="h1-1">
+  <p class="article-no turn">Статья I · листъ 2</p>
+  <h2 id="h1-1" class="turn">Хроники разлома</h2>
+  <p class="head-sub turn">Тень Архитектора и Великий Холод</p>
 
-<!-- ================= ОПИСЬ ДЕЛ ================= -->
-
-<!-- Глава I -->
-<section class="chapter">
-  <div class="frame">
-    <div class="head reveal">
-      <span class="leaf">л. 2</span>
-      <h2>Глава I. Хроники Разлома</h2>
-    </div>
-    <p class="head-sub reveal">Тень Архитектора и Великий Холод</p>
-    <div class="reveal">
-      <p><span class="lead-in">История Империи написана не чернилами, а доверием и его осколками.</span> В 2023 году, в школьных коридорах, Глеб был одним из нас. Он был Архитектором ранних дней. Но амбиции часто затмевают верность. Произошел "Великий Разлом" — предательство, которое раскололо наше единство и научило нас закрывать двери на замки.</p>
-      <p>Теперь между нами и Глебом — демилитаризованная зона. Мы видимся в школе, киваем друг другу, иногда даже гуляем по нейтральным паркам. Но это не дружба. Это холодная дипломатия. Как две сверхдержавы, мы сосуществуем, помня о ядерном чемоданчике обид. Он — призрак прошлого, который больше не имеет власти над нашим будущим.</p>
-    </div>
+  <div class="prose two turn">
+    <p class="lead"><span class="initial">И</span><span class="lead-in">стория Империи писана не чернилами, а доверием и его осколками.</span> В 2023 году, в школьных коридорах, Глеб был одним из нас — Архитектором ранних дней. Но амбиции часто затмевают верность. Случился Великий Разлом: предательство, расколовшее наше единство и научившее нас запирать двери.</p>
+    <p>Теперь между нами и Глебом — демилитаризованная зона. Мы киваем при встрече, иногда идём одним парком. Но это не дружба, а холодная дипломатия: две державы сосуществуют, помня о чемоданчике старых обид. Он — призрак, потерявший власть над нашим будущим.</p>
   </div>
+
+  <div class="stamp-row turn" aria-hidden="true">
+    <span class="stamp secret">Хранить вѣчно</span>
+    <span class="stamp">М.П.</span>
+  </div>
+
+  <span class="mark-time blot" style="left:16px; bottom:26px;" aria-hidden="true">
+    <svg viewBox="0 0 46 46"><path d="M23 6 c8 2 12 8 10 15 c6 1 9 8 4 13 c-4 4 -12 3 -16 -1 c-7 3 -15 -2 -14 -10 c-6 -5 -2 -14 6 -14 c1 -6 8 -9 10 -6 z" fill="#2A241A"/><circle cx="34" cy="12" r="2.4" fill="#2A241A"/></svg>
+  </span>
+  <span class="marginalia m-bl" data-margin aria-hidden="true">
+    <svg viewBox="0 0 56 44"><path d="M10 34 q4 -22 18 -24 q10 -1 14 8 q-8 -4 -14 0 q-10 6 -10 20 z" fill="none" stroke="#4A4234" stroke-width="1.4"/><circle cx="30" cy="16" r="2" fill="#6B0E23"/></svg>
+    <span class="note">лѣто 2023</span>
+  </span>
 </section>
 
-<div class="rule" aria-hidden="true"><span></span></div>
+<!-- ================= СТАТЬЯ II · САКРАЛЬНАЯ ГЕОГРАФИЯ ================= -->
+<section class="leaf turn" id="st-2" aria-labelledby="h1-2">
+  <p class="article-no turn">Статья II · листъ 3</p>
+  <h2 id="h1-2" class="turn">Сакральная география</h2>
+  <p class="head-sub turn">Места силы и забытые руины</p>
 
-<!-- Глава II -->
-<section class="chapter">
-  <div class="frame">
-    <div class="head reveal">
-      <span class="leaf">л. 3</span>
-      <h2>Глава II. Сакральная География</h2>
-    </div>
-    <p class="head-sub reveal">Места Силы и Забытые Руины</p>
-    <ul class="entries">
-      <li class="reveal">
-        <span class="name">Цоколь НБВ</span>
-        <span class="gloss">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика этого места настолько плотная, что здесь глохнет сотовая связь. Это сердце Империи.</span>
-      </li>
-      <li class="reveal">
-        <span class="name">Святилище Б <span class="tag">Lost</span></span>
-        <span class="gloss">Мертвый дом на колесах. Ржавый ковчег, стоявший с весны 2023. Мы осквернили его своим присутствием, оставив слишком много следов. Духи места разгневались. Теперь вход туда запечатан. Это памятник нашей неосторожности.</span>
-      </li>
-    </ul>
+  <ul class="entries turn">
+    <li>
+      <span class="name">Цоколь НБВ</span>
+      <span class="gloss">Альфа и Омега. Крытая конструкция на цокольном этаже, сросшаяся с фундаментом дома. Здесь прозвучали первые клятвы. Энергетика места столь плотна, что глохнет сотовая связь. Это сердце Империи.</span>
+    </li>
+    <li>
+      <span class="name">Святилище Б <span class="tag">Утрачено</span></span>
+      <span class="gloss">Мёртвый дом на колёсах. Ржавый ковчег, стоявший с весны 2023-го. Мы осквернили его присутствием, оставив слишком много следов. Духи места разгневались — вход запечатан. Памятник нашей неосторожности.</span>
+    </li>
+  </ul>
 
-    <ul class="entries">
-      <li class="reveal">
-        <span class="name">Королевские Регалии</span>
-        <span class="gloss">Гимн: "Mama ŠČ!" (Let 3). Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</span>
-      </li>
-      <li class="reveal">
-        <span class="name">Печать Верачек</span>
-        <span class="gloss">Физический артефакт, подтверждающий подлинность указов. Хранится в секретере.</span>
-      </li>
-    </ul>
-  </div>
+  <ul class="entries turn">
+    <li>
+      <span class="name">Королевские регалии</span>
+      <span class="gloss">Гимн: «Mama ŠČ!» (Let 3). Психоделическая мантра, пробуждающая хаос и веселье. Звук нашей свободы.</span>
+    </li>
+    <li>
+      <span class="name">Печать Верочек</span>
+      <span class="gloss">Физический артефакт, подтверждающий подлинность указов. Хранится в секретере под замком.</span>
+    </li>
+  </ul>
+
+  <span class="marginalia m-tl" data-margin aria-hidden="true">
+    <svg viewBox="0 0 56 56"><path d="M12 44 l10 -30 l10 24 l8 -16 l6 22" fill="none" stroke="#1F3A6E" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 46 h40" stroke="#4A4234" stroke-width="1"/></svg>
+    <span class="note">карта фондовъ</span>
+  </span>
 </section>
 
-<div class="rule" aria-hidden="true"><span></span></div>
+<!-- ===== интерлюдия: глубже фонд, темнее поле ===== -->
+<div class="interlude turn" aria-hidden="true">
+  <div class="rule"><i></i></div>
+  <p class="eyebrow">Глубже опись · суше воздух архива</p>
+  <div class="rule"><i></i></div>
+</div>
 
-<!-- Глава III -->
-<section class="chapter">
-  <div class="frame">
-    <div class="head reveal">
-      <span class="leaf">л. 4</span>
-      <h2>Глава III. Энтропия</h2>
-    </div>
-    <p class="head-sub reveal">Феномен "Галя"</p>
-    <div class="reveal">
-      <p><span class="lead-in">Враг не всегда носит оружие.</span> Иногда враг — это всепоглощающая глупость и суета. Мы называем это "Эффект Гали". Это вирус сознания.</p>
-    </div>
-    <ul class="entries">
-      <li class="reveal">
-        <span class="name">Тип А: Шумная</span>
-        <span class="gloss">Громкая, пустая, требующая внимания. Она как статическое электричество — раздражает, но легко заземляется игнором.</span>
-      </li>
-      <li class="reveal">
-        <span class="name">Тип Б: Латентная <span class="tag">Danger</span></span>
-        <span class="gloss">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</span>
-      </li>
-    </ul>
+<!-- ================= СТАТЬЯ III · ЭНТРОПИЯ ================= -->
+<section class="leaf turn" id="st-3" aria-labelledby="h1-3">
+  <p class="article-no turn">Статья III · листъ 4</p>
+  <h2 id="h1-3" class="turn">Энтропия</h2>
+  <p class="head-sub turn">Феномен «Галя»</p>
+
+  <div class="prose turn">
+    <p class="lead"><span class="initial">В</span><span class="lead-in">раг не всегда носит оружие.</span> Иногда враг — всепоглощающая глупость и суета. Мы зовём это «Эффект Гали»: вирус сознания, растворяющий тишину.</p>
   </div>
+
+  <ul class="entries turn">
+    <li>
+      <span class="name">Тип А: Шумная</span>
+      <span class="gloss">Громкая, пустая, требующая внимания. Как статическое электричество — раздражает, но легко заземляется игнором.</span>
+    </li>
+    <li>
+      <span class="name">Тип Б: Латентная <span class="tag">Опасно</span></span>
+      <span class="gloss">Опаснейший вид. Мимикрирует под нормального человека. Разрушает коллектив изнутри интригами и пассивной агрессией. Требует немедленной изоляции.</span>
+    </li>
+  </ul>
+
+  <div class="stamp-row turn" aria-hidden="true">
+    <span class="stamp secret">Карантинъ</span>
+  </div>
+
+  <span class="marginalia m-br" data-margin aria-hidden="true">
+    <svg viewBox="0 0 56 48"><path d="M14 40 q-6 -18 8 -26 q10 -6 20 2 q-10 -2 -18 4 q-10 8 -4 22 z" fill="none" stroke="#8B0000" stroke-width="1.5"/><path d="M30 10 l3 6 l6 1 l-4 5 l1 6 l-6 -3 l-6 3 l1 -6 l-4 -5 l6 -1 z" fill="none" stroke="#8B0000" stroke-width="1.2"/></svg>
+    <span class="note">изолировать</span>
+  </span>
 </section>
 
-<div class="rule" aria-hidden="true"><span></span></div>
+<!-- ================= СТАТЬЯ IV · УЛОЖЕНИЕ О НАКАЗАНИЯХ ================= -->
+<section class="leaf turn" id="st-4" aria-labelledby="h1-4">
+  <p class="article-no turn">Статья IV · листъ 5</p>
+  <h2 id="h1-4" class="turn">Уложение о наказаниях</h2>
+  <p class="head-sub turn">Кодекс Империи</p>
 
-<!-- Глава IV -->
-<section class="chapter">
-  <div class="frame">
-    <div class="head reveal">
-      <span class="leaf">л. 5</span>
-      <h2>Глава IV. Уложение о Наказаниях</h2>
-    </div>
-    <p class="head-sub reveal">Кодекс Империи</p>
-    <ul class="codex">
-      <li class="reveal">
-        <span class="num"></span>
-        <div>
-          <span class="dogma">Святость Личности</span>
-          <span class="interp">Честь Имперца неприкосновенна. Оскорбление приравнивается к измене.</span>
-        </div>
-      </li>
-      <li class="reveal">
-        <span class="num"></span>
-        <div>
-          <span class="dogma">Пакт Ненападения</span>
-          <span class="interp">Физическое насилие внутри Круга запрещено под страхом изгнания.</span>
-        </div>
-      </li>
-      <li class="reveal">
-        <span class="num"></span>
-        <div>
-          <span class="dogma">Целостность</span>
-          <span class="interp">Любая попытка расколоть общество карается баном. Интриги запрещены.</span>
-        </div>
-      </li>
-      <li class="reveal">
-        <span class="num"></span>
-        <div>
-          <span class="dogma">Финансовая Чистота</span>
-          <span class="interp">Запрет на вымогательство и рэкет (даже в шутку).</span>
-        </div>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<div class="rule" aria-hidden="true"><span></span></div>
-
-<!-- Глава V -->
-<section class="chapter">
-  <div class="frame">
-    <div class="head reveal">
-      <span class="leaf">л. 6</span>
-      <h2>Глава V. Иерархия</h2>
-    </div>
-    <p class="head-sub reveal">Лестница Власти</p>
-    <ul class="ladder">
-      <li class="reveal">
-        <span class="rank">01. Наблюдатель <span class="en">The Watcher</span></span>
-        <span class="desc">Неофит. Вы уже внутри, но вы под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не "Галя".</span>
-      </li>
-      <li class="reveal">
-        <span class="rank">02. Соратник <span class="en">The Ally</span></span>
-        <span class="desc">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к голосовым чатам и сходкам.</span>
-      </li>
-      <li class="reveal">
-        <span class="rank">03. Элита <span class="en">The Architect</span></span>
-        <span class="desc">Хранители ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</span>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<div class="rule" aria-hidden="true"><span></span></div>
-
-<!-- ================= ВРАТА ================= -->
-<section class="gate">
-  <div class="frame">
-    <p class="eyebrow reveal">Только для посвящённых</p>
-    <p class="creed reveal">«Призыв дождя окончен. Наступает эра Великой Тишины.»</p>
-
-    <div class="gate-form reveal">
-      <div class="pass-field" id="passField">
-        <label for="passphrase" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Слово доступа</label>
-        <input type="password" id="passphrase" placeholder="Слово" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+  <ul class="codex turn">
+    <li>
+      <span class="num"></span>
+      <div>
+        <span class="dogma">Святость личности</span>
+        <span class="interp">Честь имперца неприкосновенна. Оскорбление приравнивается к измене.</span>
       </div>
-      <button type="button" id="gateBtn">Принять Присягу</button>
-      <p class="gate-verdict" id="gateVerdict" aria-live="polite"></p>
+    </li>
+    <li>
+      <span class="num"></span>
+      <div>
+        <span class="dogma">Пакт ненападения</span>
+        <span class="interp">Физическое насилие внутри Круга запрещено под страхом изгнания.</span>
+      </div>
+    </li>
+    <li>
+      <span class="num"></span>
+      <div>
+        <span class="dogma">Целостность</span>
+        <span class="interp">Любая попытка расколоть общество карается баном. Интриги запрещены.</span>
+      </div>
+    </li>
+    <li>
+      <span class="num"></span>
+      <div>
+        <span class="dogma">Финансовая чистота</span>
+        <span class="interp">Запрет на вымогательство и рэкет — даже в шутку.</span>
+      </div>
+    </li>
+  </ul>
+
+  <div class="stamp-row turn" aria-hidden="true">
+    <span class="stamp secret">Утверждено · М.П.</span>
+  </div>
+  <span class="dogear" aria-hidden="true"></span>
+</section>
+
+<!-- ================= СТАТЬЯ V · ИЕРАРХИЯ ================= -->
+<section class="leaf turn" id="st-5" aria-labelledby="h1-5">
+  <p class="article-no turn">Статья V · листъ 6</p>
+  <h2 id="h1-5" class="turn">Иерархия</h2>
+  <p class="head-sub turn">Лестница власти</p>
+
+  <ul class="ladder turn">
+    <li>
+      <span class="rank">I. Наблюдатель <span class="en">the Watcher</span></span>
+      <span class="desc">Неофит. Вы уже внутри, но под микроскопом. Один неверный шаг — и дверь закроется. Докажите, что вы не «Галя».</span>
+    </li>
+    <li>
+      <span class="rank">II. Соратник <span class="en">the Ally</span></span>
+      <span class="desc">Брат по оружию. Тот, кто разделил с нами хлеб и тишину. Доступ к сходкам и тихим совещаниям.</span>
+    </li>
+    <li>
+      <span class="rank">III. Элита <span class="en">the Architect</span></span>
+      <span class="desc">Хранитель ключей. Бремя власти тяжело, но кто-то должен нести этот крест.</span>
+    </li>
+  </ul>
+
+  <span class="mark-time pin" style="right:22px; top:18px;" aria-hidden="true">
+    <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="4" fill="#2a1c12"/><circle cx="5.6" cy="5.6" r="1.4" fill="#c8b58a"/></svg>
+  </span>
+  <span class="marginalia m-tr" data-margin aria-hidden="true">
+    <svg viewBox="0 0 54 54"><path d="M27 8 l5 12 l13 1 l-10 8 l3 13 l-11 -7 l-11 7 l3 -13 l-10 -8 l13 -1 z" fill="none" stroke="#9C7A3C" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span class="note">по заслугамъ</span>
+  </span>
+</section>
+
+<!-- ================= КОЛОФОН · МАНДАТ ================= -->
+<section class="leaf colophon turn" id="colophon" aria-labelledby="gate-h">
+  <div class="gate frame">
+    <p class="eyebrow turn">Только для посвящённых</p>
+    <h2 id="gate-h" class="turn" style="font-size:clamp(1.4rem,5vw,2rem);">Предъявите мандат</h2>
+    <p class="creed turn">«Призыв дождя оконченъ. Наступаетъ эра Великой Тишины.»</p>
+
+    <button class="mandate turn" id="mandate" aria-label="Приложите и удерживайте печать, чтобы предъявить мандат">
+      <svg class="mandate-ring" viewBox="0 0 150 150" aria-hidden="true">
+        <circle class="track" cx="75" cy="75" r="72"/>
+        <circle class="prog"  cx="75" cy="75" r="72"/>
+      </svg>
+      <svg class="wax-vi gilt" viewBox="0 0 118 118" aria-hidden="true">
+        <defs>
+          <radialGradient id="waxg2" cx="42%" cy="36%" r="72%">
+            <stop offset="0%" stop-color="#8f1631"/>
+            <stop offset="60%" stop-color="#6B0E23"/>
+            <stop offset="100%" stop-color="#490816"/>
+          </radialGradient>
+        </defs>
+        <!-- неровный сургучный диск -->
+        <path d="M59 8 a51 51 0 0 1 50 54 a51 51 0 0 1 -55 48 a51 51 0 0 1 -46 -56 a51 51 0 0 1 51 -46 z"
+              fill="url(#waxg2)" stroke="#3c0611" stroke-width="1.2"/>
+        <path d="M59 8 a51 51 0 0 1 34 12" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="59" cy="59" r="41" fill="none" stroke="rgba(200,168,90,.6)" stroke-width="1.4"/>
+        <text x="59" y="61" text-anchor="middle" dominant-baseline="middle"
+              font-family="Old Standard TT, serif" font-weight="700" font-size="46" letter-spacing="1"
+              fill="#C8A85A" stroke="#6B0E23" stroke-width=".8">ВИ</text>
+        <!-- трещина (проступает при вскрытии) -->
+        <path id="crack" d="M59 12 l-6 26 l8 12 l-7 20 l9 16" fill="none" stroke="#2a0409" stroke-width="0" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <span class="mandate-label" id="mandateLabel" aria-live="polite">Приложите печать · удержите</span>
+    <p class="mandate-hint" id="mandateHint">Не кнопка «войти» — ритуал. Держите ≈ полторы секунды.</p>
+
+    <div class="mandate-reveal" id="mandateReveal" aria-hidden="true">
+      <p class="granted">Мандатъ признанъ. Канцелярия отворена.</p>
+      <div class="gate-links">
+        <a href="https://t.me/" rel="noopener" target="_blank">Телеграмъ · Гости</a>
+        <a href="https://t.me/" rel="noopener" target="_blank">Телеграмъ · Новости</a>
+      </div>
+    </div>
+
+    <div class="colophon-foot">
+      <p class="fond-line">Фондъ № I · Опись № V · Л. 1 · М.П.</p>
     </div>
   </div>
 </section>
 
-<div class="rule" aria-hidden="true"><span></span></div>
-
-<!-- ================= КОЛОФОН ================= -->
-<footer>
-  <p class="mark">ВИ</p>
-  <div class="links">
-    <a href="#">Telegram: Гости</a>
-    <a href="#">Telegram: Новости</a>
-  </div>
-  <p class="fond-line">Фонд № I · Опись № V · Осн. MMXXIII</p>
-  <p class="copy">© 2026 ИМПЕРИЯ ВЕРАЧКИ.<br>Дизайн: KC_Comms [oV] &amp; Архитектура: 미하이</p>
-</footer>
+</main>
 
 <script>
 (() => {
   "use strict";
+  const root = document.documentElement;
+  const reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  /* =========================================================
-     ВРАТА
-     Поменяй слово ниже. Это декоративный порог для «своих»,
-     а не защита: слово лежит в открытом JS.
-     ========================================================= */
-  const PASSPHRASE = "тишина";
-  const GATE_URL = ""; // укажи URL (например "/inner.html") для перехода при верном слове
+  // состояние атмосферного движка объявляем заранее — иначе применение
+  // «успокоенности» на старте обратится к ним в мёртвой зоне (TDZ).
+  let latest = null;   // последнее событие наклона
+  let rafId  = null;
+  let running = false;
+  const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
 
-  const input   = document.getElementById("passphrase");
-  const button  = document.getElementById("gateBtn");
-  const field   = document.getElementById("passField");
-  const verdict = document.getElementById("gateVerdict");
+  /* =======================================================
+     0. «УСПОКОИТЬ АРХИВ» — тумблер + системная настройка
+     ======================================================= */
+  const quietBtn   = document.getElementById("quietToggle");
+  const quietState = document.getElementById("quietState");
+  const STORE = "verachki-quiet";
 
-  const normalize = s => s.trim().toLowerCase().replace(/ё/g, "е");
+  function isQuiet(){ return root.getAttribute("data-quiet") === "on"; }
 
-  function judge(){
-    const word = normalize(input.value);
-    if (!word) return;
-
-    if (word === normalize(PASSPHRASE)) {
-      verdict.textContent = "Присяга принята. Добро пожаловать домой.";
-      verdict.classList.remove("denied");
-      verdict.classList.add("granted");
-      input.disabled = true;
-      button.disabled = true;
-      button.style.opacity = ".4";
-      if (GATE_URL) setTimeout(() => { window.location.href = GATE_URL; }, 1600);
-    } else {
-      verdict.textContent = "Слово не признано.";
-      verdict.classList.remove("granted");
-      verdict.classList.add("denied");
-      field.classList.remove("denied");
-      void field.offsetWidth;
-      field.classList.add("denied");
-      input.select();
+  function applyQuiet(on, persist){
+    root.setAttribute("data-quiet", on ? "on" : "auto");
+    if (quietBtn){
+      quietBtn.setAttribute("aria-pressed", String(on));
+      quietState.textContent = on ? "архив успокоен" : "движение живо";
     }
+    if (persist){
+      try { localStorage.setItem(STORE, on ? "on" : "off"); } catch(e){}
+    }
+    if (on) stopEngine(); else startEngine();
   }
 
-  button.addEventListener("click", judge);
-  input.addEventListener("keydown", e => { if (e.key === "Enter") judge(); });
-  input.addEventListener("input", () => {
-    verdict.textContent = "";
-    verdict.classList.remove("denied","granted");
-    field.classList.remove("denied");
+  // начальное состояние: явный выбор пользователя > системный reduced-motion
+  let stored = null;
+  try { stored = localStorage.getItem(STORE); } catch(e){}
+  const startOn = stored ? stored === "on" : reduceMQ.matches;
+  // не персистим при инициализации — уважаем «auto», пока не тронут тумблер
+  applyQuiet(startOn, false);
+
+  if (quietBtn){
+    quietBtn.addEventListener("click", () => applyQuiet(!isQuiet(), true));
+  }
+  reduceMQ.addEventListener?.("change", e => { if (!stored) applyQuiet(e.matches, false); });
+
+  /* =======================================================
+     1. АТМОСФЕРНЫЙ ДВИЖОК: блик золота + параллакс глубины
+        наклон (deviceorientation) → фолбэк: медленный дрейф
+     ======================================================= */
+  function onOrient(e){
+    if (e.gamma == null && e.beta == null) return;
+    latest = e;
+  }
+
+  function loop(t){
+    if (!running) return;
+    let gx, gy;
+    if (latest){
+      gx = clamp((latest.gamma || 0) / 30, -1, 1);   // лево-право
+      gy = clamp(((latest.beta || 40) - 40) / 30, -1, 1); // наклон от себя
+    } else {
+      // фолбэк: блик медленно дрейфует сам (мёртвого золота не оставляем)
+      gx = Math.sin(t / 4200);
+      gy = Math.cos(t / 5600) * 0.6;
+    }
+    root.style.setProperty("--px", gx.toFixed(3));
+    root.style.setProperty("--py", gy.toFixed(3));
+    // блик по золоту буквиц — в противоход наклону
+    root.style.setProperty("--sheen", (0.5 - gx * 0.5).toFixed(3));
+    root.style.setProperty("--shx", (44 - gx * 34).toFixed(1) + "%");
+    root.style.setProperty("--shy", (32 - gy * 26).toFixed(1) + "%");
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function startEngine(){
+    if (running || isQuiet()) return;
+    running = true;
+    rafId = requestAnimationFrame(loop);
+  }
+  function stopEngine(){
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    // статичные, но «живые» значения покоя
+    root.style.setProperty("--sheen", "0.44");
+    root.style.setProperty("--shx", "44%");
+    root.style.setProperty("--shy", "32%");
+    root.style.setProperty("--px", "0");
+    root.style.setProperty("--py", "0");
+  }
+
+  // подключение источника наклона
+  function bindOrientation(){
+    window.addEventListener("deviceorientation", onOrient, { passive:true });
+  }
+
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === "function"){
+    // iOS: нужен явный жест + HTTPS. Просим грамотой.
+    const permitWrap = document.getElementById("tiltPermit");
+    const permitBtn  = document.getElementById("tiltBtn");
+    permitWrap.hidden = false;
+    permitBtn.addEventListener("click", async () => {
+      try {
+        const res = await DOE.requestPermission();
+        if (res === "granted") bindOrientation();
+      } catch(e){ /* остаётся фолбэк-дрейф */ }
+      permitWrap.hidden = true;
+    });
+  } else if (DOE){
+    bindOrientation();
+  }
+
+  // беречь батарею: пауза вне вкладки
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { running = false; if (rafId) cancelAnimationFrame(rafId); }
+    else if (!isQuiet()) startEngine();
   });
 
-  /* =========================================================
-     ПОЯВЛЕНИЕ БЛОКОВ
-     ========================================================= */
-  const revealables = document.querySelectorAll(".reveal");
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          io.unobserve(entry.target);
-        }
-      }
-    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
-    revealables.forEach(el => io.observe(el));
-  } else {
-    revealables.forEach(el => el.classList.add("is-visible"));
+  if (!isQuiet()) startEngine();
+
+  /* =======================================================
+     2. ГЛУБИНА СКРОЛЛА (--depth) — глубже фонды темнее
+     ======================================================= */
+  let depthTick = false;
+  function updateDepth(){
+    depthTick = false;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const d = max > 0 ? clamp(window.scrollY / max, 0, 1) : 0;
+    root.style.setProperty("--depth", d.toFixed(3));
   }
+  window.addEventListener("scroll", () => {
+    if (!depthTick){ depthTick = true; requestAnimationFrame(updateDepth); }
+  }, { passive:true });
+  updateDepth();
+
+  /* =======================================================
+     3. ПЕРЕЛИСТЫВАНИЕ ФОЛИАНТА — проявление листов
+     ======================================================= */
+  const turns = document.querySelectorAll(".turn");
+  const revealAll = () => turns.forEach(el => el.classList.add("turned"));
+  if ("IntersectionObserver" in window){
+    const io = new IntersectionObserver((ents) => {
+      for (const en of ents){
+        if (en.isIntersecting){ en.target.classList.add("turned"); io.unobserve(en.target); }
+      }
+    }, { threshold:0.12, rootMargin:"0px 0px -8% 0px" });
+    turns.forEach(el => io.observe(el));
+    // страховка: если наблюдатель совсем не сработал — не оставляем текст скрытым
+    // (на рабочей странице верхние листы уже проявлены, скролл-реализм сохраняется)
+    setTimeout(() => { if (!document.querySelector(".turn.turned")) revealAll(); }, 2500);
+  } else {
+    revealAll();
+  }
+
+  /* =======================================================
+     4. ТАП ПО ПОЛЯМ — проявляются маргиналии
+     ======================================================= */
+  const margins = document.querySelectorAll("[data-margin]");
+  const timers = new WeakMap();
+  function revealMargin(m){
+    clearTimeout(timers.get(m));
+    m.classList.remove("hide");
+    m.classList.add("show");
+    timers.set(m, setTimeout(() => {
+      m.classList.remove("show");
+      m.classList.add("hide");
+    }, 4500)); // тихо гаснет через ~4.5 с
+  }
+  document.querySelectorAll(".leaf").forEach(leaf => {
+    const inLeaf = leaf.querySelectorAll("[data-margin]");
+    if (!inLeaf.length) return;
+    leaf.addEventListener("click", (e) => {
+      // не мешаем интерактивным элементам (мандат, ссылки)
+      if (e.target.closest("a,button")) return;
+      // ближайшая к тапу маргиналия
+      const x = e.clientX, y = e.clientY;
+      let best = null, bd = Infinity;
+      inLeaf.forEach(m => {
+        const r = m.getBoundingClientRect();
+        const dx = x - (r.left + r.width/2), dy = y - (r.top + r.height/2);
+        const d = dx*dx + dy*dy;
+        if (d < bd){ bd = d; best = m; }
+      });
+      if (best) revealMargin(best);
+    });
+  });
+
+  /* =======================================================
+     5. МАНДАТ — вскрытие сургучной печати (long-press 1.2 с)
+     ======================================================= */
+  const mandate = document.getElementById("mandate");
+  const label   = document.getElementById("mandateLabel");
+  const hint    = document.getElementById("mandateHint");
+  const reveal  = document.getElementById("mandateReveal");
+  const crack   = document.getElementById("crack");
+  let opened = false;
+  let holding = false;
+
+  function beginHold(){
+    if (opened) return;
+    holding = true;
+    mandate.classList.remove("resetting");
+    // reflow, чтобы transition стартовал заново
+    void mandate.offsetWidth;
+    mandate.classList.add("pressing");
+    label.textContent = "Печать теплеет…";
+  }
+  function cancelHold(){
+    if (opened || !holding) return;
+    holding = false;
+    mandate.classList.remove("pressing");
+    mandate.classList.add("resetting");
+    label.textContent = "Приложите печать · удержите";
+  }
+  function openMandate(){
+    if (opened) return;
+    opened = true; holding = false;
+    mandate.classList.remove("pressing", "resetting");
+    mandate.classList.add("broken");
+    if (crack) crack.setAttribute("stroke-width", "1.4");
+    label.textContent = "Оттискъ снятъ";
+    hint.textContent = "Добро пожаловать домой.";
+    reveal.classList.add("open");
+    reveal.setAttribute("aria-hidden", "false");
+    // фокус на первую ссылку для клавиатуры/скринридера
+    const first = reveal.querySelector("a");
+    if (first) setTimeout(() => first.focus(), 350);
+  }
+
+  // прогресс-кольцо завершилось → вскрытие
+  mandate.addEventListener("transitionend", (e) => {
+    if (e.propertyName === "stroke-dashoffset" && mandate.classList.contains("pressing")){
+      openMandate();
+    }
+  });
+
+  // указатель (тач/мышь)
+  mandate.addEventListener("pointerdown", (e) => { e.preventDefault(); beginHold(); });
+  mandate.addEventListener("pointerup", cancelHold);
+  mandate.addEventListener("pointercancel", cancelHold);
+  mandate.addEventListener("pointerleave", cancelHold);
+  mandate.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  // клавиатура: держать Enter/Space (доступная альтернатива жесту)
+  mandate.addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && !e.repeat){ e.preventDefault(); beginHold(); }
+  });
+  mandate.addEventListener("keyup", (e) => {
+    if (e.key === "Enter" || e.key === " ") cancelHold();
+  });
+  mandate.addEventListener("blur", cancelHold);
+
+  /* =======================================================
+     6. ОПИСЬ (реестр-навигация) — открытие/закрытие
+     ======================================================= */
+  const opis   = document.getElementById("opis");
+  const opisT  = document.getElementById("opisToggle");
+  let lastFocus = null;
+
+  function openOpis(){
+    lastFocus = document.activeElement;
+    opis.classList.add("open");
+    opis.setAttribute("aria-hidden", "false");
+    opisT.setAttribute("aria-expanded", "true");
+    const f = opis.querySelector("a,button");
+    if (f) f.focus();
+  }
+  function closeOpis(){
+    opis.classList.remove("open");
+    opis.setAttribute("aria-hidden", "true");
+    opisT.setAttribute("aria-expanded", "false");
+    if (lastFocus) lastFocus.focus();
+  }
+  opisT.addEventListener("click", () => {
+    opis.classList.contains("open") ? closeOpis() : openOpis();
+  });
+  opis.addEventListener("click", (e) => { if (e.target === opis) closeOpis(); });
+  opis.querySelectorAll(".opis-list a").forEach(a => a.addEventListener("click", closeOpis));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && opis.classList.contains("open")) closeOpis();
+  });
 })();
 </script>
-
 </body>
 </html>
