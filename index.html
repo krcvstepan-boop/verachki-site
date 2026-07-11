@@ -370,6 +370,93 @@ h1,h2,h3{
 }
 
 /* ------------------------------------------------------------------
+   ФАКСИМИЛЕ-УЛИКИ (сканы грамот и фото-свидетельства)
+   ------------------------------------------------------------------ */
+.dossier{ margin-top:2.2rem; }
+.dossier-lede{
+  font-family:var(--serif-body); font-style:italic;
+  font-size:1.02rem; line-height:1.6; color:var(--sepia-soft);
+  margin-bottom:1.4rem; max-width:34em;
+}
+.exhibits{ display:flex; flex-direction:column; gap:2rem; margin-top:1.3rem; }
+
+.exhibit{ margin:0; }
+.exhibit-frame{
+  position:relative; display:block; width:100%; padding:8px; border:0;
+  background:#fbfaf5;
+  box-shadow:0 12px 28px -16px rgba(0,0,0,.65), 0 0 0 1px var(--parch-edge) inset;
+  cursor:pointer; overflow:hidden;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.exhibit--doc   .exhibit-frame{ aspect-ratio:591/821; }
+.exhibit--photo .exhibit-frame{ aspect-ratio:3/4; background:#141410; }
+.exhibit-img{ width:100%; height:100%; object-fit:contain; display:block; }
+.exhibit--photo .exhibit-img{ object-fit:cover; }
+/* лёгкий наклон — как бумага, брошенная в дело */
+.exhibit:nth-child(odd)  .exhibit-frame{ transform:rotate(-1.1deg); }
+.exhibit:nth-child(even) .exhibit-frame{ transform:rotate(0.9deg); }
+.exhibit-frame:active{ filter:brightness(.97); }
+.exhibit-frame:focus-visible{ outline:2px solid var(--gold-lit); outline-offset:3px; }
+.exhibit-clip{
+  position:absolute; top:-4px; left:20px; width:15px; height:38px;
+  border:2px solid #8a8f98; border-bottom:none; border-radius:7px 7px 0 0; opacity:.75;
+}
+.exhibit-stamp{
+  position:absolute; right:9px; bottom:9px;
+  font-family:var(--mono); font-size:.5rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--cinnabar); border:1px solid var(--cinnabar); padding:.15em .4em;
+  transform:rotate(-4deg); opacity:.72; mix-blend-mode:multiply;
+}
+/* плейсхолдер, пока файл не подшит к делу */
+.exhibit-pending{ display:none; }
+.exhibit.pending .exhibit-img{ display:none; }
+.exhibit.pending .exhibit-frame{
+  display:grid; place-items:center; cursor:default;
+  background:repeating-linear-gradient(45deg,#efe9d8,#efe9d8 12px,#e7dfca 12px,#e7dfca 24px);
+}
+.exhibit.pending .exhibit-pending{
+  display:block; font-family:var(--mono); font-size:.6rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--sepia-soft); text-align:center; padding:1rem;
+}
+.exhibit.pending .exhibit-clip,.exhibit.pending .exhibit-stamp{ display:none; }
+/* экспликация под экспонатом */
+.exhibit-cap{ margin-top:.8rem; padding-top:.55rem; border-top:1px solid var(--rule-gold); }
+.exhibit-label{
+  display:block; font-family:var(--serif-head); font-weight:700;
+  font-size:1.04rem; letter-spacing:.03em; color:var(--bordo); margin-bottom:.22rem;
+}
+.exhibit-note{
+  display:block; font-family:var(--mono);
+  font-size:.66rem; line-height:1.55; color:#57534A; letter-spacing:.02em;
+}
+
+/* Лайтбокс */
+.lightbox{
+  position:fixed; inset:0; z-index:60;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem;
+  padding:calc(3.2rem + env(safe-area-inset-top)) 1rem calc(1.2rem + env(safe-area-inset-bottom));
+  background:rgba(8,8,5,.93);
+  opacity:0; visibility:hidden;
+  transition:opacity .25s var(--ease-noble), visibility .25s;
+}
+.lightbox.open{ opacity:1; visibility:visible; }
+html[data-quiet="on"] .lightbox{ transition:none; }
+.lightbox-img{
+  max-width:100%; max-height:74vh; object-fit:contain;
+  border:6px solid #fbfaf5; box-shadow:0 24px 70px -20px #000;
+}
+.lightbox-cap{ text-align:center; max-width:38ch; }
+.lightbox-cap .l{ display:block; font-family:var(--serif-head); font-weight:700; color:var(--gold-lit); font-size:1.05rem; margin-bottom:.25rem; }
+.lightbox-cap .n{ font-family:var(--mono); font-size:.72rem; line-height:1.5; color:var(--label-dark); }
+.lightbox-close{
+  position:absolute; top:calc(.6rem + env(safe-area-inset-top)); right:.7rem;
+  width:44px; height:44px; display:grid; place-items:center;
+  background:transparent; border:1px solid rgba(232,223,200,.4); border-radius:50%;
+  color:var(--parch); font-size:1.3rem; line-height:1; cursor:pointer; touch-action:manipulation;
+}
+.lightbox-close:focus-visible{ outline:2px solid var(--gold-lit); outline-offset:2px; }
+
+/* ------------------------------------------------------------------
    ВНЕШНИЕ СНОШЕНИЯ (тонкая строка каналов у самого верха)
    ------------------------------------------------------------------ */
 .ties{
@@ -382,12 +469,21 @@ h1,h2,h3{
   gap:.5rem 1.4rem; margin:0;
 }
 .ties .tie{
+  display:inline-block;
   font-family:var(--mono);
   font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
   color:var(--label-dark);
-  padding-bottom:2px;
-  border-bottom:1px dotted var(--violet-lit);
+  padding:.35rem 0 2px;
 }
+/* действующий канал — золотое подчёркивание, ссылка */
+a.tie-live{
+  color:var(--gold-lit); text-decoration:none;
+  border-bottom:1px solid var(--gold);
+}
+a.tie-live:hover{ filter:brightness(1.1); }
+a.tie-live:focus-visible{ outline:2px solid var(--gold-lit); outline-offset:3px; }
+/* канал в разработке — пунктир пурпуром, без ссылки */
+.tie-dev{ border-bottom:1px dotted var(--violet-lit); cursor:default; }
 .ties-note{
   margin-top:.55rem;
   font-family:var(--serif-body); font-style:italic;
@@ -742,6 +838,7 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
       <li><a href="#st-1"><span class="n">Ст. I</span>Хроники разлома</a></li>
       <li><a href="#st-2"><span class="n">Ст. II</span>Сакральная география</a></li>
       <li><a href="#st-3"><span class="n">Ст. III</span>Энтропия</a></li>
+      <li><a href="#hronika"><span class="n">Дело</span>Хроника происшествий</a></li>
       <li><a href="#st-4"><span class="n">Ст. IV</span>Уложение о наказаниях</a></li>
       <li><a href="#st-5"><span class="n">Ст. V</span>Иерархия</a></li>
       <li><a href="#colophon"><span class="n">М.П.</span>Колофон · мандат</a></li>
@@ -757,12 +854,12 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
 <!-- ===== Внешние сношения канцелярии (в разработке) ===== -->
 <nav class="ties" aria-label="Внешние каналы канцелярии">
   <ul class="ties-list">
-    <li><span class="tie">VerachkiNews</span></li>
-    <li><span class="tie">VeHistory</span></li>
-    <li><span class="tie">InstaVER</span></li>
-    <li><span class="tie">V&nbsp;massage</span></li>
+    <li><a class="tie tie-live" href="https://t.me/VerachkiNews" target="_blank" rel="noopener noreferrer">VerachkiNews</a></li>
+    <li><span class="tie tie-dev">VeHistory</span></li>
+    <li><span class="tie tie-dev">InstaVER</span></li>
+    <li><span class="tie tie-dev">V&nbsp;massage</span></li>
   </ul>
-  <p class="ties-note">каналы в разработке</p>
+  <p class="ties-note">прочие каналы — в разработке</p>
 </nav>
 
 <!-- ================= АКТ I · ПРИЁМНАЯ ================= -->
@@ -901,6 +998,23 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
     </li>
   </ul>
 
+  <!-- вещественное доказательство к карточке «Святилище Б» -->
+  <figure class="exhibit exhibit--photo turn" style="max-width:400px;margin-inline:auto;">
+    <button type="button" class="exhibit-frame" aria-label="Открыть фото Святилища Б">
+      <img class="exhibit-img" src="assets/svyatilishe.jpg"
+           alt="Фото Святилища Б — заброшенный жилой прицеп с заклеенными плёнкой разбитыми окнами, стоящий в поле"
+           loading="lazy" width="960" height="1280"
+           onerror="this.closest('.exhibit').classList.add('pending')">
+      <span class="exhibit-clip" aria-hidden="true"></span>
+      <span class="exhibit-stamp" aria-hidden="true">вещдок</span>
+      <span class="exhibit-pending">ожидает подшивки к делу</span>
+    </button>
+    <figcaption class="exhibit-cap">
+      <span class="exhibit-label">Святилище Б · Утрачено</span>
+      <span class="exhibit-note">Мёртвый домъ на колёсахъ. Вход запечатанъ. Утрачено.</span>
+    </figcaption>
+  </figure>
+
   <ul class="entries turn">
     <li>
       <span class="name">Королевские регалии</span>
@@ -956,6 +1070,53 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
   </span>
 </section>
 
+<!-- ================= ДЕЛО · ХРОНИКА ПРОИСШЕСТВИЙ ================= -->
+<section class="leaf turn" id="hronika" aria-labelledby="h-hron">
+  <p class="article-no turn">Дело · внеочередное</p>
+  <h2 id="h-hron" class="turn">Хроника происшествий</h2>
+  <p class="head-sub turn">Свидетельства по делу</p>
+
+  <p class="dossier-lede turn">Не всё в летописи — победы. Иные листы — о хрупкости.</p>
+
+  <div class="dossier turn">
+    <div class="exhibits">
+
+      <figure class="exhibit exhibit--photo">
+        <button type="button" class="exhibit-frame" aria-label="Открыть фото: санитарный манёвр">
+          <img class="exhibit-img" src="assets/skoraya.jpg"
+               alt="Фото: карета скорой помощи во дворе жилого дома; автомобильные номера скрыты"
+               loading="lazy" width="960" height="1280"
+               onerror="this.closest('.exhibit').classList.add('pending')">
+          <span class="exhibit-clip" aria-hidden="true"></span>
+          <span class="exhibit-stamp" aria-hidden="true">вещдок</span>
+          <span class="exhibit-pending">ожидает подшивки к делу</span>
+        </button>
+        <figcaption class="exhibit-cap">
+          <span class="exhibit-label">Санитарный манёвръ</span>
+          <span class="exhibit-note">Чрезвычайное положение отработано.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="exhibit exhibit--photo">
+        <button type="button" class="exhibit-frame" aria-label="Открыть фото: малый гражданин">
+          <img class="exhibit-img" src="assets/golub.jpg"
+               alt="Фото: голубь, бережно уложенный в картонную коробку"
+               loading="lazy" width="960" height="1280"
+               onerror="this.closest('.exhibit').classList.add('pending')">
+          <span class="exhibit-clip" aria-hidden="true"></span>
+          <span class="exhibit-stamp" aria-hidden="true">вещдок</span>
+          <span class="exhibit-pending">ожидает подшивки к делу</span>
+        </button>
+        <figcaption class="exhibit-cap">
+          <span class="exhibit-label">Малый гражданин</span>
+          <span class="exhibit-note">Погребён с почестями. Vale, малый гражданинъ.</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
 <!-- ================= СТАТЬЯ IV · УЛОЖЕНИЕ О НАКАЗАНИЯХ ================= -->
 <section class="leaf turn" id="st-4" aria-labelledby="h1-4">
   <p class="article-no turn">Статья IV · листъ 5</p>
@@ -996,6 +1157,63 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
   <div class="stamp-row turn" aria-hidden="true">
     <span class="stamp secret">Утверждено · М.П.</span>
   </div>
+
+  <!-- Архив грамот: три факсимиле-улики -->
+  <div class="dossier turn">
+    <p class="article-no">Архивъ грамотъ · факсимиле</p>
+    <div class="exhibits">
+
+      <figure class="exhibit exhibit--doc">
+        <button type="button" class="exhibit-frame" aria-label="Открыть скан «О национальной безопасности»">
+          <img class="exhibit-img" src="assets/doc-natbez.jpg"
+               alt="Скан постановления правительства ЧВК Вер «О национальной безопасности», код VT_666_267_938_988, с подписью"
+               loading="lazy" width="591" height="821"
+               onerror="this.closest('.exhibit').classList.add('pending')">
+          <span class="exhibit-clip" aria-hidden="true"></span>
+          <span class="exhibit-stamp" aria-hidden="true">улика</span>
+          <span class="exhibit-pending">ожидает подшивки к делу</span>
+        </button>
+        <figcaption class="exhibit-cap">
+          <span class="exhibit-label">О национальной безопасности</span>
+          <span class="exhibit-note">Постановление правительства ЧВК Веръ · защищено электронной подписью.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="exhibit exhibit--doc">
+        <button type="button" class="exhibit-frame" aria-label="Открыть скан «Дело А. П. Чехова»">
+          <img class="exhibit-img" src="assets/doc-chehov.jpg"
+               alt="Скан постановления о наложении санкций против А. П. Чехова от 12 августа 2025"
+               loading="lazy" width="900" height="1273"
+               onerror="this.closest('.exhibit').classList.add('pending')">
+          <span class="exhibit-clip" aria-hidden="true"></span>
+          <span class="exhibit-stamp" aria-hidden="true">улика</span>
+          <span class="exhibit-pending">ожидает подшивки к делу</span>
+        </button>
+        <figcaption class="exhibit-cap">
+          <span class="exhibit-label">Дело А. П. Чехова</span>
+          <span class="exhibit-note">О наложении санкций за оскорбление чувствъ жителей Верочекъ. Лѣто 2025.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="exhibit exhibit--doc">
+        <button type="button" class="exhibit-frame" aria-label="Открыть скан «Уголовный кодекс»">
+          <img class="exhibit-img" src="assets/doc-kodeks.jpg"
+               alt="Скан уголовного кодекса ЧВК Вер с перечнем статей и подписью"
+               loading="lazy" width="900" height="1273"
+               onerror="this.closest('.exhibit').classList.add('pending')">
+          <span class="exhibit-clip" aria-hidden="true"></span>
+          <span class="exhibit-stamp" aria-hidden="true">улика</span>
+          <span class="exhibit-pending">ожидает подшивки к делу</span>
+        </button>
+        <figcaption class="exhibit-cap">
+          <span class="exhibit-label">Уголовный кодексъ</span>
+          <span class="exhibit-note">За несоблюдение — изгнание. «Правила чата будут в чате».</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+
   <span class="dogear" aria-hidden="true"></span>
 </section>
 
@@ -1067,8 +1285,8 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
     <div class="mandate-reveal" id="mandateReveal" aria-hidden="true">
       <p class="granted">Мандатъ признанъ. Канцелярия отворена.</p>
       <div class="gate-links">
-        <a href="https://t.me/" rel="noopener" target="_blank">Телеграмъ · Гости</a>
-        <a href="https://t.me/" rel="noopener" target="_blank">Телеграмъ · Новости</a>
+        <a href="https://t.me/VerochkiPublic" target="_blank" rel="noopener noreferrer">Телеграмъ · Гости</a>
+        <a href="https://t.me/VerachkiNews" target="_blank" rel="noopener noreferrer">Телеграмъ · Новости</a>
       </div>
     </div>
 
@@ -1079,6 +1297,13 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
 </section>
 
 </main>
+
+<!-- ===== Лайтбокс для улик ===== -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр улики" aria-hidden="true">
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Закрыть">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  <p class="lightbox-cap"><span class="l" id="lightboxLabel"></span><span class="n" id="lightboxNote"></span></p>
+</div>
 
 <script>
 (() => {
@@ -1362,6 +1587,56 @@ html[data-quiet="on"] .ring-turn{ animation:none !important; }
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && opis.classList.contains("open")) closeOpis();
   });
+
+  /* =======================================================
+     7. ЛАЙТБОКС УЛИК (тап по факсимиле → на весь экран)
+     ======================================================= */
+  const lb      = document.getElementById("lightbox");
+  const lbImg   = document.getElementById("lightboxImg");
+  const lbLabel = document.getElementById("lightboxLabel");
+  const lbNote  = document.getElementById("lightboxNote");
+  const lbClose = document.getElementById("lightboxClose");
+  let lbLastFocus = null;
+
+  function openLightbox(fig){
+    const img = fig.querySelector(".exhibit-img");
+    if (!img) return;
+    const label = fig.querySelector(".exhibit-label");
+    const note  = fig.querySelector(".exhibit-note");
+    lbImg.src = img.currentSrc || img.src;
+    lbImg.alt = img.alt || "";
+    lbLabel.textContent = label ? label.textContent : "";
+    lbNote.textContent  = note ? note.textContent : "";
+    lbLastFocus = document.activeElement;
+    lb.classList.add("open");
+    lb.setAttribute("aria-hidden", "false");
+    lbClose.focus();
+  }
+  function closeLightbox(){
+    if (!lb.classList.contains("open")) return;
+    lb.classList.remove("open");
+    lb.setAttribute("aria-hidden", "true");
+    if (lbLastFocus) lbLastFocus.focus();
+  }
+
+  document.querySelectorAll(".exhibit-frame").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const fig = btn.closest(".exhibit");
+      if (fig && !fig.classList.contains("pending")) openLightbox(fig);
+    });
+  });
+  lbClose.addEventListener("click", closeLightbox);
+  lb.addEventListener("click", (e) => { if (e.target === lb) closeLightbox(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && lb.classList.contains("open")) closeLightbox();
+  });
+  // свайп вниз — закрыть (тач)
+  let lbTouchY = null;
+  lb.addEventListener("touchstart", (e) => { lbTouchY = e.touches[0].clientY; }, { passive:true });
+  lb.addEventListener("touchmove", (e) => {
+    if (lbTouchY != null && e.touches[0].clientY - lbTouchY > 90){ lbTouchY = null; closeLightbox(); }
+  }, { passive:true });
+  lb.addEventListener("touchend", () => { lbTouchY = null; });
 })();
 </script>
 </body>
